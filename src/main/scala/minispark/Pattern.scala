@@ -25,7 +25,7 @@ trait Pattern {
   type Params
 
   /**
-   * Higher order method which returns the mapping function to convert input type into output type.
+   * Higher order method which returns the mapper function to convert input type into output type.
    *
    * @param params Parameters to construct the resulting mapping function.
    * @return Returns the mapping function to convert input into output.

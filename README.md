@@ -198,4 +198,59 @@ In addition to implemented Dataset operators there are also predefined functions
 
 ## The pattern
 
-TODO
+The most typical operation being performed on the Dataset is a map function.
+It expects a function to convert input record into output record.
+This may be enough to perform some not so complex transformation.
+Moreover, such a map operation may work with one input schema and produce another one.
+What to do ich we need something more complex and at the same time we would like
+to be able to use it to broader range of input or output schemas.
+The answer to such a challenge is the pattern which is and extension to the map function.
+
+The pattern is a typ which defines a common interface to handle such use case.
+It specifies the containers for input and output types, the container for parameters
+and expect to provide the function which will build the mapper function for the given parameters.
+
+Then it also provides an apply function which will produce the map function
+provided it will get specific getter to convert the input record and a constructor
+which will convert all the produced data to the output record.
+
+```
+case class Record(id: Int, amount: Double, name: String, date: Date, time: Timestamp)
+
+object Adder extends Pattern {
+  override type Input = Int // or any case class defined within the Adder object
+  override type Output = Int // or any case class defined within the Adder object
+  case class AdderParams(delta: Int)
+  override type Params = AdderParams // or e.g. Option[Nothing] and then None in case of no parameters
+  override def build(params: Params): Input => Output = _ + params.delta
+}
+
+val getter: Record => Int = (r: Record) => r.id
+val constructor: (Record, Int) => Record = (r: Record, output: Adder.Output) => r.copy(id = output)
+val adder: Function[Record, Record] = Adder[Record, Record](AdderParams(7), getter, constructor)
+val result: Dataset[Record] = ds ++ adder
+// or in shorter version:
+val result: Dataset[Record] = ds ++ Adder[Record, Record](AdderParams(7), _.id,
+  (r: Record, output: Adder.Output) => r.copy(id = output))
+```
+
+Moreover, to make it work, it does not be like that that input schema of Record contains
+an `id` column. It is the getter responsibility to provide value of Adder.Input type,
+even if this would require to carry this out through some not so complex processing.
+
+Consequently, the same with the constructor, it is not required that output schema,
+here also of type Record, is subclass of Adder.Output type, as it is the constructor
+responsibility to perform conversion from input record and output of the mapper function
+produced by build factory method.
+
+Finally, the most important is that the real logic is inside the mapper function
+which deals with the types Input and Output and these things are implemented inside
+the function of this pattern type. Please notice that this logic might be arbitrarily complicated
+and be implemented using pure functions, while getter and constructor are only interfaces
+to input and output schemas, and they are provided not during this function implementation,
+but during real usage in a given context.
+
+In other words, the function implemented according to such a pattern follows typical pattern of ETL:
+- Extract is the getter,
+- Transform is the mapper function produced by factory method build,
+- Load is the constructor.

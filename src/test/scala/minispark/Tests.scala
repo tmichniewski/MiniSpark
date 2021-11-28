@@ -208,9 +208,17 @@ class Tests extends AnyFunSuite {
     assert((ds ++ pipeline(cacher, mapper, sorter)).collect()(0).id == -2)
   }
 
-  test("Test Pattern") {
+  test("Test the Pattern") {
     val result: Dataset[Record] = ds ++ Adder[Record, Record](AdderParams(7), _.id,
       (r: Record, output: Adder.Output) => r.copy(id = output))
+    assert(result.map(_.id).collect() sameElements Array(8, 9))
+  }
+
+  test("Test the Pattern with intermediate variables") {
+    val getter: Record => Int = (r: Record) => r.id
+    val constructor: (Record, Int) => Record = (r: Record, output: Adder.Output) => r.copy(id = output)
+    val adder: Function[Record, Record] = Adder[Record, Record](AdderParams(7), getter, constructor)
+    val result: Dataset[Record] = ds ++ adder
     assert(result.map(_.id).collect() sameElements Array(8, 9))
   }
 }
