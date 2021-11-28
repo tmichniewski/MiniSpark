@@ -93,7 +93,7 @@ val addFullNameAndGreeting: Function[Person, PersonWithGreeting] = addFullName +
 
 Having such a simple concept we may start building more and more useful functions from some smaller ones.
 
-Please also notice, that such a function might be also used in Spark Dataset.transform method,
+Please also notice, that such a function might be also used in Spark `Dataset.transform` method,
 because our function is exactly equal to the type of parameter to the transform method.
 
 So, in fact our function might be perceived to be both -
@@ -121,7 +121,7 @@ implicit class ExtendedDataset[T](val d: Dataset[T]) extends AnyVal {
 ```
 
 The purpose of this method,
-which is yet another alias to standard - this time Spark - method called Dataset.transform,
+which is yet another alias to standard - this time Spark - method called `Dataset.transform`,
 is to be able to compose expressions consisting of Dataset with subsequent function,
 when such an expression will produce another Dataset.
 
