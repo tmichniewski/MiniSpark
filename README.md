@@ -247,7 +247,7 @@ responsibility to perform conversion from input record and output of the mapper 
 produced by build factory method to the output schema.
 
 Finally, the most important is that the real logic is inside the mapper function
-which deals with the types Input and Output and these things are implemented inside
+which deals with Input and Output types and these things are implemented inside
 the function of this pattern type. This is the logic of this transformation.
 Please notice that this logic might be arbitrarily complicated
 and be implemented using pure functions, while getter and constructor are only interfaces
