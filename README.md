@@ -101,7 +101,7 @@ an alias to Scala Function1 and a type of Spark transform method.
 
 ## Dataset composition with the function
 
-This library provides also a set of additional operators of Spark Dataset.
+This library provides also a set of additional operators on Spark Dataset.
 They mainly provide operator like names for other Spark Dataset methods.
 One important extension to this set of operators is the method `++`
 implemented - next to other operators - in the implicit class
