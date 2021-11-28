@@ -103,7 +103,7 @@ an alias to Scala Function1 and a type of Spark transform method.
 
 This library provides also a set of additional operators on Spark Dataset.
 They mainly provide operator like names for other Spark Dataset methods.
-One important extension to this set of operators is the method `++`
+One important extension to this set of operators is the `++` method,
 implemented - next to other operators - in the implicit class
 (BTW - this could be expressed as an extension method in Scala 3,
 but so far in Spark we are in Scala 2):
