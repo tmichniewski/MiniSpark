@@ -21,7 +21,7 @@ Summing up, we define the following type called *the function*:
 
 ```
 /**
- * The function represents any kind of transformation of one Dataset into another.
+ * The function represents any kind of transformation from one Dataset into another.
  *
  * @tparam T Type of input data.
  * @tparam U Type of output data.
@@ -63,7 +63,7 @@ final case class PersonWithGreeting(
   greeting: String
 )
 
-val addFullName: Dataset[Person] => Dataset[PersonWithFullName] = { (d: Dataset[Person]) =>
+val addFullName: Function[Person, PersonWithFullName] = { (d: Dataset[Person]) =>
   d.map { (p: Person) =>
     PersonWithFullName(
       firstName = p.firstName,
@@ -73,8 +73,8 @@ val addFullName: Dataset[Person] => Dataset[PersonWithFullName] = { (d: Dataset[
   }
 }
 
-val addGreeting: Dataset[PersonWithFullName] => Dataset[PersonWithGreeting] = { (d: Dataset[PersonWithFullName]) =>
-  d.map { (p: Person) =>
+val addGreeting: Function[PersonWithFullName, PersonWithGreeting] = { (d: Dataset[PersonWithFullName]) =>
+  d.map { (p: PersonWithFullName) =>
     PersonWithGreeting(
       firstName = p.firstName,
       lastName = p.lastName,
@@ -88,7 +88,7 @@ val addGreeting: Dataset[PersonWithFullName] => Dataset[PersonWithGreeting] = { 
 Then, having defined two such functions we may compose them, to achieve one function only:
 
 ```
-val addFullNameAndGreeting: Dataset[Person] => Dataset[PersonWithGreeting] = addFullName + addGreeting
+val addFullNameAndGreeting: Function[Person, PersonWithGreeting] = addFullName + addGreeting
 ```
 
 Having such a simple concept we may start building more and more useful functions from some smaller ones.
@@ -103,7 +103,7 @@ an alias to Scala Function1 and a type of Spark transform method.
 
 This library provides also a set of additional operators of Spark Dataset.
 They mainly provide operator like names for other Spark Dataset methods.
-One important extension to those set of operators is the method `++`
+One important extension to this set of operators is the method `++`
 implemented - next to other operators - in the implicit class
 (BTW - this could be expressed as an extension method in Scala 3,
 but so far in Spark we are in Scala 2):
@@ -126,19 +126,19 @@ is to be able to compose expressions consisting of Dataset with subsequent funct
 when such an expression will produce another Dataset.
 
 ```
-val person: Dataset[Person] = spark.read.parquet("person.parquet")
-val newPerson: Dataset[PersonWithGreeting] = person ++ addFullName ++ addGreeting
+val person: Dataset[Person] = spark.read.parquet("person.parquet").as[Person]
+val newPerson1: Dataset[PersonWithGreeting] = person ++ addFullName ++ addGreeting
 // or
-val newPerson: Dataset[PersonWithGreeting] = person ++ (addFullName + addGreeting)
+val newPerson2: Dataset[PersonWithGreeting] = person ++ (addFullName + addGreeting)
 // or
-val newPerson: Dataset[PersonWithGreeting] = person ++ addFullNameAndGreeting // the function defined earlier
+val newPerson3: Dataset[PersonWithGreeting] = person ++ addFullNameAndGreeting
 ```
 
 This is the core concept to shape Spark applications and express them as composition of such functions.
 
 ## Dataset implicit operators
 
-In addition to the composition method on Dataset, there are bunch of mentioned earlier operators,
+In addition to the composition method on Dataset, there is a bunch of mentioned earlier operators,
 which are supposed to shorten and simplify some set operators on Datasets as well as joins.
 
 ### Dataset set operators
@@ -160,7 +160,7 @@ which are supposed to shorten and simplify some set operators on Datasets as wel
 |Right outer join|def &#124;+=&#124;[U](other: Dataset[U]): JoinedDatasetPair[T, U] |
 |Full outer join |def &#124;+=+&#124;[U](other: Dataset[U]): JoinedDatasetPair[T, U]|
 
-## Sample functions
+## Sample typical functions
 
 In addition to implemented Dataset operators there are also predefined functions.
 
@@ -196,23 +196,25 @@ In addition to implemented Dataset operators there are also predefined functions
 |Sort            |def sort[T](columns: Column*): Function[T, T]                                          |
 |Pipeline        |def pipeline[T](f: Function[T, T], fs: Function[T, T]*): Function[T, T]                |
 
-## The pattern
+## The map pattern
 
 The most typical operation being performed on the Dataset is a map function.
 It expects a function to convert input record into output record.
 This may be enough to perform some not so complex transformation.
 Moreover, such a map operation may work with one input schema and produce another one.
-What to do ich we need something more complex and at the same time we would like
-to be able to use it to broader range of input or output schemas.
-The answer to such a challenge is the pattern which is and extension to the map function.
 
-The pattern is a typ which defines a common interface to handle such use case.
-It specifies the containers for input and output types, the container for parameters
-and expect to provide the function which will build the mapper function for the given parameters.
+What to do, if we need something more complex and at the same time we would like
+to be able to use it on broader range of input or output schemas.
+The answer to such a challenge is the pattern which is an extension to the map function.
 
-Then it also provides an apply function which will produce the map function
-provided it will get specific getter to convert the input record and a constructor
-which will convert all the produced data to the output record.
+The pattern is a type which defines a common interface to handle such use case.
+It specifies the containers for Input and Output types, the container for parameters
+and expect to provide the function which will build the mapper function for the given parameters
+and Input and Output types.
+
+Then, it also provides the apply function which will produce in return the map function,
+provided that it will get a specific getter to convert the input record to the Input type
+and a constructor, which will convert all the produced data to the output record.
 
 ```
 case class Record(id: Int, amount: Double, name: String, date: Date, time: Timestamp)
@@ -234,23 +236,28 @@ val result: Dataset[Record] = ds ++ Adder[Record, Record](AdderParams(7), _.id,
   (r: Record, output: Adder.Output) => r.copy(id = output))
 ```
 
-Moreover, to make it work, it does not be like that that input schema of Record contains
+Moreover, to make it work, it does not have to be like that, that input schema of Record contains
 an `id` column. It is the getter responsibility to provide value of Adder.Input type,
 even if this would require to carry this out through some not so complex processing.
+In other words, if the input schema had no `id` column, then the getter method may produce it.
 
-Consequently, the same with the constructor, it is not required that output schema,
-here also of type Record, is subclass of Adder.Output type, as it is the constructor
+Consequently, the same with the constructor method, it is not required that output schema,
+here also of type Record, is a subclass of Adder.Output type, as it is the constructor
 responsibility to perform conversion from input record and output of the mapper function
-produced by build factory method.
+produced by build factory method to the output schema.
 
 Finally, the most important is that the real logic is inside the mapper function
 which deals with the types Input and Output and these things are implemented inside
-the function of this pattern type. Please notice that this logic might be arbitrarily complicated
+the function of this pattern type. This is the logic of this transformation.
+Please notice that this logic might be arbitrarily complicated
 and be implemented using pure functions, while getter and constructor are only interfaces
-to input and output schemas, and they are provided not during this function implementation,
+to input and output schemas, and they are provided not during the function implementation,
 but during real usage in a given context.
 
 In other words, the function implemented according to such a pattern follows typical pattern of ETL:
 - Extract is the getter,
 - Transform is the mapper function produced by factory method build,
 - Load is the constructor.
+
+The emphasis is that it is the mapper function - the middle one - that is the most complex.
+The other two are just interfaces to input and output schemas.
