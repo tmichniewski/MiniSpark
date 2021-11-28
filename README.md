@@ -208,8 +208,8 @@ to be able to use it on broader range of input or output schemas.
 The answer to such a challenge is the pattern which is an extension to the map function.
 
 The pattern is a type which defines a common interface to handle such use case.
-It specifies the containers for Input and Output types, the container for parameters
-and expect to provide the function which will build the mapper function for the given parameters
+It specifies the containers for Input and Output types, the container for parameters,
+and it expects to provide the function which will build the mapper function for the given parameters
 and Input and Output types.
 
 Then, it also provides the apply function which will produce in return the map function,
