@@ -105,7 +105,8 @@ This library provides also a set of additional operators of Spark Dataset.
 They mainly provide operator like names for other Spark Dataset methods.
 One important extension to those set of operators is the method `++`
 implemented - next to other operators - in the implicit class
-(BTW - this could expressed as extension method in Scala 3, but so far in Spark we are in Scala 2):
+(BTW - this could be expressed as an extension method in Scala 3,
+but so far in Spark we are in Scala 2):
 
 ```
 implicit class ExtendedDataset[T](val d: Dataset[T]) extends AnyVal {
