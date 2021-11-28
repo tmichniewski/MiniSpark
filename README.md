@@ -96,7 +96,7 @@ Having such a simple concept we may start building more and more useful function
 Please also notice, that such a function might be also used in Spark `Dataset.transform` method,
 because our function is exactly equal to the type of parameter to the transform method.
 
-So, in fact our function might be perceived to be both -
+So, in fact, our function might be perceived to be both -
 an alias to Scala Function1 and a type of Spark transform method.
 
 ## Dataset composition with the function
