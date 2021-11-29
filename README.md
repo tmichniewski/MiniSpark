@@ -214,7 +214,7 @@ and Input and Output types.
 
 Then, it also provides the apply function which will produce in return the map function,
 provided that it will get a specific getter to convert the input record to the Input type
-and a constructor, which will convert all the produced data to the output record.
+and a constructor which will convert all the produced data to the output record.
 
 ```
 case class Record(id: Int, amount: Double, name: String, date: Date, time: Timestamp)
