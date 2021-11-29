@@ -1,7 +1,7 @@
 package com.github
 package minispark
 
-import minispark.Adder.AdderParams
+import minispark.Adder.{AdderInput, AdderOutput, AdderParams}
 import minispark.Functions._
 import minispark.Implicits.ExtendedDataset
 
@@ -14,12 +14,15 @@ import java.sql.{Date, Timestamp}
 
 case class Record(id: Int, amount: Double, name: String, date: Date, time: Timestamp)
 
-object Adder extends Pattern {
-  override type Input = Int
-  override type Output = Int
+object Adder extends MapPattern {
+  case class AdderInput(value: Int)
+  case class AdderOutput(value: Int)
+  override type Input = AdderInput
+  override type Output = AdderOutput
   case class AdderParams(delta: Int)
   override type Params = AdderParams
-  override def build(params: Params): Input => Output = _ + params.delta
+  override def build(params: Params): Input => Output =
+    (r: AdderInput) => AdderOutput(r.value + params.delta)
 }
 
 class Tests extends AnyFunSuite {
@@ -209,14 +212,16 @@ class Tests extends AnyFunSuite {
   }
 
   test("Test the Pattern") {
-    val result: Dataset[Record] = ds ++ Adder[Record, Record](AdderParams(7), _.id,
-      (r: Record, output: Adder.Output) => r.copy(id = output))
+    val result: Dataset[Record] = ds ++ Adder[Record, Record](AdderParams(7),
+      (r: Record) => AdderInput(r.id),
+      (r: Record, output: AdderOutput) => r.copy(id = output.value))
     assert(result.map(_.id).collect() sameElements Array(8, 9))
   }
 
   test("Test the Pattern with intermediate variables") {
-    val getter: Record => Int = (r: Record) => r.id
-    val constructor: (Record, Int) => Record = (r: Record, output: Adder.Output) => r.copy(id = output)
+    val getter: Record => AdderInput = (r: Record) => AdderInput(r.id)
+    val constructor: (Record, AdderOutput) => Record =
+      (r: Record, output: AdderOutput) => r.copy(id = output.value)
     val adder: Function[Record, Record] = Adder[Record, Record](AdderParams(7), getter, constructor)
     val result: Dataset[Record] = ds ++ adder
     assert(result.map(_.id).collect() sameElements Array(8, 9))

@@ -205,7 +205,7 @@ Moreover, such a map operation may work with one input schema and produce anothe
 
 What to do, if we need something more complex and at the same time we would like
 to be able to use it on broader range of input or output schemas.
-The answer to such a challenge is the pattern which is an extension to the map function.
+The answer to such a challenge is the map pattern which is an extension to the map function.
 
 The pattern is a type which defines a common interface to handle such use case.
 It specifies the containers for Input and Output types, the container for parameters,
@@ -219,7 +219,7 @@ and a constructor, which will convert all the produced data to the output record
 ```
 case class Record(id: Int, amount: Double, name: String, date: Date, time: Timestamp)
 
-object Adder extends Pattern {
+object Adder extends MapPattern {
   override type Input = Int // or any case class defined within the Adder object
   override type Output = Int // or any case class defined within the Adder object
   case class AdderParams(delta: Int)
