@@ -242,7 +242,7 @@ even if this would require to carry this out through some not so complex process
 In other words, if the input schema had no `id` column, then the getter method may produce it.
 
 Consequently, the same with the constructor method, it is not required that output schema,
-here also of type Record, is a subclass of Adder.Output type, as it is the constructor
+here of type Record, is a subclass of Adder.Output type, as it is the constructor
 responsibility to perform conversion from input record and output of the mapper function
 produced by build factory method to the output schema.
 
