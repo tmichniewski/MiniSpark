@@ -198,7 +198,7 @@ In addition to implemented Dataset operators there are also predefined functions
 
 ## The map pattern
 
-The most typical operation being performed on the Dataset is a map function.
+The most typical operation being performed on a Dataset is the map function.
 It expects a function to convert input record into output record.
 This may be enough to perform some not so complex transformation.
 Moreover, such a map operation may work with one input schema and produce another one.
