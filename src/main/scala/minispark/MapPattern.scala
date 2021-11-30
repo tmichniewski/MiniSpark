@@ -6,14 +6,13 @@ import minispark.Functions.map
 import org.apache.spark.sql.Encoder
 
 /**
- * Generic map pattern. It uses the concept of getter which converts T into Input.
- * So, in general, we replace inheritance relation of T being subtype of Input
- * into necessity to provide more general higher order function called getter.
- * This way we no longer have to extend input type T with the type of Input.
+ * Generic map pattern. It uses the concept of getter which converts T into Input
+ * and constructor which converts input record and mapper result into output record.
  *
  * It is recommend to define Input and Output as a concrete types or containers for data.
- * We no longer need additional types (traits) for them, as it is the getter to provide Input value.
- * This way we do not need to extend T type with type of Input, as this relation is hidden inside the getter.
+ * There is no need to define additional types (traits) for Input and Output types,
+ * as it is the getter to provide Input value and it is constructor which consumes the mapper result.
+ * This way we there is no need to extend T type with type of Input, as this relation is hidden inside the getter.
  * There is also no need to extend U with type of Output, as this relation is hidden inside the constructor.
  */
 trait MapPattern {
