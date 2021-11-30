@@ -261,3 +261,36 @@ In other words, the function implemented according to such a pattern follows typ
 
 The emphasis is that it is the mapper function - the middle one - that is the most complex.
 The other two are just interfaces to input and output schemas.
+
+Please notice that such a pattern might be applied to wide range of use cases,
+starting from a plain function, through bigger function covering some business related use cases
+and ending on the big functions representing whole submodules. So, this is the decision of the user
+where to use it. Moreover, this is also possible to encapsulate functions implemented with this pattern
+inside other functions also implemented with this pattern, and so on. 
+
+## Summary
+
+Summing up, this library consists of:
+- usage of `Dataset` as the main data representation,
+- `Dataset.++` operator which is an alias to `Dataset.transform` method,
+- set of implicits which provide aliases to typical Dataset operations,
+- the `Function[T, U]` type which is an alias to Scala `Function1[Dataset[T], Dataset[U]]` type,
+- the `Function.+` composition operator which is an alias to Scala `Function1.andThen`,
+- set of methods producing typical Spark functions as one-liner aliases to Spark counterparts,
+- and finally the map pattern.
+
+In turn, the map pattern has the following features:
+- provides the contract or an interface to build the map function,
+- specifies `Input`, `Output` and `Params` containers for data, typically in the form of case class only or some standard type,
+- no necessity to create any traits,
+- common API for creating the mapper function in the form of abstract `build` method,
+- standard `apply` method which returns the map function,
+- the apply method is type parameterized, but those types `[T, U]` do not have to be subclasses of `Input` and `Output` respectively,
+- instead, the apply method uses generic and functional interface to input and output records in the form of getter and constructor functions.
+
+## Final word
+
+Concluding, this library is not about the API, which hardly brings anything new, but about the thinking.
+
+The thinking of building enterprise class systems and their decomposition into smaller parts.
+Thinking about how to shape the small pieces of the system and then, how to glue them together.
