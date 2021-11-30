@@ -234,6 +234,7 @@ val result: Dataset[Record] = ds ++ adder
 // or in shorter version:
 val result: Dataset[Record] = ds ++ Adder[Record, Record](AdderParams(7), _.id,
   (r: Record, output: Adder.Output) => r.copy(id = output))
+// see the tests for more examples
 ```
 
 Moreover, to make it work, it does not have to be like that, that input schema of Record contains
@@ -292,6 +293,6 @@ In turn, the map pattern has the following features:
 
 Concluding, this library is not about the API, which hardly brings anything new.
 
-Instead, this is about the thinking.
+Instead, it is about the thinking.
 The thinking about building enterprise class systems and their decomposition into smaller parts.
 Thinking about how to shape the small pieces of the system and then, how to glue them together.
