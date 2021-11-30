@@ -271,8 +271,8 @@ inside other functions also implemented with this pattern, and so on.
 ## Summary
 
 Summing up, this library consists of:
-- usage of `Dataset` as the main data representation,
-- `Dataset.++` operator which is an alias to `Dataset.transform` method,
+- usage of the `Dataset` type as the main data representation,
+- the `Dataset.++` operator which is an alias to `Dataset.transform` method,
 - set of implicits which provide aliases to typical Dataset operations,
 - the `Function[T, U]` type which is an alias to Scala `Function1[Dataset[T], Dataset[U]]` type,
 - the `Function.+` composition operator which is an alias to Scala `Function1.andThen`,
@@ -290,7 +290,8 @@ In turn, the map pattern has the following features:
 
 ## Final word
 
-Concluding, this library is not about the API, which hardly brings anything new, but about the thinking.
+Concluding, this library is not about the API, which hardly brings anything new.
 
-The thinking of building enterprise class systems and their decomposition into smaller parts.
+Instead, this is about the thinking.
+The thinking about building enterprise class systems and their decomposition into smaller parts.
 Thinking about how to shape the small pieces of the system and then, how to glue them together.
