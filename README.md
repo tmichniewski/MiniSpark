@@ -296,3 +296,9 @@ Concluding, this library is not about the API, which hardly brings anything new.
 Instead, it is about the thinking.
 The thinking about building enterprise class systems and their decomposition into smaller parts.
 Thinking about how to shape the small pieces of the system and then, how to glue them together.
+
+## Versions
+
+|Version|Date      |Description   |
+|-------|----------|--------------|
+|1.0.0  |2021-11-28|First version.|

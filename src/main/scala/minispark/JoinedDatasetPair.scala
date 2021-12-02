@@ -1,7 +1,7 @@
 package com.github
 package minispark
 
-import org.apache.spark.sql.{Dataset, Row}
+import org.apache.spark.sql.{Column, Dataset, Row}
 
 /**
  * Represents a pair of Datasets to be joined.
@@ -21,6 +21,26 @@ private [minispark] class JoinedDatasetPair[T, U](d1: Dataset[T], d2: Dataset[U]
    */
   def on(columns: Seq[String]): Dataset[Row] = joinType match {
     case "inner" | "left" | "right" | "full" => d1.join(d2, columns, joinType)
+  }
+
+  /**
+   * Finishes the join transformation.
+   *
+   * @param joinExpr Join expression.
+   * @return Returns the joined Datasets.
+   */
+  def on(joinExpr: Column): Dataset[Row] = joinType match {
+    case "inner" | "left" | "right" | "full" => d1.join(d2, joinExpr, joinType)
+  }
+
+  /**
+   * Finishes the join transformation.
+   *
+   * @param joinExpr Join expression.
+   * @return Returns the joined Datasets which contains tuple of rows from both Datasets.
+   */
+  def onTuple(joinExpr: Column): Dataset[(T, U)] = joinType match {
+    case "inner" | "left" | "right" | "full" => d1.joinWith(d2, joinExpr, joinType)
   }
 }
 

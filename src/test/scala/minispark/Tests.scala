@@ -75,20 +75,62 @@ class Tests extends AnyFunSuite {
     assert((ds |*| ds).count() == 4L)
   }
 
-  test("Test ExtendedDataset: |=|") {
+  test("Test ExtendedDataset: |=| on Strings") {
     assert((ds |=| ds.limit(1) on Seq("id")).count() == 1L)
   }
 
-  test("Test ExtendedDataset: |=+|") {
+  test("Test ExtendedDataset: |=| on Column") {
+    val ds1: Dataset[Record] = ds.limit(1)
+    assert((ds |=| ds1 on ds("id") === ds1("id")).count() == 1L)
+  }
+
+  test("Test ExtendedDataset: |=| onTuple Column") {
+    val ds1: Dataset[Record] = ds.limit(1)
+    assert((ds |=| ds1 onTuple ds("id") === ds1("id")).count() == 1L)
+  }
+
+  test("Test ExtendedDataset: |=+| on Strings") {
     assert((ds |=+| ds.limit(1) on Seq("id")).count() == 2L)
   }
 
-  test("Test ExtendedDataset: |+=|") {
+  test("Test ExtendedDataset: |=+| on Column") {
+    val ds1: Dataset[Record] = ds.limit(1)
+    assert((ds |=+| ds1 on ds("id") === ds1("id")).count() == 2L)
+  }
+
+  test("Test ExtendedDataset: |=+| onTuple Column") {
+    val ds1: Dataset[Record] = ds.limit(1)
+    assert((ds |=+| ds1 onTuple ds("id") === ds1("id")).count() == 2L)
+  }
+
+  test("Test ExtendedDataset: |+=| on Strings") {
     assert((ds.limit(1) |+=| ds on Seq("id")).count() == 2L)
   }
 
-  test("Test ExtendedDataset: |+=+|") {
+  test("Test ExtendedDataset: |+=| on Column") {
+    val ds1: Dataset[Record] = ds.limit(1)
+    assert((ds.limit(1) |+=| ds on ds("id") === ds1("id")).count() == 2L)
+  }
+
+  test("Test ExtendedDataset: |+=| onTuple Column") {
+    val ds1: Dataset[Record] = ds.limit(1)
+    assert((ds.limit(1) |+=| ds onTuple ds("id") === ds1("id")).count() == 2L)
+  }
+
+  test("Test ExtendedDataset: |+=+| on Strings") {
     assert((ds.filter("id = 1") |+=+| ds.filter("id = 2") on Seq("id")).count() == 2L)
+  }
+
+  test("Test ExtendedDataset: |+=+| on Column") {
+    val ds1: Dataset[Record] = ds.filter("id = 1")
+    val ds2: Dataset[Record] = ds.filter("id = 2")
+    assert((ds1 |+=+| ds2 on ds1("id") === ds2("id")).count() == 2L)
+  }
+
+  test("Test ExtendedDataset: |+=+| onTuple Column") {
+    val ds1: Dataset[Record] = ds.filter("id = 1")
+    val ds2: Dataset[Record] = ds.filter("id = 2")
+    assert((ds1 |+=+| ds2 onTuple ds1("id") === ds2("id")).count() == 2L)
   }
 
   test("Test Functions: filter on String") {
