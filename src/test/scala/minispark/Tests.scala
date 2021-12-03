@@ -84,9 +84,9 @@ class Tests extends AnyFunSuite {
     assert((ds |=| ds1 on ds("id") === ds1("id")).count() == 1L)
   }
 
-  test("Test ExtendedDataset: |=| onTuple Column") {
+  test("Test ExtendedDataset: |=| onTyped Column") {
     val ds1: Dataset[Record] = ds.limit(1)
-    assert((ds |=| ds1 onTuple ds("id") === ds1("id")).count() == 1L)
+    assert((ds |=| ds1 onTyped ds("id") === ds1("id")).count() == 1L)
   }
 
   test("Test ExtendedDataset: |=+| on Strings") {
@@ -98,9 +98,9 @@ class Tests extends AnyFunSuite {
     assert((ds |=+| ds1 on ds("id") === ds1("id")).count() == 2L)
   }
 
-  test("Test ExtendedDataset: |=+| onTuple Column") {
+  test("Test ExtendedDataset: |=+| onTyped Column") {
     val ds1: Dataset[Record] = ds.limit(1)
-    assert((ds |=+| ds1 onTuple ds("id") === ds1("id")).count() == 2L)
+    assert((ds |=+| ds1 onTyped ds("id") === ds1("id")).count() == 2L)
   }
 
   test("Test ExtendedDataset: |+=| on Strings") {
@@ -109,12 +109,12 @@ class Tests extends AnyFunSuite {
 
   test("Test ExtendedDataset: |+=| on Column") {
     val ds1: Dataset[Record] = ds.limit(1)
-    assert((ds.limit(1) |+=| ds on ds("id") === ds1("id")).count() == 2L)
+    assert((ds1 |+=| ds on ds1("id") === ds("id")).count() == 2L)
   }
 
-  test("Test ExtendedDataset: |+=| onTuple Column") {
+  test("Test ExtendedDataset: |+=| onTyped Column") {
     val ds1: Dataset[Record] = ds.limit(1)
-    assert((ds.limit(1) |+=| ds onTuple ds("id") === ds1("id")).count() == 2L)
+    assert((ds1 |+=| ds onTyped ds1("id") === ds("id")).count() == 2L)
   }
 
   test("Test ExtendedDataset: |+=+| on Strings") {
@@ -127,10 +127,10 @@ class Tests extends AnyFunSuite {
     assert((ds1 |+=+| ds2 on ds1("id") === ds2("id")).count() == 2L)
   }
 
-  test("Test ExtendedDataset: |+=+| onTuple Column") {
+  test("Test ExtendedDataset: |+=+| onTyped Column") {
     val ds1: Dataset[Record] = ds.filter("id = 1")
     val ds2: Dataset[Record] = ds.filter("id = 2")
-    assert((ds1 |+=+| ds2 onTuple ds1("id") === ds2("id")).count() == 2L)
+    assert((ds1 |+=+| ds2 onTyped ds1("id") === ds2("id")).count() == 2L)
   }
 
   test("Test Functions: filter on String") {
@@ -210,20 +210,66 @@ class Tests extends AnyFunSuite {
     assert((ds ++ cross(ds)).count() == 4L)
   }
 
-  test("Test Functions: inner") {
+  test("Test Functions: crossTyped") {
+    assert((ds ++ crossTyped(ds)).count() == 4L)
+  }
+
+  test("Test Functions: inner on String") {
     assert((ds ++ inner(ds.limit(1), Seq("id"))).count() == 1L)
   }
 
-  test("Test Functions: left") {
+  test("Test Functions: inner on Column") {
+    val ds1: Dataset[Record] = ds.limit(1)
+    assert((ds ++ inner(ds1, ds("id") === ds1("id"))).count() == 1L)
+  }
+
+  test("Test Functions: innerTyped on Column") {
+    val ds1: Dataset[Record] = ds.limit(1)
+    assert((ds ++ innerTyped(ds1, ds("id") === ds1("id"))).count() == 1L)
+  }
+
+  test("Test Functions: left on String") {
     assert((ds ++ left(ds.limit(1), Seq("id"))).count() == 2L)
   }
 
-  test("Test Functions: right") {
+  test("Test Functions: left on Column") {
+    val ds1: Dataset[Record] = ds.limit(1)
+    assert((ds ++ left(ds1, ds("id") === ds1("id"))).count() == 2L)
+  }
+
+  test("Test Functions: leftTyped on Column") {
+    val ds1: Dataset[Record] = ds.limit(1)
+    assert((ds ++ leftTyped(ds1, ds("id") === ds1("id"))).count() == 2L)
+  }
+
+  test("Test Functions: right on String") {
     assert((ds.limit(1) ++ right(ds, Seq("id"))).count() == 2L)
   }
 
-  test("Test Functions: full") {
+  test("Test Functions: right on Column") {
+    val ds1: Dataset[Record] = ds.limit(1)
+    assert((ds1 ++ right(ds, ds1("id") === ds("id"))).count() == 2L)
+  }
+
+  test("Test Functions: rightTyped on Column") {
+    val ds1: Dataset[Record] = ds.limit(1)
+    assert((ds1 ++ rightTyped(ds, ds1("id") === ds("id"))).count() == 2L)
+  }
+
+  test("Test Functions: full on String") {
     assert((ds.filter("id = 1") ++ full(ds.filter("id = 2"), Seq("id"))).count() == 2L)
+  }
+
+  test("Test Functions: full on Column") {
+    val ds1: Dataset[Record] = ds.filter("id = 1")
+    val ds2: Dataset[Record] = ds.filter("id = 2")
+    assert((ds1 ++ full(ds2, ds1("id") === ds2("id"))).count() == 2L)
+  }
+
+  test("Test Functions: fullTyped on Column") {
+    val ds1: Dataset[Record] = ds.filter("id = 1")
+    val ds2: Dataset[Record] = ds.filter("id = 2")
+    assert((ds1 ++ fullTyped(ds2, ds1("id") === ds2("id"))).count() == 2L)
   }
 
   test("Test Functions: as") {

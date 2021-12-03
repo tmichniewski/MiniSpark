@@ -1,6 +1,7 @@
 package com.github
 package minispark
 
+import org.apache.spark.sql.functions.lit
 import org.apache.spark.sql.types.DataType
 import org.apache.spark.sql.{Column, DataFrame, Dataset, Encoder, Row}
 
@@ -209,6 +210,17 @@ object Functions {
   def cross[T](other: Dataset[_]): Function[T, Row] = (d: Dataset[T]) => d crossJoin other
 
   /**
+   * Cross joins with the other Dataset.
+   *
+   * @param other The other Dataset to be cross joined.
+   * @tparam T Type of input data.
+   * @tparam U Type of input data.
+   * @return Returns the function to cross join the given Datasets.
+   */
+  def crossTyped[T, U](other: Dataset[U]): Function[T, (T, U)] =
+    (d: Dataset[T]) => d.joinWith(other, lit(true), "cross")
+
+  /**
    * Inner joins with the other Dataset.
    *
    * @param other The other Dataset to be inner joined.
@@ -217,7 +229,30 @@ object Functions {
    * @return Returns the function to inner join the given Datasets.
    */
   def inner[T](other: Dataset[_], columns: Seq[String]): Function[T, Row] =
-    (d: Dataset[T]) => d.join(other, columns)
+    (d: Dataset[T]) => d.join(other, columns, "inner")
+
+  /**
+   * Inner joins with the other Dataset.
+   *
+   * @param other The other Dataset to be inner joined.
+   * @param joinExpr Join expression.
+   * @tparam T Type of input data.
+   * @return Returns the function to inner join the given Datasets.
+   */
+  def inner[T](other: Dataset[_], joinExpr: Column): Function[T, Row] =
+    (d: Dataset[T]) => d.join(other, joinExpr, "inner")
+
+  /**
+   * Inner joins with the other Dataset.
+   *
+   * @param other The other Dataset to be inner joined.
+   * @param joinExpr Join expression.
+   * @tparam T Type of input data.
+   * @tparam U Type of input data.
+   * @return Returns the function to inner join the given Datasets.
+   */
+  def innerTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)] =
+    (d: Dataset[T]) => d.joinWith(other, joinExpr, "inner")
 
   /**
    * Left outer joins with the other Dataset.
@@ -231,6 +266,29 @@ object Functions {
     (d: Dataset[T]) => d.join(other, columns, "left")
 
   /**
+   * Left outer joins with the other Dataset.
+   *
+   * @param other The other Dataset to be left outer joined.
+   * @param joinExpr Join expression.
+   * @tparam T Type of input data.
+   * @return Returns the function to left outer join the given Datasets.
+   */
+  def left[T](other: Dataset[_], joinExpr: Column): Function[T, Row] =
+    (d: Dataset[T]) => d.join(other, joinExpr, "left")
+
+  /**
+   * Left outer joins with the other Dataset.
+   *
+   * @param other The other Dataset to be left outer joined.
+   * @param joinExpr Join expression.
+   * @tparam T Type of input data.
+   * @tparam U Type of input data.
+   * @return Returns the function to left outer join the given Datasets.
+   */
+  def leftTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T,U)] =
+    (d: Dataset[T]) => d.joinWith(other, joinExpr, "left")
+
+  /**
    * Right outer joins with the other Dataset.
    *
    * @param other The other Dataset to be right outer joined.
@@ -242,6 +300,29 @@ object Functions {
     (d: Dataset[T]) => d.join(other, columns, "right")
 
   /**
+   * Right outer joins with the other Dataset.
+   *
+   * @param other The other Dataset to be right outer joined.
+   * @param joinExpr Join expression.
+   * @tparam T Type of input data.
+   * @return Returns the function to right outer join the given Datasets.
+   */
+  def right[T](other: Dataset[_], joinExpr: Column): Function[T, Row] =
+    (d: Dataset[T]) => d.join(other, joinExpr, "right")
+
+  /**
+   * Right outer joins with the other Dataset.
+   *
+   * @param other The other Dataset to be right outer joined.
+   * @param joinExpr Join expression.
+   * @tparam T Type of input data.
+   * @tparam U Type of input data.
+   * @return Returns the function to right outer join the given Datasets.
+   */
+  def rightTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)] =
+    (d: Dataset[T]) => d.joinWith(other, joinExpr, "right")
+
+  /**
    * Full outer joins with the other Dataset.
    *
    * @param other The other Dataset to be full outer joined.
@@ -251,6 +332,29 @@ object Functions {
    */
   def full[T](other: Dataset[_], columns: Seq[String]): Function[T, Row] =
     (d: Dataset[T]) => d.join(other, columns, "full")
+
+  /**
+   * Full outer joins with the other Dataset.
+   *
+   * @param other The other Dataset to be full outer joined.
+   * @param joinExpr Join expression.
+   * @tparam T Type of input data.
+   * @return Returns the function to full outer join the given Datasets.
+   */
+  def full[T](other: Dataset[_], joinExpr: Column): Function[T, Row] =
+    (d: Dataset[T]) => d.join(other, joinExpr, "full")
+
+  /**
+   * Full outer joins with the other Dataset.
+   *
+   * @param other The other Dataset to be full outer joined.
+   * @param joinExpr Join expression.
+   * @tparam T Type of input data.
+   * @tparam U Type of input data.
+   * @return Returns the function to full outer join the given Datasets.
+   */
+  def fullTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)] =
+    (d: Dataset[T]) => d.joinWith(other, joinExpr, "full")
 
   // utility
 

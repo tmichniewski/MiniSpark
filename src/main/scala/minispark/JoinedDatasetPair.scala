@@ -39,7 +39,7 @@ private [minispark] class JoinedDatasetPair[T, U](d1: Dataset[T], d2: Dataset[U]
    * @param joinExpr Join expression.
    * @return Returns the joined Datasets which contains tuple of rows from both Datasets.
    */
-  def onTuple(joinExpr: Column): Dataset[(T, U)] = joinType match {
+  def onTyped(joinExpr: Column): Dataset[(T, U)] = joinType match {
     case "inner" | "left" | "right" | "full" => d1.joinWith(d2, joinExpr, joinType)
   }
 }

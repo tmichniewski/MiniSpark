@@ -185,10 +185,19 @@ In addition to implemented Dataset operators there are also predefined functions
 |Intersect       |def intersect[T](other: Dataset[T]): Function[T, T]                                    |
 |Delta           |def delta[T](other: Dataset[T]): Function[T, T]                                        |
 |Cross join      |def cross[T](other: Dataset[_]): Function[T, Row]                                      |
+|Cross join      |def crossTyped[T, U](other: Dataset[U]): Function[T, (T, U)]                           |
 |Inner join      |def inner[T](other: Dataset[_], columns: Seq[String]): Function[T, Row]                |
+|Inner join      |def inner[T](other: Dataset[_], joinExpr: Column): Function[T, Row]                    |
+|Inner join      |def inner[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)]              |
 |Left outer join |def left[T](other: Dataset[_], columns: Seq[String]): Function[T, Row]                 |
+|Left outer join |def left[T](other: Dataset[_], joinExpr: Column): Function[T, Row]                     |
+|Left outer join |def leftTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)]          |
 |Right outer join|def right[T](other: Dataset[_], columns: Seq[String]): Function[T, Row]                |
+|Right outer join|def right[T](other: Dataset[_], joinExpr: Column): Function[T, Row]                    |
+|Right outer join|def rightTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)]         |
 |Full outer join |def full[T](other: Dataset[_], columns: Seq[String]): Function[T, Row]                 |
+|Full outer join |def full[T](other: Dataset[_], joinExpr: Column): Function[T, Row]                     |
+|Full outer join |def fullTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)]          |
 |Cast Dataset    |def as[T: Encoder] (): Function[Row, T]                                                |
 |Cast Dataset    |def row[T] (): Function[T, Row]                                                        |
 |Cache           |def cache[T] (): Function[T, T]                                                        |
@@ -299,6 +308,7 @@ Thinking about how to shape the small pieces of the system and then, how to glue
 
 ## Versions
 
-|Version|Date      |Description   |
-|-------|----------|--------------|
-|1.0.0  |2021-11-28|First version.|
+|Version|Date      |Description                         |
+|-------|----------|------------------------------------|
+|1.1.0  |2021-12-05|Add joins on Column and typed joins.|
+|1.0.0  |2021-11-28|First version.                      |
