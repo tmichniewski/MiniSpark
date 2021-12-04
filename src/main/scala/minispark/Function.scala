@@ -25,6 +25,6 @@ trait Function[T, U] extends (Dataset[T] => Dataset[U]) {
 
 /**
  * This version of the function only extends the generic function to specify input and output types.
- * It might be perceived ad type alias.
+ * It might be perceived as a type alias only.
  */
 trait DfFunction extends Function[Row, Row]
