@@ -1,7 +1,8 @@
 package com.github
 package minispark
 
-import org.apache.spark.sql.Dataset
+import org.apache.spark.ml.Transformer
+import org.apache.spark.sql.{Dataset, Row}
 
 /**
  * The function represents any kind of transformation of one Dataset into another.
@@ -22,3 +23,9 @@ trait Function[T, U] extends (Dataset[T] => Dataset[U]) {
    */
   def +[V](f: Function[U, V]): Function[T, V] = (d: Dataset[T]) => (this andThen f)(d) // d transform (this andThen f)
 }
+
+/**
+ * This version of the function only extends the generic function to specify input and output types.
+ * It might be perceived ad type alias.
+ */
+trait DfFunction extends Function[Row, Row]
