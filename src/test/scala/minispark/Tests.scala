@@ -5,8 +5,10 @@ import minispark.Adder.{AdderInput, AdderOutput, AdderParams}
 import minispark.Functions._
 import minispark.Implicits.ExtendedDataset
 
-import org.apache.spark.sql.functions.lit
-import org.apache.spark.sql.types.LongType
+import org.apache.spark.ml.param.ParamMap
+import org.apache.spark.ml.util.DefaultParamsReadable
+import org.apache.spark.sql.functions.{col, lit}
+import org.apache.spark.sql.types.{LongType, StructType}
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -25,6 +27,15 @@ object Adder extends MapPattern {
     (r: AdderInput) => AdderOutput(r.value + params.delta)
 }
 
+class FilterFunctionTransformer extends FunctionTransformer {
+  override def func: Function[Row, Row] = filter[Row]("id = 1")
+  override def transformSchema(schema: StructType): StructType = schema
+}
+object FilterFunctionTransformer extends DefaultParamsReadable[FilterFunctionTransformer] {
+  override def load(path: String): FilterFunctionTransformer = super.load(path)
+  def apply(): FilterFunctionTransformer = new FilterFunctionTransformer
+}
+
 class Tests extends AnyFunSuite {
   val spark: SparkSession = SparkSession.builder().master("local[*]").getOrCreate()
   import spark.implicits._
@@ -33,8 +44,8 @@ class Tests extends AnyFunSuite {
   val t: Timestamp = Timestamp.valueOf("2021-11-28 12:34:56")
 
   val rows: Seq[Record] = Seq(Record(1, 1.23, "Name1", d, t), Record(2, 2.46, "Name2", d, t))
-  val df: DataFrame = rows.toDF()
-  val ds: Dataset[Record] = rows.toDS()
+  val df: DataFrame = rows.toDF().alias("df")
+  val ds: Dataset[Record] = rows.toDS().alias("ds")
 
   test("Test Spark") {
     assert(spark.range(1).count() == 1L)
@@ -80,13 +91,13 @@ class Tests extends AnyFunSuite {
   }
 
   test("Test ExtendedDataset: |=| on Column") {
-    val ds1: Dataset[Record] = ds.limit(1)
-    assert((ds |=| ds1 on ds("id") === ds1("id")).count() == 1L)
+    val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
+    assert((ds |=| ds1 on col("ds.id") === col("ds1.id")).count() == 1L)
   }
 
   test("Test ExtendedDataset: |=| onTyped Column") {
-    val ds1: Dataset[Record] = ds.limit(1)
-    assert((ds |=| ds1 onTyped ds("id") === ds1("id")).count() == 1L)
+    val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
+    assert((ds |=| ds1 onTyped col("ds.id") === col("ds1.id")).count() == 1L)
   }
 
   test("Test ExtendedDataset: |=+| on Strings") {
@@ -94,13 +105,13 @@ class Tests extends AnyFunSuite {
   }
 
   test("Test ExtendedDataset: |=+| on Column") {
-    val ds1: Dataset[Record] = ds.limit(1)
-    assert((ds |=+| ds1 on ds("id") === ds1("id")).count() == 2L)
+    val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
+    assert((ds |=+| ds1 on col("ds.id") === col("ds1.id")).count() == 2L)
   }
 
   test("Test ExtendedDataset: |=+| onTyped Column") {
-    val ds1: Dataset[Record] = ds.limit(1)
-    assert((ds |=+| ds1 onTyped ds("id") === ds1("id")).count() == 2L)
+    val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
+    assert((ds |=+| ds1 onTyped col("ds.id") === col("ds1.id")).count() == 2L)
   }
 
   test("Test ExtendedDataset: |+=| on Strings") {
@@ -108,13 +119,13 @@ class Tests extends AnyFunSuite {
   }
 
   test("Test ExtendedDataset: |+=| on Column") {
-    val ds1: Dataset[Record] = ds.limit(1)
-    assert((ds1 |+=| ds on ds1("id") === ds("id")).count() == 2L)
+    val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
+    assert((ds1 |+=| ds on col("ds1.id") === col("ds.id")).count() == 2L)
   }
 
   test("Test ExtendedDataset: |+=| onTyped Column") {
-    val ds1: Dataset[Record] = ds.limit(1)
-    assert((ds1 |+=| ds onTyped ds1("id") === ds("id")).count() == 2L)
+    val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
+    assert((ds1 |+=| ds onTyped col("ds1.id") === col("ds.id")).count() == 2L)
   }
 
   test("Test ExtendedDataset: |+=+| on Strings") {
@@ -122,15 +133,15 @@ class Tests extends AnyFunSuite {
   }
 
   test("Test ExtendedDataset: |+=+| on Column") {
-    val ds1: Dataset[Record] = ds.filter("id = 1")
-    val ds2: Dataset[Record] = ds.filter("id = 2")
-    assert((ds1 |+=+| ds2 on ds1("id") === ds2("id")).count() == 2L)
+    val ds1: Dataset[Record] = ds.filter("id = 1").alias("ds1")
+    val ds2: Dataset[Record] = ds.filter("id = 2").alias("ds2")
+    assert((ds1 |+=+| ds2 on col("ds1.id") === col("ds2.id")).count() == 2L)
   }
 
   test("Test ExtendedDataset: |+=+| onTyped Column") {
-    val ds1: Dataset[Record] = ds.filter("id = 1")
-    val ds2: Dataset[Record] = ds.filter("id = 2")
-    assert((ds1 |+=+| ds2 onTyped ds1("id") === ds2("id")).count() == 2L)
+    val ds1: Dataset[Record] = ds.filter("id = 1").alias("ds1")
+    val ds2: Dataset[Record] = ds.filter("id = 2").alias("ds2")
+    assert((ds1 |+=+| ds2 onTyped col("ds1.id") === col("ds2.id")).count() == 2L)
   }
 
   test("Test Functions: filter on String") {
@@ -219,13 +230,13 @@ class Tests extends AnyFunSuite {
   }
 
   test("Test Functions: inner on Column") {
-    val ds1: Dataset[Record] = ds.limit(1)
-    assert((ds ++ inner(ds1, ds("id") === ds1("id"))).count() == 1L)
+    val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
+    assert((ds ++ inner(ds1, col("ds.id") === col("ds1.id"))).count() == 1L)
   }
 
   test("Test Functions: innerTyped on Column") {
-    val ds1: Dataset[Record] = ds.limit(1)
-    assert((ds ++ innerTyped(ds1, ds("id") === ds1("id"))).count() == 1L)
+    val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
+    assert((ds ++ innerTyped(ds1, col("ds.id") === col("ds1.id"))).count() == 1L)
   }
 
   test("Test Functions: left on String") {
@@ -233,13 +244,13 @@ class Tests extends AnyFunSuite {
   }
 
   test("Test Functions: left on Column") {
-    val ds1: Dataset[Record] = ds.limit(1)
-    assert((ds ++ left(ds1, ds("id") === ds1("id"))).count() == 2L)
+    val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
+    assert((ds ++ left(ds1, col("ds.id") === col("ds1.id"))).count() == 2L)
   }
 
   test("Test Functions: leftTyped on Column") {
-    val ds1: Dataset[Record] = ds.limit(1)
-    assert((ds ++ leftTyped(ds1, ds("id") === ds1("id"))).count() == 2L)
+    val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
+    assert((ds ++ leftTyped(ds1, col("ds.id") === col("ds1.id"))).count() == 2L)
   }
 
   test("Test Functions: right on String") {
@@ -247,13 +258,13 @@ class Tests extends AnyFunSuite {
   }
 
   test("Test Functions: right on Column") {
-    val ds1: Dataset[Record] = ds.limit(1)
-    assert((ds1 ++ right(ds, ds1("id") === ds("id"))).count() == 2L)
+    val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
+    assert((ds1 ++ right(ds, col("ds1.id") === col("ds.id"))).count() == 2L)
   }
 
   test("Test Functions: rightTyped on Column") {
-    val ds1: Dataset[Record] = ds.limit(1)
-    assert((ds1 ++ rightTyped(ds, ds1("id") === ds("id"))).count() == 2L)
+    val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
+    assert((ds1 ++ rightTyped(ds, col("ds1.id") === col("ds.id"))).count() == 2L)
   }
 
   test("Test Functions: full on String") {
@@ -261,15 +272,15 @@ class Tests extends AnyFunSuite {
   }
 
   test("Test Functions: full on Column") {
-    val ds1: Dataset[Record] = ds.filter("id = 1")
-    val ds2: Dataset[Record] = ds.filter("id = 2")
-    assert((ds1 ++ full(ds2, ds1("id") === ds2("id"))).count() == 2L)
+    val ds1: Dataset[Record] = ds.filter("id = 1").alias("ds1")
+    val ds2: Dataset[Record] = ds.filter("id = 2").alias("ds2")
+    assert((ds1 ++ full(ds2, col("ds1.id") === col("ds2.id"))).count() == 2L)
   }
 
   test("Test Functions: fullTyped on Column") {
-    val ds1: Dataset[Record] = ds.filter("id = 1")
-    val ds2: Dataset[Record] = ds.filter("id = 2")
-    assert((ds1 ++ fullTyped(ds2, ds1("id") === ds2("id"))).count() == 2L)
+    val ds1: Dataset[Record] = ds.filter("id = 1").alias("ds1")
+    val ds2: Dataset[Record] = ds.filter("id = 2").alias("ds2")
+    assert((ds1 ++ fullTyped(ds2, col("ds1.id") === col("ds2.id"))).count() == 2L)
   }
 
   test("Test Functions: as") {
@@ -297,6 +308,34 @@ class Tests extends AnyFunSuite {
     val mapper: Function[Record, Record] = map((r: Record) => r.copy(id = -r.id))
     val sorter: Function[Record, Record] = sort("id")
     assert((ds ++ pipeline(cacher, mapper, sorter)).collect()(0).id == -2)
+  }
+
+  test("Test Functions: trans") {
+    val f: Function[Row, Row] = filter[Row]("id = 1")
+    val fft: FilterFunctionTransformer = FilterFunctionTransformer()
+    val func: Function[Row, Row] = trans(fft.copy(ParamMap()))
+    val result = df ++ func
+    assert(result.count() == 1L)
+  }
+
+  test("Test FunctionTransformer") {
+    val f: Function[Row, Row] = filter[Row]("id = 1")
+    val fft: FilterFunctionTransformer = FilterFunctionTransformer()
+    val result = fft.transform(ds)
+    assert(result.count() == 1L)
+  }
+
+  test("Test FunctionTransformer.save and load") {
+    // import java.io.File
+    // import scala.reflect.io.Directory
+    // val directory: Directory = new Directory(new File("C:/TEMP/transformer.json"))
+    // directory.deleteRecursively()
+    // val fft: FilterFunctionTransformer = FilterFunctionTransformer()
+    // fft.save("C:/TEMP/transformer.json")
+    // val transformer: FilterFunctionTransformer = FilterFunctionTransformer.load("C:/TEMP/transformer.json")
+    val transformer: FilterFunctionTransformer = FilterFunctionTransformer()
+    val result = transformer.transform(ds)
+    assert(result.count() == 1L)
   }
 
   test("Test the Pattern") {
