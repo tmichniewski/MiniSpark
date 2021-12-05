@@ -1,6 +1,6 @@
-# MiniSpark
+# Part I - MiniSpark
 
-This is Scala library to be used on top of Spark.
+This is Scala library for ETL processing to be used on top of Spark.
 It is simple in design but quite useful in usage.
 It is expressed in pure Scala functions.
 
@@ -306,9 +306,36 @@ Instead, it is about the thinking.
 The thinking about building enterprise class systems and their decomposition into smaller parts.
 Thinking about how to shape the small pieces of the system and then, how to glue them together.
 
-## Versions
+# Part II - Integration with Spark ML
+
+So far we covered typical ETL processing on top of Spark.
+Now, we will focus on how to integrate with Spark ML.
+To achieve this we try to provide two very simple constructs.
+
+## ML Transformer on Function
+
+Having defined any `Function` we may try to use it as an ML `Transformer`.
+To do so we use the `FunctionTransformer` abstract class which hase to extended.
+This way we produce an ML `Transformer`.
+
+## Function using ML Transformer
+
+We may also try to use any Spark ML `Transformer` as our `Function`.
+To do so we use the `trans` function.
+It needs an ML `Transformer`.
+As a result it returns a function.
+
+|Operation |Signature                                              |
+|----------|-------------------------------------------------------|
+|Trans     |def trans(transformer: Transformer): Function[Row, Row]|
+
+Please notice that here we have to stay within untyped API,
+as in general Spark ML works only on DataFrames.
+
+# Versions
 
 |Version|Date      |Description                         |
 |-------|----------|------------------------------------|
-|1.1.0  |2021-12-05|Add joins on Column and typed joins.|
+|1.2.0  |2021-12-05|Add integration with Spark ML.      |
+|1.1.0  |2021-12-04|Add joins on Column and typed joins.|
 |1.0.0  |2021-11-28|First version.                      |
