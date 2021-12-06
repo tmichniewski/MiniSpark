@@ -22,9 +22,3 @@ trait Function[T, U] extends (Dataset[T] => Dataset[U]) {
    */
   def +[V](f: Function[U, V]): Function[T, V] = (d: Dataset[T]) => (this andThen f)(d) // d transform (this andThen f)
 }
-
-// /**
-//  * Extends the generic function to specify input and output types.
-//  * It might be perceived as a type alias only.
-//  */
-// trait DataFrameFunction extends Function[Row, Row]
