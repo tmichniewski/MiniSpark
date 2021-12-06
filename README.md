@@ -314,16 +314,78 @@ To achieve this we try to provide two very simple constructs.
 
 ## ML Transformer on Function
 
-Having defined any `Function` we may try to use it as an ML `Transformer`.
-To do so we use the `FunctionTransformer` abstract class which hase to extended.
-This way we produce an ML `Transformer`.
+Having defined some `Function` we may use it as an ML `Transformer`.
+To do so we use the `FunctionTransformer` abstract class which has to be extended.
 
+```
+abstract class FunctionTransformer(override val uid: String) extends Transformer with DefaultParamsWritable {
+  /** Additional, default constructor. */
+  def this() = this(Identifiable.randomUID("FunctionTransformer"))
+
+  /**
+   * Function to perform the transformation.
+   *
+   * @return Returns the function to perform the transformation.
+   */
+  def func: Function[Row, Row]
+
+  /**
+   * Check schema validity and produce the output schema from the input schema.
+   * Raise an exception if something is invalid.
+   *
+   * @param schema Input schema.
+   * @return Return output schema. Raises an exception if schemas are inappropriate.
+   */
+  override def transformSchema(schema: StructType): StructType
+
+  /**
+   * Transforms the input dataset.
+   *
+   * @param dataset Dataset to be transformed.
+   * @return Returns transformed dataset.
+   */
+  override def transform(dataset: Dataset[_]): DataFrame = {
+    transformSchema(dataset.schema)
+    func(dataset.toDF())
+  }
+
+  /**
+   * Creates a copy of this instance with the same UID and some extra params.
+   *
+   * @param extra Extra parameters.
+   * @return Returns copy of this transformer.
+   */
+  override def copy(extra: ParamMap): Transformer = defaultCopy(extra)
+}
+```
+
+This way we may produce an ML `Transformer`.
+
+```
+class FilterFunctionTransformer(override val uid: String) extends FunctionTransformer with DefaultParamsWritable {
+  def this() = this(Identifiable.randomUID("FilterFunctionTransformer"))
+  override def func: Function[Row, Row] = filter[Row]("id = 1")
+  override def transformSchema(schema: StructType): StructType = schema
+}
+object FilterFunctionTransformer extends DefaultParamsReadable[FilterFunctionTransformer] {
+  override def load(path: String): FilterFunctionTransformer = super.load(path)
+  def apply(): FilterFunctionTransformer = new FilterFunctionTransformer()
+}
+
+val fft: FilterFunctionTransformer = FilterFunctionTransformer()
+val result: DataFrame = fft.transform(ds)
+```
 ## Function using ML Transformer
 
 We may also try to use any Spark ML `Transformer` as our `Function`.
-To do so we use the `trans` function.
-It needs an ML `Transformer`.
+To do so we use the `trans` function which needs an ML `Transformer`.
 As a result it returns a function.
+
+```
+val fft: FilterFunctionTransformer = FilterFunctionTransformer()
+val func: Function[Row, Row] = trans(fft)
+val result: Dataset[Row] = df ++ func
+```
 
 |Operation |Signature                                              |
 |----------|-------------------------------------------------------|
@@ -336,6 +398,7 @@ as in general Spark ML works only on DataFrames.
 
 |Version|Date      |Description                         |
 |-------|----------|------------------------------------|
+|1.2.1  |2021-12-06|Amend FunctionTransformer.          |
 |1.2.0  |2021-12-05|Add integration with Spark ML.      |
 |1.1.0  |2021-12-04|Add joins on Column and typed joins.|
 |1.0.0  |2021-11-28|First version.                      |
