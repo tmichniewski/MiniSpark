@@ -377,7 +377,7 @@ val result: DataFrame = fft.transform(ds)
 ```
 ## Function using ML Transformer
 
-We may also try to use any Spark ML `Transformer` as our `Function`.
+We may also use any Spark ML `Transformer` as our `Function`.
 To do so we use the `trans` function which needs an ML `Transformer`.
 As a result it returns a function.
 
