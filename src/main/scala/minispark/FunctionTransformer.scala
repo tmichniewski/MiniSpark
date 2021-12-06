@@ -13,10 +13,9 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row}
  *
  * @param uid Transformer id.
  */
-abstract class FunctionTransformer(override val uid: String)
-  extends Transformer with DefaultParamsWritable {
+abstract class FunctionTransformer(override val uid: String) extends Transformer with DefaultParamsWritable {
   /** Additional, default constructor. */
-  def this() = this(Identifiable.randomUID("MiniSpark_FunctionTransformer"))
+  def this() = this(Identifiable.randomUID("FunctionTransformer"))
 
   /**
    * Function to perform the transformation.
@@ -51,5 +50,5 @@ abstract class FunctionTransformer(override val uid: String)
    * @param extra Extra parameters.
    * @return Returns copy of this transformer.
    */
-  override def copy(extra: ParamMap): Transformer = this // defaultCopy(extra)
+  override def copy(extra: ParamMap): Transformer = defaultCopy(extra)
 }
