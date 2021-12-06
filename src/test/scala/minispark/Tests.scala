@@ -313,6 +313,13 @@ class Tests extends AnyFunSuite {
 
   test("Test Functions: trans") {
     val fft: FilterFunctionTransformer = FilterFunctionTransformer()
+    val func: Function[Row, Row] = trans(fft)
+    val result: Dataset[Row] = df ++ func
+    assert(result.count() == 1L)
+  }
+
+  test("Test Functions: trans with copy") {
+    val fft: FilterFunctionTransformer = FilterFunctionTransformer()
     val func: Function[Row, Row] = trans(fft.copy(ParamMap()))
     val result: Dataset[Row] = df ++ func
     assert(result.count() == 1L)
@@ -321,12 +328,6 @@ class Tests extends AnyFunSuite {
   test("Test FunctionTransformer") {
     val fft: FilterFunctionTransformer = FilterFunctionTransformer()
     val result: DataFrame = fft.transform(ds)
-    assert(result.count() == 1L)
-  }
-
-  test("Test FunctionTransformer.save and load") {
-    val transformer: FilterFunctionTransformer = FilterFunctionTransformer()
-    val result: DataFrame = transformer.transform(ds)
     assert(result.count() == 1L)
   }
 
