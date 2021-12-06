@@ -6,7 +6,7 @@ import minispark.Functions._
 import minispark.Implicits.ExtendedDataset
 
 import org.apache.spark.ml.param.ParamMap
-import org.apache.spark.ml.util.DefaultParamsReadable
+import org.apache.spark.ml.util.{DefaultParamsReadable, DefaultParamsWritable, Identifiable}
 import org.apache.spark.sql.functions.{col, lit}
 import org.apache.spark.sql.types.{LongType, StructType}
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
@@ -27,13 +27,14 @@ object Adder extends MapPattern {
     (r: AdderInput) => AdderOutput(r.value + params.delta)
 }
 
-class FilterFunctionTransformer extends FunctionTransformer {
+class FilterFunctionTransformer(override val uid: String) extends FunctionTransformer with DefaultParamsWritable {
+  def this() = this(Identifiable.randomUID("FilterFunctionTransformer"))
   override def func: Function[Row, Row] = filter[Row]("id = 1")
   override def transformSchema(schema: StructType): StructType = schema
 }
 object FilterFunctionTransformer extends DefaultParamsReadable[FilterFunctionTransformer] {
   override def load(path: String): FilterFunctionTransformer = super.load(path)
-  def apply(): FilterFunctionTransformer = new FilterFunctionTransformer
+  def apply(): FilterFunctionTransformer = new FilterFunctionTransformer()
 }
 
 class Tests extends AnyFunSuite {
@@ -311,7 +312,6 @@ class Tests extends AnyFunSuite {
   }
 
   test("Test Functions: trans") {
-    val f: Function[Row, Row] = filter[Row]("id = 1")
     val fft: FilterFunctionTransformer = FilterFunctionTransformer()
     val func: Function[Row, Row] = trans(fft.copy(ParamMap()))
     val result = df ++ func
@@ -319,20 +319,12 @@ class Tests extends AnyFunSuite {
   }
 
   test("Test FunctionTransformer") {
-    val f: Function[Row, Row] = filter[Row]("id = 1")
     val fft: FilterFunctionTransformer = FilterFunctionTransformer()
     val result = fft.transform(ds)
     assert(result.count() == 1L)
   }
 
   test("Test FunctionTransformer.save and load") {
-    // import java.io.File
-    // import scala.reflect.io.Directory
-    // val directory: Directory = new Directory(new File("C:/TEMP/transformer.json"))
-    // directory.deleteRecursively()
-    // val fft: FilterFunctionTransformer = FilterFunctionTransformer()
-    // fft.save("C:/TEMP/transformer.json")
-    // val transformer: FilterFunctionTransformer = FilterFunctionTransformer.load("C:/TEMP/transformer.json")
     val transformer: FilterFunctionTransformer = FilterFunctionTransformer()
     val result = transformer.transform(ds)
     assert(result.count() == 1L)
