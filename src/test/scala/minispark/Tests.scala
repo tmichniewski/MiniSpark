@@ -333,6 +333,19 @@ class Tests extends AnyFunSuite {
     assertThrows[RuntimeException](ft.transform(ds))
   }
 
+  // The default jsonEncode only supports string, vector and matrix. org.apache.spark.ml.param.Param must override jsonEncode for scala.collection.immutable.$colon$colon.
+  // java.lang.UnsupportedOperationException: The default jsonEncode only supports string, vector and matrix. org.apache.spark.ml.param.Param must override jsonEncode for scala.collection.immutable.$colon$colon.
+  // at org.apache.spark.ml.param.Param.jsonEncode(params.scala:100)
+  // test("Test FunctionTransformer - save and load") {
+  //   val ft: FunctionTransformer = FunctionTransformer()
+  //   ft.setSchema(Seq(("id", IntegerType)))
+  //   ft.setFunction(filter[Row]("id = 1"))
+  //   ft.save("C:/TEMP/transformer.json")
+  //   val transformer: FunctionTransformer = FunctionTransformer.load("C:/TEMP/transformer.json")
+  //   val result: DataFrame = transformer.transform(ds)
+  //   assert(result.count() == 1L)
+  // }
+
   test("Test the Pattern") {
     val result: Dataset[Record] = ds ++ Adder[Record, Record](AdderParams(7),
       (r: Record) => AdderInput(r.id),

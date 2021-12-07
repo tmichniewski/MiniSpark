@@ -59,12 +59,12 @@ class FunctionTransformer(override val uid: String) extends Transformer with Def
    * Check schema validity and produce the output schema from the input schema.
    * Raise an exception if something is invalid.
    *
-   * @param schema Input schema.
+   * @param inputSchema Input schema.
    * @return Return output schema. Raises an exception if input schema is inappropriate.
    */
-  override def transformSchema(schema: StructType): StructType = {
+  override def transformSchema(inputSchema: StructType): StructType = {
     val valid: Boolean = getSchema.forall { (p: (String, DataType)) =>
-      val index: Int = schema.fields.indexWhere { (sf: StructField) =>
+      val index: Int = inputSchema.fields.indexWhere { (sf: StructField) =>
         sf.name == p._1 && sf.dataType == p._2
       }
       if (index == -1)
@@ -73,7 +73,7 @@ class FunctionTransformer(override val uid: String) extends Transformer with Def
     }
     require(valid)
 
-    schema
+    inputSchema
   }
 
   /**
@@ -96,14 +96,14 @@ class FunctionTransformer(override val uid: String) extends Transformer with Def
   override def copy(extra: ParamMap): Transformer = defaultCopy(extra)
 }
 
-/** Companion object with load and applied methods. */
+/** Companion object. */
 object FunctionTransformer extends DefaultParamsReadable[FunctionTransformer] {
-  /**
-   * Loads the model.
-   * @param path Path to saved model.
-   * @return Returns loaded model.
-   */
-  override def load(path: String): FunctionTransformer = super.load(path)
+  // /**
+  //  * Loads the model.
+  //  * @param path Path to saved model.
+  //  * @return Returns loaded model.
+  //  */
+  // override def load(path: String): FunctionTransformer = super.load(path)
 
   /**
    * Constructs the instance.
