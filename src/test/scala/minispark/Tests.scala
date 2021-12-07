@@ -6,9 +6,8 @@ import minispark.Functions._
 import minispark.Implicits.ExtendedDataset
 
 import org.apache.spark.ml.param.ParamMap
-import org.apache.spark.ml.util.{DefaultParamsReadable, DefaultParamsWritable, Identifiable}
 import org.apache.spark.sql.functions.{col, lit}
-import org.apache.spark.sql.types.{LongType, StructType}
+import org.apache.spark.sql.types.{IntegerType, LongType}
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -25,16 +24,6 @@ object Adder extends MapPattern {
   override type Params = AdderParams
   override def build(params: Params): Input => Output =
     (r: AdderInput) => AdderOutput(r.value + params.delta)
-}
-
-class FilterFunctionTransformer(override val uid: String) extends FunctionTransformer with DefaultParamsWritable {
-  def this() = this(Identifiable.randomUID("FilterFunctionTransformer"))
-  override def func: Function[Row, Row] = filter[Row]("id = 1")
-  override def transformSchema(schema: StructType): StructType = schema
-}
-object FilterFunctionTransformer extends DefaultParamsReadable[FilterFunctionTransformer] {
-  override def load(path: String): FilterFunctionTransformer = super.load(path)
-  def apply(): FilterFunctionTransformer = new FilterFunctionTransformer()
 }
 
 class Tests extends AnyFunSuite {
@@ -312,23 +301,36 @@ class Tests extends AnyFunSuite {
   }
 
   test("Test Functions: trans") {
-    val fft: FilterFunctionTransformer = FilterFunctionTransformer()
-    val func: Function[Row, Row] = trans(fft)
+    val ft: FunctionTransformer = FunctionTransformer()
+    ft.setSchema(Seq(("id", IntegerType)))
+    ft.setFunction(filter[Row]("id = 1"))
+    val func: Function[Row, Row] = trans(ft)
     val result: Dataset[Row] = df ++ func
     assert(result.count() == 1L)
   }
 
   test("Test Functions: trans with copy") {
-    val fft: FilterFunctionTransformer = FilterFunctionTransformer()
-    val func: Function[Row, Row] = trans(fft.copy(ParamMap()))
+    val ft: FunctionTransformer = FunctionTransformer()
+    ft.setSchema(Seq(("id", IntegerType)))
+    ft.setFunction(filter[Row]("id = 1"))
+    val func: Function[Row, Row] = trans(ft.copy(ParamMap()))
     val result: Dataset[Row] = df ++ func
     assert(result.count() == 1L)
   }
 
   test("Test FunctionTransformer") {
-    val fft: FilterFunctionTransformer = FilterFunctionTransformer()
-    val result: DataFrame = fft.transform(ds)
+    val ft: FunctionTransformer = FunctionTransformer()
+    ft.setSchema(Seq(("id", IntegerType)))
+    ft.setFunction(filter[Row]("id = 1"))
+    val result: DataFrame = ft.transform(ds)
     assert(result.count() == 1L)
+  }
+
+  test("Test FunctionTransformer - incorrect schema") {
+    val ft: FunctionTransformer = FunctionTransformer()
+    ft.setSchema(Seq(("dummy", IntegerType)))
+    ft.setFunction(filter[Row]("id = 1"))
+    assertThrows[RuntimeException](ft.transform(ds))
   }
 
   test("Test the Pattern") {
