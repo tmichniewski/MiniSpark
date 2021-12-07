@@ -1,6 +1,6 @@
 name := "MiniSpark"
 
-version := "1.2.1"
+version := "1.3.0"
 
 scalaVersion := "2.12.14"
 val sparkVersion = "3.2.0"
