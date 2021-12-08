@@ -19,9 +19,6 @@ class FunctionTransformer(override val uid: String) extends Transformer with Def
   /** Additional, default constructor. */
   def this() = this(Identifiable.randomUID("FunctionTransformer"))
 
-  // /** Schema parameter. The function is provided in Seq[(column, type)] form. */
-  // final val schema: Param[Seq[(String, DataType)]] =
-  //  new Param[Seq[(String, DataType)]](this, "schema", "Schema")
   /**
    * Schema parameter. The function is provided in Seq[(column, type)] form,
    * but stored in serialized form as String, due to limitations of Param.jsonEncode.
@@ -43,9 +40,6 @@ class FunctionTransformer(override val uid: String) extends Transformer with Def
    */
   def getSchema: Seq[(String, DataType)] = deserialize($(schema)).asInstanceOf[Seq[(String, DataType)]]
 
-  // /** Function parameter. The function is provided in lambda form. */
-  // final val function: Param[Function[Row, Row]] =
-  //   new Param[Function[Row, Row]](this, "function", "Function")
   /**
    * Function parameter. The function is provided in lambda form,
    * but stored in serialized form as String, due to limitations of Param.jsonEncode.
