@@ -1,6 +1,8 @@
 package com.github
 package minispark
 
+import minispark.Serialize.{deserialize, serialize}
+
 import org.apache.spark.ml.Transformer
 import org.apache.spark.ml.param.{Param, ParamMap}
 import org.apache.spark.ml.util.{DefaultParamsReadable, DefaultParamsWritable, Identifiable}
@@ -15,11 +17,16 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row}
  */
 class FunctionTransformer(override val uid: String) extends Transformer with DefaultParamsWritable {
   /** Additional, default constructor. */
-  def this() = this(Identifiable.randomUID("FunctionTransformer2"))
+  def this() = this(Identifiable.randomUID("FunctionTransformer"))
 
-  /** Schema parameter. The function is provided in Seq[(column, type)] form. */
-  final val schema: Param[Seq[(String, DataType)]] =
-    new Param[Seq[(String, DataType)]](this, "schema", "Schema")
+  // /** Schema parameter. The function is provided in Seq[(column, type)] form. */
+  // final val schema: Param[Seq[(String, DataType)]] =
+  //  new Param[Seq[(String, DataType)]](this, "schema", "Schema")
+  /**
+   * Schema parameter. The function is provided in Seq[(column, type)] form,
+   * but stored in serialized form as String, due to limitations of Param.jsonEncode.
+   */
+  final val schema: Param[String] = new Param[String](this, "schema", "Schema")
 
   /**
    * Setter for the parameter.
@@ -27,18 +34,23 @@ class FunctionTransformer(override val uid: String) extends Transformer with Def
    * @param value New value of the parameter.
    * @return Returns this transformer.
    */
-  def setSchema(value: Seq[(String, DataType)]): this.type = set(schema, value)
+  def setSchema(value: Seq[(String, DataType)]): this.type = set(schema, serialize(value))
 
   /**
    * Getter for the parameter.
    *
    * @return Returns value of the parameter.
    */
-  def getSchema: Seq[(String, DataType)] = $(schema)
+  def getSchema: Seq[(String, DataType)] = deserialize($(schema)).asInstanceOf[Seq[(String, DataType)]]
 
-  /** Function parameter. The function is provided in lambda form. */
-  final val function: Param[Function[Row, Row]] =
-    new Param[Function[Row, Row]](this, "function", "Function")
+  // /** Function parameter. The function is provided in lambda form. */
+  // final val function: Param[Function[Row, Row]] =
+  //   new Param[Function[Row, Row]](this, "function", "Function")
+  /**
+   * Function parameter. The function is provided in lambda form,
+   * but stored in serialized form as String, due to limitations of Param.jsonEncode.
+   */
+  final val function: Param[String] = new Param[String](this, "function", "Function")
 
   /**
    * Setter for the parameter.
@@ -46,14 +58,14 @@ class FunctionTransformer(override val uid: String) extends Transformer with Def
    * @param value New value of the parameter.
    * @return Returns this transformer.
    */
-  def setFunction(value: Function[Row, Row]): this.type = set(function, value)
+  def setFunction(value: Function[Row, Row]): this.type = set(function, serialize(value))
 
   /**
    * Getter for the parameter.
    *
    * @return Returns value of the parameter.
    */
-  def getFunction: Function[Row, Row] = $(function)
+  def getFunction: Function[Row, Row] = deserialize($(function)).asInstanceOf[Function[Row, Row]]
 
   /**
    * Check schema validity and produce the output schema from the input schema.
