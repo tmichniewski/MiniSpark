@@ -4,14 +4,18 @@ package minispark
 import minispark.Adder.{AdderInput, AdderOutput, AdderParams}
 import minispark.Functions._
 import minispark.Implicits.ExtendedDataset
+import minispark.Serialize.{deserialize, serialize}
 
 import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.sql.functions.{col, lit}
-import org.apache.spark.sql.types.{IntegerType, LongType}
+import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 import org.scalatest.funsuite.AnyFunSuite
 
+import java.io
+import java.io.File
 import java.sql.{Date, Timestamp}
+import scala.reflect.io.Directory
 
 case class Record(id: Int, amount: Double, name: String, date: Date, time: Timestamp)
 
@@ -36,6 +40,8 @@ class Tests extends AnyFunSuite {
   val rows: Seq[Record] = Seq(Record(1, 1.23, "Name1", d, t), Record(2, 2.46, "Name2", d, t))
   val df: DataFrame = rows.toDF().alias("df")
   val ds: Dataset[Record] = rows.toDS().alias("ds")
+
+  def deleteDirectory(path: String): Unit = new Directory(new File(path)).deleteRecursively()
 
   test("Test Spark") {
     assert(spark.range(1).count() == 1L)
@@ -333,18 +339,16 @@ class Tests extends AnyFunSuite {
     assertThrows[RuntimeException](ft.transform(ds))
   }
 
-  // The default jsonEncode only supports string, vector and matrix. org.apache.spark.ml.param.Param must override jsonEncode for scala.collection.immutable.$colon$colon.
-  // java.lang.UnsupportedOperationException: The default jsonEncode only supports string, vector and matrix. org.apache.spark.ml.param.Param must override jsonEncode for scala.collection.immutable.$colon$colon.
-  // at org.apache.spark.ml.param.Param.jsonEncode(params.scala:100)
-  // test("Test FunctionTransformer - save and load") {
-  //   val ft: FunctionTransformer = FunctionTransformer()
-  //   ft.setSchema(Seq(("id", IntegerType)))
-  //   ft.setFunction(filter[Row]("id = 1"))
-  //   ft.save("C:/TEMP/transformer.json")
-  //   val transformer: FunctionTransformer = FunctionTransformer.load("C:/TEMP/transformer.json")
-  //   val result: DataFrame = transformer.transform(ds)
-  //   assert(result.count() == 1L)
-  // }
+  test("Test FunctionTransformer - save and load") {
+    deleteDirectory("C:/TEMP/transformer.json")
+    val ft: FunctionTransformer = FunctionTransformer()
+    ft.setSchema(Seq(("id", IntegerType)))
+    ft.setFunction(filter[Row]("id = 1"))
+    ft.save("C:/TEMP/transformer.json")
+    val transformer: FunctionTransformer = FunctionTransformer.load("C:/TEMP/transformer.json")
+    val result: DataFrame = transformer.transform(ds)
+    assert(result.count() == 1L)
+  }
 
   test("Test the Pattern") {
     val result: Dataset[Record] = ds ++ Adder[Record, Record](AdderParams(7),
@@ -360,5 +364,22 @@ class Tests extends AnyFunSuite {
     val adder: Function[Record, Record] = Adder[Record, Record](AdderParams(7), getter, constructor)
     val result: Dataset[Record] = ds ++ adder
     assert(result.map(_.id).collect() sameElements Array(8, 9))
+  }
+
+  test("Test schema serialize and deserialize") {
+    val schema: Seq[(String, io.Serializable)] = Seq(("id", IntegerType), ("amount", DoubleType), ("name", StringType),
+      ("date", DateType), ("time", TimestampType))
+    val serializedSchema: String = serialize(schema)
+    val deserializedSchema: Seq[(String, io.Serializable)] =
+      deserialize(serializedSchema).asInstanceOf[Seq[(String, io.Serializable)]]
+    assert(schema == deserializedSchema)
+  }
+
+  test("Test function serialize and deserialize") {
+    val function: Int => Int = (i: Int) => i + 1
+    val serializedFunction: String = serialize(function)
+    val deserializedFunction: Int => Int = deserialize(serializedFunction).asInstanceOf[Int => Int]
+    assert(function(1) == 2)
+    assert(deserializedFunction(1) == 2)
   }
 }
