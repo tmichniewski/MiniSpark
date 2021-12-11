@@ -3,14 +3,18 @@ package minispark
 
 import org.apache.spark.sql.Dataset
 
-trait F0[T] extends (() => Dataset[T]) { outer =>
-  def +[U](f0: F0[U]): F0F0[T, U] = new F0F0[T, U](this, f0) // F0 + F0 = (F0, F0)
+trait F0[T] extends (() => Dataset[T]) {
+  def +[U](f0: F0[U]): F0F0[T, U] = F0F0[T, U](this, f0) // F0 + F0 = (F0, F0)
   def +[U](f1: F1[T, U]): F0[U] = () => f1(apply()) // F0 + F1 = F0
-  def +[U, V](f2: F2[T, U, V]): F1[U, V] = f2(outer.apply(), _) // F0 + F2 = F1
+  def +[U, V](f2: F2[T, U, V]): F1[U, V] = f2(apply(), _) // F0 + F2 = F1
 }
 
-class F0F0[T, U](f1: F0[T], f2: F0[U]) {
-  def+[V](f: F2[T, U, V]): F0[V] = () => f(f1(), f2()) // (F0, F0) + F2 = F0
+class F0F0[T, U](f01: F0[T], f02: F0[U]) {
+  def +[V, W](f11: F1[T, V], f12: F1[U, W]): F0F0[V, W] = F0F0[V, W](f01 + f11, f02 + f12) // (F0, F0) + (F1, F1) = (F0, F0)
+  def +[V](f2: F2[T, U, V]): F0[V] = () => f2(f01(), f02()) // (F0, F0) + F2 = F0
+}
+object F0F0 {
+  def apply[T, U](f01: F0[T], f02: F0[U]) = new F0F0[T, U](f01, f02)
 }
 
 trait F1[T, U] extends (Dataset[T] => Dataset[U]) {
