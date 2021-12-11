@@ -13,9 +13,7 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.io
-import java.io.File
 import java.sql.{Date, Timestamp}
-import scala.reflect.io.Directory
 
 case class Record(id: Int, amount: Double, name: String, date: Date, time: Timestamp)
 
@@ -40,8 +38,6 @@ class Tests extends AnyFunSuite {
   val rows: Seq[Record] = Seq(Record(1, 1.23, "Name1", d, t), Record(2, 2.46, "Name2", d, t))
   val df: DataFrame = rows.toDF().alias("df")
   val ds: Dataset[Record] = rows.toDS().alias("ds")
-
-  def deleteDirectory(path: String): Unit = new Directory(new File(path)).deleteRecursively()
 
   test("Test Spark") {
     assert(spark.range(1).count() == 1L)
@@ -340,6 +336,9 @@ class Tests extends AnyFunSuite {
   }
 
   //test("Test FunctionTransformer - save and load") {
+  //  import java.io.File
+  //  import scala.reflect.io.Directory
+  //  def deleteDirectory(path: String): Unit = new Directory(new File(path)).deleteRecursively()
   //  deleteDirectory("C:/TEMP/transformer.json")
   //  val ft: FunctionTransformer = FunctionTransformer()
   //  ft.setSchema(Seq(("id", IntegerType)))
