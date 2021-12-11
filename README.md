@@ -441,6 +441,7 @@ as in general Spark ML works only on DataFrames.
 
 |Version|Date      |Description                                             |
 |-------|----------|--------------------------------------------------------|
+|1.4.1  |2021-12-11|Clean the code.                                         |
 |1.4.0  |2021-12-08|Update saving and loading of FunctionTransformer.       |
 |1.3.0  |2021-12-07|Replace FunctionTransformer with parameterized version. |
 |1.2.1  |2021-12-06|Amend FunctionTransformer to use extendable class.      |
