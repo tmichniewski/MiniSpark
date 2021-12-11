@@ -25,6 +25,7 @@ object Serialize {
    * @param s String containing serialized object.
    * @return Returns deserialized object.
    */
+  @SuppressWarnings(Array("MethodReturningAny"))
   def deserialize(s: String): AnyRef = {
     val data: Array[Byte] = Base64.getDecoder.decode(s)
     val ois: ObjectInputStream = new ObjectInputStream(new ByteArrayInputStream(data))
