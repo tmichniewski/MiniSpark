@@ -106,13 +106,6 @@ class FunctionTransformer(override val uid: String) extends Transformer with Def
 
 /** Companion object. */
 object FunctionTransformer extends DefaultParamsReadable[FunctionTransformer] {
-  // /**
-  //  * Loads the model.
-  //  * @param path Path to saved model.
-  //  * @return Returns loaded model.
-  //  */
-  // override def load(path: String): FunctionTransformer = super.load(path)
-
   /**
    * Constructs the instance.
    *
