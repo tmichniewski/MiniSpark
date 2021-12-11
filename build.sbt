@@ -1,3 +1,5 @@
+import sbt.Keys.classLoaderLayeringStrategy
+
 name := "MiniSpark"
 
 version := "1.4.1"
@@ -14,6 +16,8 @@ libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-sql" % sparkVersion % "provided", // Spark SQL
   "org.apache.spark" %% "spark-mllib" % sparkVersion % "provided" // Spark MLLib
 )
+
+Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat
 
 // force full test coverage
 coverageMinimumStmtTotal := 100
