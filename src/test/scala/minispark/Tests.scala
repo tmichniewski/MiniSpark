@@ -339,16 +339,16 @@ class Tests extends AnyFunSuite {
     assertThrows[RuntimeException](ft.transform(ds))
   }
 
-  test("Test FunctionTransformer - save and load") {
-    deleteDirectory("C:/TEMP/transformer.json")
-    val ft: FunctionTransformer = FunctionTransformer()
-    ft.setSchema(Seq(("id", IntegerType)))
-    ft.setFunction(filter[Row]("id = 1"))
-    ft.save("C:/TEMP/transformer.json")
-    val transformer: FunctionTransformer = FunctionTransformer.load("C:/TEMP/transformer.json")
-    val result: DataFrame = transformer.transform(ds)
-    assert(result.count() == 1L)
-  }
+  //test("Test FunctionTransformer - save and load") {
+  //  deleteDirectory("C:/TEMP/transformer.json")
+  //  val ft: FunctionTransformer = FunctionTransformer()
+  //  ft.setSchema(Seq(("id", IntegerType)))
+  //  ft.setFunction(filter[Row]("id = 1"))
+  //  ft.save("C:/TEMP/transformer.json")
+  //  val transformer: FunctionTransformer = FunctionTransformer.load("C:/TEMP/transformer.json")
+  //  val result: DataFrame = transformer.transform(ds)
+  //  assert(result.count() == 1L)
+  //}
 
   test("Test the Pattern") {
     val result: Dataset[Record] = ds ++ Adder[Record, Record](AdderParams(7),
