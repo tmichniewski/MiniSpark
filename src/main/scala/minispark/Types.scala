@@ -5,13 +5,7 @@ import org.apache.spark.sql.Dataset
 
 trait F0[T] extends (() => Dataset[T]) { outer =>
   def +[U](f0: F0[U]): F0F0[T, U] = new F0F0[T, U](this, f0) // F0 + F0 = (F0, F0)
-
   def +[U](f1: F1[T, U]): F0[U] = () => f1(apply()) // F0 + F1 = F0
-    //new F0[U]() {
-    //  override def +[V](f0: F0[V]): F0F0[U, V] = new F0F0[U, V](outer + f1, f0)
-    //  override def apply(): Dataset[U] = f1(outer.apply())
-    //}
-
   def +[U, V](f2: F2[T, U, V]): F1[U, V] = f2(outer.apply(), _) // F0 + F2 = F1
 }
 
