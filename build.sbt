@@ -5,7 +5,7 @@ name := "MiniSpark"
 version := "1.4.1"
 
 scalaVersion := "2.12.14"
-val sparkVersion = "3.1.2"
+val sparkVersion = "3.2.0"
 
 idePackagePrefix := Some("com.github")
 Global / excludeLintKeys += idePackagePrefix
