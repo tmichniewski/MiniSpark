@@ -431,6 +431,5 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to reduce the given Dataset.
    */
-  @deprecated("Use plain Scala instead")
   def reduce[T](): FN[T, T] = (ds: Seq[Dataset[T]]) => ds.reduce(_ union _)
 }
