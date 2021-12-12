@@ -319,10 +319,6 @@ class Tests extends AnyFunSuite {
     assert(result.count() == 1L)
   }
 
-  test("Test Functions: reduce") {
-    assert(reduce[Record]()(Seq(ds, ds)).count() == 4L)
-  }
-
   test("Test FunctionTransformer") {
     val ft: FunctionTransformer = FunctionTransformer()
     ft.setSchema(Seq(("id", IntegerType)))
@@ -383,5 +379,59 @@ class Tests extends AnyFunSuite {
     val deserializedFunction: Int => Int = deserialize(serializedFunction).asInstanceOf[Int => Int]
     assert(function(1) == 2)
     assert(deserializedFunction(1) == 2)
+  }
+
+  test("Types: F0 + F1") {
+    val f0: F0[Record] = () => ds
+    val f1: F1[Record, Record] = (d: Dataset[Record]) => d.map((r: Record) => r.copy(id = 2 * r.id))
+    val result: Dataset[Record] = (f0 + f1)()
+    assert(result.collect()(0).id == 2)
+  }
+
+  test("Types: F0 + F2") {
+    val f0: F0[Record] = () => ds
+    val f2: F2[Record, Record, (Record, Record)] =
+      (d1: Dataset[Record], d2:Dataset[Record]) => d1.joinWith[Record](d2, d1("id") === d2("id"))
+    val f0f2: F1[Record, (Record, Record)] = f0 + f2
+    val result: Dataset[(Record, Record)] = (f0 + f0f2)()
+    assert(result.count() == 2)
+  }
+
+  test("Types: F0 + F0 + F2") {
+    val f0: F0[Record] = () => ds
+    val f2: F2[Record, Record, (Record, Record)] =
+      (d1: Dataset[Record], d2:Dataset[Record]) => d1.joinWith[Record](d2, d1("id") === d2("id"))
+    val f0f0f2: F0[(Record, Record)] = f0 + f0 + f2
+    val result: Dataset[(Record, Record)] = f0f0f2()
+    assert(result.count() == 2L)
+  }
+
+  test("Types: F1 + F1") {
+    val f1: F1[Record, Record] = (d: Dataset[Record]) => d.map((r: Record) => r.copy(id = 2 * r.id))
+    val f1f1: F1[Record, Record] = f1 + f1
+    val result: Dataset[Record] = f1f1(ds)
+    assert(result.count() == 2L)
+  }
+
+  test("Types: F2 + F1") {
+    val f2: F2[Record, Record, (Record, Record)] =
+      (d1: Dataset[Record], d2:Dataset[Record]) => d1.joinWith[Record](d2, d1("id") === d2("id"))
+    val f1: F1[(Record, Record), Record] = (d: Dataset[(Record, Record)]) => d.map(_._1)
+    val f2f1: F2[Record, Record, Record] = f2 + f1
+    val result: Dataset[Record] = f2f1(ds, ds)
+    assert(result.count() == 2L)
+    assert(result.collect()(0).id == 1L)
+  }
+
+  test("Types: FN + F1") {
+    val fn: FN[Record, Record] = (ds: Seq[Dataset[Record]]) => ds.reduce(_ union _)
+    val f1: F1[Record, Record] = (d: Dataset[Record]) => d.map((r: Record) => r.copy(id = 2 * r.id))
+    val fnf1: FN[Record, Record] = fn + f1
+    val result: Dataset[Record] = fnf1(Seq(ds, ds))
+    assert(result.count() == 4L)
+  }
+
+  test("Test Functions: reduce") {
+    assert(reduce[Record]()(Seq(ds, ds)).count() == 4L)
   }
 }
