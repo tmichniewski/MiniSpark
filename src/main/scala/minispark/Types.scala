@@ -12,8 +12,6 @@ trait F0[T] extends (() => Dataset[T]) {
 }
 
 class F0F0[T, U](val f0t: F0[T], val f0u: F0[U]) {
-  @deprecated("Use separately F1.+ method on f0t or f0u instead")
-  def ++[V, W](f1tv: F1[T, V], f1uw: F1[U, W]): F0F0[V, W] = F0F0[V, W](f0t + f1tv, f0u + f1uw) // (F0, F0) + (F1, F1) = (F0, F0)
   def +[V](f2tuv: F2[T, U, V]): F0[V] = () => f2tuv(f0t(), f0u()) // (F0, F0) + F2 = F0
 }
 object F0F0 {
