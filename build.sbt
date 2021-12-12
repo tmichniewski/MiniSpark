@@ -2,7 +2,7 @@ import sbt.Keys.classLoaderLayeringStrategy
 
 name := "MiniSpark"
 
-version := "1.4.1"
+version := "1.5.0"
 
 scalaVersion := "2.12.14"
 val sparkVersion = "3.2.0"
