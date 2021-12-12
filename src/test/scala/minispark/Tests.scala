@@ -319,6 +319,10 @@ class Tests extends AnyFunSuite {
     assert(result.count() == 1L)
   }
 
+  test("Test Functions: reduce") {
+    assert(reduce[Record]()(Seq(ds, ds)).count() == 4L)
+  }
+
   test("Test FunctionTransformer") {
     val ft: FunctionTransformer = FunctionTransformer()
     ft.setSchema(Seq(("id", IntegerType)))
