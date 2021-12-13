@@ -437,6 +437,14 @@ The `trans` function is of the following signature.
 Please notice that here we have to stay within untyped API,
 as in general Spark ML works only on DataFrames.
 
+# Composition of functions
+
+TODO
+
+# Complete example
+
+TODO
+
 # Versions
 
 |Version|Date      |Description                                             |
