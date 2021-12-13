@@ -4,11 +4,14 @@ package minispark
 import org.apache.spark.sql.Dataset
 
 trait F0[T] extends (() => Dataset[T]) {
+  @deprecated
   def +[U](f0u: F0[U]): F0F0[T, U] = new F0F0[T, U](this, f0u) // F0 + F0 = (F0, F0)
   def +[U](f1tu: F1[T, U]): F0[U] = () => f1tu(apply()) // F0 + F1 = F0
+  @deprecated
   def +[U, V](f2tuv: F2[T, U, V]): F1[U, V] = f2tuv(apply(), _) // F0 + F2 = F1
 }
 
+@deprecated
 class F0F0[T, U](f0t: F0[T], f0u: F0[U]) {
   def +[V](f2tuv: F2[T, U, V]): F0[V] = () => f2tuv(f0t(), f0u()) // (F0, F0) + F2 = F0
 }
