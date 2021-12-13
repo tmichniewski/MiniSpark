@@ -422,15 +422,4 @@ object Functions {
    * @return Returns the function to transform the given Dataset.
    */
   def trans(transformer: Transformer): Function[Row, Row] = (d: Dataset[_]) => transformer.transform(d)
-
-  // types
-
-  /**
-   * Reduces the given Datasets.
-   *
-   * @tparam T Type of input data.
-   * @return Returns the function to reduce the given Dataset.
-   */
-  @deprecated("Use plain Scala instead")
-  def reduce[T](): FN[T, T] = (ds: Seq[Dataset[T]]) => ds.reduce(_ union _)
 }

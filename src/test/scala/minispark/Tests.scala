@@ -430,8 +430,4 @@ class Tests extends AnyFunSuite {
     val result: Dataset[Record] = fnf1(Seq(ds, ds))
     assert(result.count() == 4L)
   }
-
-  test("Test Functions: reduce") {
-    assert(reduce[Record]()(Seq(ds, ds)).count() == 4L)
-  }
 }
