@@ -384,26 +384,9 @@ class Tests extends AnyFunSuite {
   test("Types: F0 + F1") {
     val f0: F0[Record] = () => ds
     val f1: F1[Record, Record] = (d: Dataset[Record]) => d.map((r: Record) => r.copy(id = 2 * r.id))
-    val result: Dataset[Record] = (f0 + f1)()
+    val f0f1: F0[Record] = f0 + f1
+    val result: Dataset[Record] = f0f1()
     assert(result.collect()(0).id == 2)
-  }
-
-  test("Types: F0 + F2") {
-    val f0: F0[Record] = () => ds
-    val f2: F2[Record, Record, (Record, Record)] =
-      (d1: Dataset[Record], d2:Dataset[Record]) => d1.joinWith[Record](d2, d1("id") === d2("id"))
-    val f0f2: F1[Record, (Record, Record)] = f0 + f2
-    val result: Dataset[(Record, Record)] = (f0 + f0f2)()
-    assert(result.count() == 2)
-  }
-
-  test("Types: F0 + F0 + F2") {
-    val f0: F0[Record] = () => ds
-    val f2: F2[Record, Record, (Record, Record)] =
-      (d1: Dataset[Record], d2:Dataset[Record]) => d1.joinWith[Record](d2, d1("id") === d2("id"))
-    val f0f0f2: F0[(Record, Record)] = f0 + f0 + f2
-    val result: Dataset[(Record, Record)] = f0f0f2()
-    assert(result.count() == 2L)
   }
 
   test("Types: F1 + F1") {
