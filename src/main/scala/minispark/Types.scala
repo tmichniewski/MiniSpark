@@ -67,9 +67,9 @@ trait FN[T, U] extends (Seq[Dataset[T]] => Dataset[U]) {
   /**
    * Composition of FN and F1.
    *
-   * @param f1uw F1 function to apply next.
+   * @param f1uv F1 function to apply next.
    * @tparam V Type of output data.
    * @return Returns composed function.
    */
-  def +[V](f1uw: F1[U, V]): FN[T, V] = (ds: Seq[Dataset[T]]) => f1uw(apply(ds)) // FN + F1 = FN
+  def +[V](f1uv: F1[U, V]): FN[T, V] = (ds: Seq[Dataset[T]]) => f1uv(apply(ds)) // FN + F1 = FN
 }
