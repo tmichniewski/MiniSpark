@@ -19,7 +19,7 @@ In our case we prefer to use a name `+` for this kind of function composition.
 
 Summing up, we define the following type called *the function*:
 
-```
+```scala
 /**
  * The function represents any kind of transformation from one Dataset into another.
  *
@@ -42,11 +42,13 @@ Please notice that so far we used only an alias to standard `Function1` Scala tr
 
 Surprisingly, this very simple concept is present commonly in any Spark notebook in the shape of methods like:
 
-```def func(d: DataFrame): DataFrame```
+```scala
+def func(d: DataFrame): DataFrame
+```
 
 But instead of methods we prefer to instantiate lambda expressions of the given type:
 
-```
+```scala
 final case class Person(
   firstName: String,
   lastName: String
@@ -87,7 +89,7 @@ val addGreeting: Function[PersonWithFullName, PersonWithGreeting] = { (d: Datase
 
 Then, having defined two such functions we may compose them, to achieve one function only:
 
-```
+```scala
 val addFullNameAndGreeting: Function[Person, PersonWithGreeting] = addFullName + addGreeting
 ```
 
@@ -108,7 +110,7 @@ implemented - next to other operators - in the implicit class
 (BTW - this could be expressed as an extension method in Scala 3,
 but so far in Spark we are in Scala 2):
 
-```
+```scala
 implicit class ExtendedDataset[T](val d: Dataset[T]) extends AnyVal {
   /**
    * Applies the given function to the Dataset.
@@ -125,7 +127,7 @@ which is yet another alias to standard - this time Spark - method called `Datase
 is to be able to compose expressions consisting of Dataset with subsequent function,
 when such an expression will produce another Dataset.
 
-```
+```scala
 val person: Dataset[Person] = spark.read.parquet("person.parquet").as[Person]
 val newPerson1: Dataset[PersonWithGreeting] = person ++ addFullName ++ addGreeting
 // or
@@ -225,7 +227,7 @@ Then, it also provides the apply function which will produce in return the map f
 provided that it will get a specific getter to convert the input record to the Input type
 and a constructor which will convert all the produced data to the output record.
 
-```
+```scala
 case class Record(id: Int, amount: Double, name: String, date: Date, time: Timestamp)
 
 object Adder extends MapPattern {
@@ -318,7 +320,7 @@ Having defined some `Function` we may use it as an ML `Transformer`.
 To do so we use the `FunctionTransformer` class
 which below is presented without implementation.
 
-```
+```scala
 /**
  * Spark ML transformer which uses the Function.
  * This gives plenty of possibilities to create new ML Transformers.
@@ -327,7 +329,7 @@ which below is presented without implementation.
  */
 class FunctionTransformer(override val uid: String) extends Transformer with DefaultParamsWritable {
   /** Additional, default constructor. */
-  def this()
+  def this() = this(Identifiable.randomUID("FunctionTransformer"))
 
   /**
    * Schema parameter. The function is provided in Seq[(column, type)] form,
@@ -348,13 +350,13 @@ class FunctionTransformer(override val uid: String) extends Transformer with Def
    *
    * @return Returns value of the parameter.
    */
-  def getSchema: Seq[(String, DataType)] = deserialize($(schema)).asInstanceOf[Seq[(String, DataType)]]
+  def getSchema: Seq[(String, DataType)]
 
   /**
    * Function parameter. The function is provided in lambda form,
    * but stored in serialized form as String, due to limitations of Param.jsonEncode.
    */
-  final val function: Param[String] = new Param[String](this, "function", "Function")
+  final val function: Param[String]
 
   /**
    * Setter for the parameter.
@@ -400,7 +402,7 @@ class FunctionTransformer(override val uid: String) extends Transformer with Def
 
 This way we may produce an ML `Transformer`.
 
-```
+```scala
 val ft: FunctionTransformer = FunctionTransformer()
 ft.setSchema(Seq(("id", IntegerType)))
 ft.setFunction(filter[Row]("id = 1"))
@@ -413,7 +415,7 @@ We may also use any Spark ML `Transformer` as our `Function`.
 To do so we use the `trans` function which needs an ML `Transformer`.
 As a result it returns a function.
 
-```
+```scala
 val func: Function[Row, Row] = trans(ft)
 val result: Dataset[Row] = df ++ func
 ```
@@ -443,15 +445,60 @@ As a result we received nice set of operations with a few rules of composing the
 
 # Complete example
 
-As an example toy application we implement hello world query which in Spark is word count.
+As an example toy application we implement word count query which in Spark is hello world count.
 
 ## First approach using the Functions
 
-TODO
+Let us start from plain simple solution:
+
+```scala
+val df: DataFrame = spark.read.text("<path>")
+df.as[String].flatMap(_.split(" ")).groupBy("value").count()
+```
+
+Then we do the same using Functions:
+```scala
+val df: DataFrame = spark.read.text("<path>")
+val castToDataset: Function[Row, String] = as[String]()
+val splitter: Function[String, String] = flatMap[String, String](_.split(" "))
+val aggregator: Function[String, Row] = agg[String](Seq("value"), Seq(("value", "count")))
+df ++ castToDataset ++ splitter ++ aggregator
+```
+
+or in more compact way:
+
+```scala
+val df: DataFrame = spark.read.text("<path>")
+val aggregator: Function[String, Row] = flatMap[String, String](_.split(" ")) +
+  agg[String](Seq("value"), Seq(("value", "count")))
+df ++ as[String]() ++ aggregator
+```
+
+which gives plenty of possibilities including reusing of the aggregator Function in any place,
+not only on this df DataFrame.
 
 ## Second approach using the Types
 
-TODO
+Alternatively, we may use the Types:
+
+```scala
+val f0: F0[String] = () => spark.read.text("<path>") ++ as[String]()
+val f1: F1[String, Row] = flatMap[String, String](_.split(" ")) +
+  agg[String](Seq("value"), Seq(("value", "count")))
+(f0 + f1)()
+```
+
+while the last expression might be written like this
+(provided the ++ method in ExtendedDataset is modified to accept F1 instead Function):
+
+```scala
+f0() ++ f1
+```
+
+So, having such API we have more freedom in reusing pieces on implementation
+as well as a possibility to encapsulate series of Spark calls within reusable functions.
+And these are the building blocks of enterprise class systems
+which might be composed on such functions. 
 
 # Versions
 
