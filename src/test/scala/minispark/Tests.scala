@@ -12,7 +12,6 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 import org.scalatest.funsuite.AnyFunSuite
 
-import java.io
 import java.sql.{Date, Timestamp}
 
 case class Record(id: Int, amount: Double, name: String, date: Date, time: Timestamp)
@@ -137,142 +136,142 @@ class Tests extends AnyFunSuite {
   }
 
   test("Test Functions: filter on String") {
-    assert((ds ++ filter("id = 1")).count() == 1L)
+    assert((ds ++ filter[Record]("id = 1")).count() == 1L)
   }
 
   test("Test Functions: filter on Column") {
-    assert((ds ++ filter(ds("id") === 1)).count() == 1L)
+    assert((ds ++ filter[Record](ds("id") === 1)).count() == 1L)
   }
 
   test("Test Functions: select on Strings") {
-    assert((ds ++ select("id", "name")).columns sameElements Array("id", "name"))
+    assert((ds ++ select[Record]("id", "name")).columns sameElements Array("id", "name"))
   }
 
   test("Test Functions: select on Columns") {
-    assert((ds ++ select($"id", ds("name"))).columns sameElements Array("id", "name"))
+    assert((ds ++ select[Record]($"id", ds("name"))).columns sameElements Array("id", "name"))
   }
 
   test("Test Functions: add one column") {
-    assert((ds ++ add("total", lit(1))).columns sameElements (ds.columns ++ Array("total")))
+    assert((ds ++ add[Record]("total", lit(1))).columns sameElements (ds.columns ++ Array("total")))
   }
 
   test("Test Functions: add many columns") {
-    assert((ds ++ add(("total", lit(1)), ("text", lit("Text")))).columns sameElements
+    assert((ds ++ add[Record](("total", lit(1)), ("text", lit("Text")))).columns sameElements
       (ds.columns ++ Array("total", "text")))
   }
 
   test("Test Functions: drop") {
-    assert((ds ++ drop("id", "amount", "name")).columns sameElements Array("date", "time"))
+    assert((ds ++ drop[Record]("id", "amount", "name")).columns sameElements Array("date", "time"))
   }
 
   test("Test Functions: rename one column") {
-    assert((ds ++ rename("id", "ident")).columns(0) == "ident")
+    assert((ds ++ rename[Record]("id", "ident")).columns(0) == "ident")
   }
 
   test("Test Functions: rename many columns") {
-    assert((ds ++ rename(("id", "ident"), ("amount", "total"))).columns(1) == "total")
+    assert((ds ++ rename[Record](("id", "ident"), ("amount", "total"))).columns(1) == "total")
   }
 
   test("Test Functions: cast one column") {
-    assert((ds ++ cast("id", LongType)).dtypes(0)._2 == "LongType")
+    assert((ds ++ cast[Record]("id", LongType)).dtypes(0)._2 == "LongType")
   }
 
   test("Test Functions: cast many columns") {
-    assert((ds ++ cast(("id", LongType), ("amount", LongType))).dtypes(1)._2 == "LongType")
+    assert((ds ++ cast[Record](("id", LongType), ("amount", LongType))).dtypes(1)._2 == "LongType")
   }
 
   test("Test Functions: map") {
-    assert((ds ++ map((r: Record) => r.copy(id = r.id + 1))).collect()(0).id == 2)
+    assert((ds ++ map[Record, Record]((r: Record) => r.copy(id = r.id + 1))).collect()(0).id == 2)
   }
 
   test("Test Functions: flatMap") {
-    assert((ds ++ flatMap((r: Record) => Seq(r.copy(id = r.id + 1)))).collect()(0).id == 2)
+    assert((ds ++ flatMap[Record, Record]((r: Record) => Seq(r.copy(id = r.id + 1)))).collect()(0).id == 2)
   }
 
   test("Test Functions: agg") {
-    assert((ds ++ agg(Seq("id"), Seq(("name", "count")))).collect()(0).getAs[Long]("count(name)") == 1L)
+    assert((ds ++ agg[Record](Seq("id"), Seq(("name", "count")))).collect()(0).getAs[Long]("count(name)") == 1L)
   }
 
   test("Test Functions: union") {
-    assert((ds ++ union(ds)).count() == 4L)
+    assert((ds ++ union[Record](ds)).count() == 4L)
   }
 
   test("Test Functions: subtract") {
-    assert((ds ++ subtract(ds.limit(1))).count() == 1L)
+    assert((ds ++ subtract[Record](ds.limit(1))).count() == 1L)
   }
 
   test("Test Functions: intersect") {
-    assert((ds ++ intersect(ds.limit(1))).count() == 1L)
+    assert((ds ++ intersect[Record](ds.limit(1))).count() == 1L)
   }
 
   test("Test Functions: delta") {
-    assert((ds ++ delta(ds)).count() == 0L)
+    assert((ds ++ delta[Record](ds)).count() == 0L)
   }
 
   test("Test Functions: cross") {
-    assert((ds ++ cross(ds)).count() == 4L)
+    assert((ds ++ cross[Record](ds)).count() == 4L)
   }
 
   test("Test Functions: crossTyped") {
-    assert((ds ++ crossTyped(ds)).count() == 4L)
+    assert((ds ++ crossTyped[Record, Record](ds)).count() == 4L)
   }
 
   test("Test Functions: inner on String") {
-    assert((ds ++ inner(ds.limit(1), Seq("id"))).count() == 1L)
+    assert((ds ++ inner[Record](ds.limit(1), Seq("id"))).count() == 1L)
   }
 
   test("Test Functions: inner on Column") {
     val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
-    assert((ds ++ inner(ds1, col("ds.id") === col("ds1.id"))).count() == 1L)
+    assert((ds ++ inner[Record](ds1, col("ds.id") === col("ds1.id"))).count() == 1L)
   }
 
   test("Test Functions: innerTyped on Column") {
     val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
-    assert((ds ++ innerTyped(ds1, col("ds.id") === col("ds1.id"))).count() == 1L)
+    assert((ds ++ innerTyped[Record, Record](ds1, col("ds.id") === col("ds1.id"))).count() == 1L)
   }
 
   test("Test Functions: left on String") {
-    assert((ds ++ left(ds.limit(1), Seq("id"))).count() == 2L)
+    assert((ds ++ left[Record](ds.limit(1), Seq("id"))).count() == 2L)
   }
 
   test("Test Functions: left on Column") {
     val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
-    assert((ds ++ left(ds1, col("ds.id") === col("ds1.id"))).count() == 2L)
+    assert((ds ++ left[Record](ds1, col("ds.id") === col("ds1.id"))).count() == 2L)
   }
 
   test("Test Functions: leftTyped on Column") {
     val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
-    assert((ds ++ leftTyped(ds1, col("ds.id") === col("ds1.id"))).count() == 2L)
+    assert((ds ++ leftTyped[Record, Record](ds1, col("ds.id") === col("ds1.id"))).count() == 2L)
   }
 
   test("Test Functions: right on String") {
-    assert((ds.limit(1) ++ right(ds, Seq("id"))).count() == 2L)
+    assert((ds.limit(1) ++ right[Record](ds, Seq("id"))).count() == 2L)
   }
 
   test("Test Functions: right on Column") {
     val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
-    assert((ds1 ++ right(ds, col("ds1.id") === col("ds.id"))).count() == 2L)
+    assert((ds1 ++ right[Record](ds, col("ds1.id") === col("ds.id"))).count() == 2L)
   }
 
   test("Test Functions: rightTyped on Column") {
     val ds1: Dataset[Record] = ds.limit(1).alias("ds1")
-    assert((ds1 ++ rightTyped(ds, col("ds1.id") === col("ds.id"))).count() == 2L)
+    assert((ds1 ++ rightTyped[Record, Record](ds, col("ds1.id") === col("ds.id"))).count() == 2L)
   }
 
   test("Test Functions: full on String") {
-    assert((ds.filter("id = 1") ++ full(ds.filter("id = 2"), Seq("id"))).count() == 2L)
+    assert((ds.filter("id = 1") ++ full[Record](ds.filter("id = 2"), Seq("id"))).count() == 2L)
   }
 
   test("Test Functions: full on Column") {
     val ds1: Dataset[Record] = ds.filter("id = 1").alias("ds1")
     val ds2: Dataset[Record] = ds.filter("id = 2").alias("ds2")
-    assert((ds1 ++ full(ds2, col("ds1.id") === col("ds2.id"))).count() == 2L)
+    assert((ds1 ++ full[Record](ds2, col("ds1.id") === col("ds2.id"))).count() == 2L)
   }
 
   test("Test Functions: fullTyped on Column") {
     val ds1: Dataset[Record] = ds.filter("id = 1").alias("ds1")
     val ds2: Dataset[Record] = ds.filter("id = 2").alias("ds2")
-    assert((ds1 ++ fullTyped(ds2, col("ds1.id") === col("ds2.id"))).count() == 2L)
+    assert((ds1 ++ fullTyped[Record, Record](ds2, col("ds1.id") === col("ds2.id"))).count() == 2L)
   }
 
   test("Test Functions: as") {
@@ -280,26 +279,26 @@ class Tests extends AnyFunSuite {
   }
 
   test("Test Functions: row") {
-    assert((ds ++ row()).collect()(0).getAs[Int]("id") == 1)
+    assert((ds ++ row[Record]()).collect()(0).getAs[Int]("id") == 1)
   }
 
   test("Test Functions: cache") {
-    assert((ds ++ cache()).count() == 2L)
+    assert((ds ++ cache[Record]()).count() == 2L)
   }
 
   test("Test Functions: sort on Strings") {
-    assert((ds ++ sort("id", "name")).collect()(0).id == 1)
+    assert((ds ++ sort[Record]("id", "name")).collect()(0).id == 1)
   }
 
   test("Test Functions: sort on Columns") {
-    assert((ds ++ sort(ds("id"), ds("name"))).collect()(0).id == 1)
+    assert((ds ++ sort[Record](ds("id"), ds("name"))).collect()(0).id == 1)
   }
 
   test("Test Functions: pipeline") {
-    val cacher: Function[Record, Record] = cache()
-    val mapper: Function[Record, Record] = map((r: Record) => r.copy(id = -r.id))
-    val sorter: Function[Record, Record] = sort("id")
-    assert((ds ++ pipeline(cacher, mapper, sorter)).collect()(0).id == -2)
+    val cacher: Function[Record, Record] = cache[Record]()
+    val mapper: Function[Record, Record] = map[Record, Record]((r: Record) => r.copy(id = -r.id))
+    val sorter: Function[Record, Record] = sort[Record]("id")
+    assert((ds ++ pipeline[Record](cacher, mapper, sorter)).collect()(0).id == -2)
   }
 
   test("Test Functions: trans") {
@@ -366,11 +365,11 @@ class Tests extends AnyFunSuite {
   }
 
   test("Test schema serialize and deserialize") {
-    val schema: Seq[(String, io.Serializable)] = Seq(("id", IntegerType), ("amount", DoubleType), ("name", StringType),
+    val schema: Seq[(String, DataType)] = Seq(("id", IntegerType), ("amount", DoubleType), ("name", StringType),
       ("date", DateType), ("time", TimestampType))
     val serializedSchema: String = serialize(schema)
-    val deserializedSchema: Seq[(String, io.Serializable)] =
-      deserialize(serializedSchema).asInstanceOf[Seq[(String, io.Serializable)]]
+    val deserializedSchema: Seq[(String, DataType)] =
+      deserialize(serializedSchema).asInstanceOf[Seq[(String, DataType)]]
     assert(schema == deserializedSchema)
   }
 
@@ -380,5 +379,38 @@ class Tests extends AnyFunSuite {
     val deserializedFunction: Int => Int = deserialize(serializedFunction).asInstanceOf[Int => Int]
     assert(function(1) == 2)
     assert(deserializedFunction(1) == 2)
+  }
+
+  test("Types: F0 + F1") {
+    val f0: F0[Record] = () => ds
+    val f1: F1[Record, Record] = (d: Dataset[Record]) => d.map((r: Record) => r.copy(id = 2 * r.id))
+    val f0f1: F0[Record] = f0 + f1
+    val result: Dataset[Record] = f0f1()
+    assert(result.collect()(0).id == 2)
+  }
+
+  test("Types: F1 + F1") {
+    val f1: F1[Record, Record] = (d: Dataset[Record]) => d.map((r: Record) => r.copy(id = 2 * r.id))
+    val f1f1: F1[Record, Record] = f1 + f1
+    val result: Dataset[Record] = f1f1(ds)
+    assert(result.count() == 2L)
+  }
+
+  test("Types: F2 + F1") {
+    val f2: F2[Record, Record, (Record, Record)] =
+      (d1: Dataset[Record], d2:Dataset[Record]) => d1.joinWith[Record](d2, d1("id") === d2("id"))
+    val f1: F1[(Record, Record), Record] = (d: Dataset[(Record, Record)]) => d.map(_._1)
+    val f2f1: F2[Record, Record, Record] = f2 + f1
+    val result: Dataset[Record] = f2f1(ds, ds)
+    assert(result.count() == 2L)
+    assert(result.collect()(0).id == 1L)
+  }
+
+  test("Types: FN + F1") {
+    val fn: FN[Record, Record] = (ds: Seq[Dataset[Record]]) => ds.reduce(_ union _)
+    val f1: F1[Record, Record] = (d: Dataset[Record]) => d.map((r: Record) => r.copy(id = 2 * r.id))
+    val fnf1: FN[Record, Record] = fn + f1
+    val result: Dataset[Record] = fnf1(Seq(ds, ds))
+    assert(result.count() == 4L)
   }
 }
