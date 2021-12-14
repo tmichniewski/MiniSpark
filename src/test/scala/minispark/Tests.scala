@@ -413,4 +413,36 @@ class Tests extends AnyFunSuite {
     val result: Dataset[Record] = fnf1(Seq(ds, ds))
     assert(result.count() == 4L)
   }
+
+  test("Test 1") {
+    val textFile = spark.sparkContext.textFile("hdfs://...")
+    val counts = textFile.flatMap(line => line.split(" "))
+      .map(word => (word, 1))
+      .reduceByKey(_ + _)
+    counts.saveAsTextFile("hdfs://...")
+  }
+
+  test("Test 2") {
+    val df: DataFrame = spark.read.text("<path>") // DataFrame
+    df.as[String].flatMap(_.split(" ")).groupBy("value").count()
+  }
+
+  test("Test 3") {
+    val df: DataFrame = spark.read.text("<path>")
+    val castToDataset: Function[Row, String] = as[String]()
+    val splitter: Function[String,String] = flatMap[String, String](_.split(" "))
+    val aggregator: Function[String, Row] = agg[String](Seq("value"), Seq(("value", "count")))
+    df ++ castToDataset ++ splitter ++ aggregator
+  }
+
+  test("Test 4") {
+    val df: DataFrame = spark.read.text("<path>")
+    df ++ as[String]() ++ flatMap[String, String](_.split(" ")) ++
+      agg[String](Seq("value"), Seq(("value", "count")))
+  }
+
+  test("Test 5") {
+    val df: DataFrame = spark.read.text("<path>")
+    df ++ as[String]() ++ flatMap(_.split(" ")) ++ agg(Seq("value"), Seq(("value", "count")))
+  }
 }
