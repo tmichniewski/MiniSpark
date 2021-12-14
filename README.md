@@ -443,6 +443,14 @@ As a result we received nice set of operations with a few rules of composing the
 
 # Complete example
 
+As an example toy application we implement hello world query which in Spark is word count.
+
+## First approach using the Functions
+
+TODO
+
+## Second approach using the Types
+
 TODO
 
 # Versions
