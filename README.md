@@ -511,10 +511,10 @@ while the last expression might be written like this
 f0() ++ f1
 ```
 
-So, having such API we have more freedom in reusing pieces on implementation
+So, having such API we have more freedom in reusing pieces of implementation
 as well as a possibility to encapsulate series of Spark calls within reusable functions.
 And these are the building blocks of enterprise class systems
-which might be composed on such functions. 
+which might be composed of such functions. 
 
 # Versions
 
