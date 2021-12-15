@@ -504,6 +504,7 @@ which might be composed on such functions.
 
 |Version|Date      |Description                                             |
 |-------|----------|--------------------------------------------------------|
+|1.5.1  |2021-12-15|Add more tests.                                         |
 |1.5.0  |2021-12-12|Add prototype of core types.                            |
 |1.4.1  |2021-12-11|Clean the code.                                         |
 |1.4.0  |2021-12-08|Update saving and loading of FunctionTransformer.       |
