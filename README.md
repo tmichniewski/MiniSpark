@@ -459,7 +459,7 @@ trait FN[T, U] extends (Seq[Dataset[T]] => Dataset[U]) {
 
 As a result we received nice set of operations with a few rules of composing them. 
 
-# Complete example
+# Part IV - Complete example
 
 As an example toy application we implement word count query which in Spark is hello world count.
 
