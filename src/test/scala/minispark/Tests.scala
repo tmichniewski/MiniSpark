@@ -414,35 +414,54 @@ class Tests extends AnyFunSuite {
     assert(result.count() == 4L)
   }
 
-  test("Test 1") {
-    val textFile = spark.sparkContext.textFile("hdfs://...")
-    val counts = textFile.flatMap(line => line.split(" "))
-      .map(word => (word, 1))
-      .reduceByKey(_ + _)
-    counts.saveAsTextFile("hdfs://...")
+  test("Complete test: Spark") {
+    val text: Dataset[String] = ds.map(_.name)
+    val result: DataFrame = text.flatMap(_.split(" ")).groupBy("value").count()
+    assert(result.count() == 2L)
   }
 
-  test("Test 2") {
-    val df: DataFrame = spark.read.text("<path>") // DataFrame
-    df.as[String].flatMap(_.split(" ")).groupBy("value").count()
-  }
-
-  test("Test 3") {
-    val df: DataFrame = spark.read.text("<path>")
-    val castToDataset: Function[Row, String] = as[String]()
-    val splitter: Function[String,String] = flatMap[String, String](_.split(" "))
+  test("Complete test: separate functions") {
+    val text: Dataset[String] = ds.map(_.name)
+    val splitter: Function[String, String] = flatMap[String, String](_.split(" "))
     val aggregator: Function[String, Row] = agg[String](Seq("value"), Seq(("value", "count")))
-    df ++ castToDataset ++ splitter ++ aggregator
+    val result: Dataset[Row] = text ++ splitter ++ aggregator
+    assert(result.count() == 2L)
   }
 
-  test("Test 4") {
-    val df: DataFrame = spark.read.text("<path>")
-    df ++ as[String]() ++ flatMap[String, String](_.split(" ")) ++
+  test("Complete test: series of typed functions") {
+    val text: Dataset[String] = ds.map(_.name)
+    val result: Dataset[Row] = text ++ flatMap[String, String](_.split(" ")) ++
       agg[String](Seq("value"), Seq(("value", "count")))
+    assert(result.count() == 2L)
   }
 
-  test("Test 5") {
-    val df: DataFrame = spark.read.text("<path>")
-    df ++ as[String]() ++ flatMap(_.split(" ")) ++ agg(Seq("value"), Seq(("value", "count")))
+  test("Complete test: series of untyped functions") {
+    val text: Dataset[String] = ds.map(_.name)
+    val result: Dataset[Row] = text ++ flatMap(_.split(" ")) ++ agg(Seq("value"), Seq(("value", "count")))
+    assert(result.count() == 2L)
+  }
+
+  test("Complete test: one composite function") {
+    val text: Dataset[String] = ds.map(_.name)
+    val aggregator: Function[String, Row] = flatMap[String, String](_.split(" ")) +
+      agg[String](Seq("value"), Seq(("value", "count")))
+    val result: Dataset[Row] = text ++ aggregator
+    assert(result.count() == 2L)
+  }
+
+  test("Complete test: composition of functions") {
+    val f0: F0[String] = () => ds.map(_.name)
+    val f1: F1[String, Row] = flatMap[String, String](_.split(" ")) +
+      agg[String](Seq("value"), Seq(("value", "count")))
+    val result: Dataset[Row] = (f0 + f1)()
+    assert(result.count() == 2L)
+  }
+
+  test("Complete test: conversion from function to Dataset") {
+    val f0: F0[String] = () => ds.map(_.name)
+    val f1: F1[String, Row] = flatMap[String, String](_.split(" ")) +
+      agg[String](Seq("value"), Seq(("value", "count")))
+    val result: Dataset[Row] = f0() ++ f1
+    assert(result.count() == 2L)
   }
 }
