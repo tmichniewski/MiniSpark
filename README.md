@@ -19,7 +19,7 @@ In our case we prefer to use a name `+` for this kind of function composition.
 
 Summing up, we define the following type called *the function*:
 
-```
+```scala
 /**
  * The function represents any kind of transformation from one Dataset into another.
  *
@@ -42,11 +42,13 @@ Please notice that so far we used only an alias to standard `Function1` Scala tr
 
 Surprisingly, this very simple concept is present commonly in any Spark notebook in the shape of methods like:
 
-```def func(d: DataFrame): DataFrame```
+```scala
+def func(d: DataFrame): DataFrame
+```
 
 But instead of methods we prefer to instantiate lambda expressions of the given type:
 
-```
+```scala
 final case class Person(
   firstName: String,
   lastName: String
@@ -87,7 +89,7 @@ val addGreeting: Function[PersonWithFullName, PersonWithGreeting] = { (d: Datase
 
 Then, having defined two such functions we may compose them, to achieve one function only:
 
-```
+```scala
 val addFullNameAndGreeting: Function[Person, PersonWithGreeting] = addFullName + addGreeting
 ```
 
@@ -108,7 +110,7 @@ implemented - next to other operators - in the implicit class
 (BTW - this could be expressed as an extension method in Scala 3,
 but so far in Spark we are in Scala 2):
 
-```
+```scala
 implicit class ExtendedDataset[T](val d: Dataset[T]) extends AnyVal {
   /**
    * Applies the given function to the Dataset.
@@ -125,7 +127,7 @@ which is yet another alias to standard - this time Spark - method called `Datase
 is to be able to compose expressions consisting of Dataset with subsequent function,
 when such an expression will produce another Dataset.
 
-```
+```scala
 val person: Dataset[Person] = spark.read.parquet("person.parquet").as[Person]
 val newPerson1: Dataset[PersonWithGreeting] = person ++ addFullName ++ addGreeting
 // or
@@ -225,7 +227,7 @@ Then, it also provides the apply function which will produce in return the map f
 provided that it will get a specific getter to convert the input record to the Input type
 and a constructor which will convert all the produced data to the output record.
 
-```
+```scala
 case class Record(id: Int, amount: Double, name: String, date: Date, time: Timestamp)
 
 object Adder extends MapPattern {
@@ -315,9 +317,10 @@ To achieve this we try to provide two very simple constructs.
 ## ML Transformer on Function
 
 Having defined some `Function` we may use it as an ML `Transformer`.
-To do so we use the `FunctionTransformer` class.
+To do so we use the `FunctionTransformer` class
+which below is presented without implementation.
 
-```
+```scala
 /**
  * Spark ML transformer which uses the Function.
  * This gives plenty of possibilities to create new ML Transformers.
@@ -326,11 +329,13 @@ To do so we use the `FunctionTransformer` class.
  */
 class FunctionTransformer(override val uid: String) extends Transformer with DefaultParamsWritable {
   /** Additional, default constructor. */
-  def this() = this(Identifiable.randomUID("FunctionTransformer2"))
+  def this() = this(Identifiable.randomUID("FunctionTransformer"))
 
-  /** Schema parameter. The function is provided in Seq[(column, type)] form. */
-  final val schema: Param[Seq[(String, DataType)]] =
-    new Param[Seq[(String, DataType)]](this, "schema", "Schema")
+  /**
+   * Schema parameter. The function is provided in Seq[(column, type)] form,
+   * but stored in serialized form as String, due to limitations of Param.jsonEncode.
+   */
+  final val schema: Param[String]
 
   /**
    * Setter for the parameter.
@@ -338,18 +343,20 @@ class FunctionTransformer(override val uid: String) extends Transformer with Def
    * @param value New value of the parameter.
    * @return Returns this transformer.
    */
-  def setSchema(value: Seq[(String, DataType)]): this.type = set(schema, value)
+  def setSchema(value: Seq[(String, DataType)]): this.type
 
   /**
    * Getter for the parameter.
    *
    * @return Returns value of the parameter.
    */
-  def getSchema: Seq[(String, DataType)] = $(schema)
+  def getSchema: Seq[(String, DataType)]
 
-  /** Function parameter. The function is provided in lambda form. */
-  final val function: Param[Function[Row, Row]] =
-    new Param[Function[Row, Row]](this, "function", "Function")
+  /**
+   * Function parameter. The function is provided in lambda form,
+   * but stored in serialized form as String, due to limitations of Param.jsonEncode.
+   */
+  final val function: Param[String]
 
   /**
    * Setter for the parameter.
@@ -357,35 +364,23 @@ class FunctionTransformer(override val uid: String) extends Transformer with Def
    * @param value New value of the parameter.
    * @return Returns this transformer.
    */
-  def setFunction(value: Function[Row, Row]): this.type = set(function, value)
+  def setFunction(value: Function[Row, Row]): this.type
 
   /**
    * Getter for the parameter.
    *
    * @return Returns value of the parameter.
    */
-  def getFunction: Function[Row, Row] = $(function)
+  def getFunction: Function[Row, Row]
 
   /**
    * Check schema validity and produce the output schema from the input schema.
    * Raise an exception if something is invalid.
    *
-   * @param schema Input schema.
+   * @param inputSchema Input schema.
    * @return Return output schema. Raises an exception if input schema is inappropriate.
    */
-  override def transformSchema(schema: StructType): StructType = {
-    val valid: Boolean = getSchema.forall { (p: (String, DataType)) =>
-      val index: Int = schema.fields.indexWhere { (sf: StructField) =>
-        sf.name == p._1 && sf.dataType == p._2
-      }
-      if (index == -1)
-        throw new RuntimeException(s"Incorrect input schema, no column: $p._1 of type $p._2.toString()")
-      index >= 0
-    }
-    require(valid)
-
-    schema
-  }
+  override def transformSchema(inputSchema: StructType): StructType
 
   /**
    * Transforms the input dataset.
@@ -393,10 +388,7 @@ class FunctionTransformer(override val uid: String) extends Transformer with Def
    * @param dataset Dataset to be transformed.
    * @return Returns transformed dataset.
    */
-  override def transform(dataset: Dataset[_]): DataFrame = {
-    transformSchema(dataset.schema)
-    getFunction(dataset.toDF())
-  }
+  override def transform(dataset: Dataset[_]): DataFrame
 
   /**
    * Creates a copy of this instance with the same UID and some extra params.
@@ -404,13 +396,13 @@ class FunctionTransformer(override val uid: String) extends Transformer with Def
    * @param extra Extra parameters.
    * @return Returns copy of this transformer.
    */
-  override def copy(extra: ParamMap): Transformer = defaultCopy(extra)
+  override def copy(extra: ParamMap): Transformer
 }
 ```
 
 This way we may produce an ML `Transformer`.
 
-```
+```scala
 val ft: FunctionTransformer = FunctionTransformer()
 ft.setSchema(Seq(("id", IntegerType)))
 ft.setFunction(filter[Row]("id = 1"))
@@ -423,12 +415,12 @@ We may also use any Spark ML `Transformer` as our `Function`.
 To do so we use the `trans` function which needs an ML `Transformer`.
 As a result it returns a function.
 
-```
+```scala
 val func: Function[Row, Row] = trans(ft)
 val result: Dataset[Row] = df ++ func
 ```
 
-The `trans` function is of the following signature.
+The `trans` function has the following signature.
 
 |Operation |Signature                                              |
 |----------|-------------------------------------------------------|
@@ -439,16 +431,80 @@ as in general Spark ML works only on DataFrames.
 
 # Composition of functions
 
-TODO
+So far we defined plain functions which together with set of implicits let build
+any Spark application. Now we go a step further and define types which may:
+- produce data - F0,
+- process data - F1 (which is equivalent to Function),
+- combine data - F2,
+- reduce data - FN.
+
+Those types are plain aliases to Scala functions of specific number of parameters.
+Then we supplement them with additional method (operator) to compose them with F1 function
+which in general might co next after any of them, as F1 will simply modify the result of all of those types.
+As a result we received nice set of operations with a few rules of composing them. 
 
 # Complete example
 
-TODO
+As an example toy application we implement word count query which in Spark is hello world count.
+
+## First approach using the Functions
+
+Let us start from plain simple solution:
+
+```scala
+val df: DataFrame = spark.read.text("<path>")
+df.as[String].flatMap(_.split(" ")).groupBy("value").count()
+```
+
+Then we do the same using Functions:
+```scala
+val df: DataFrame = spark.read.text("<path>")
+val castToDataset: Function[Row, String] = as[String]()
+val splitter: Function[String, String] = flatMap[String, String](_.split(" "))
+val aggregator: Function[String, Row] = agg[String](Seq("value"), Seq(("value", "count")))
+df ++ castToDataset ++ splitter ++ aggregator
+```
+
+or in more compact way:
+
+```scala
+val df: DataFrame = spark.read.text("<path>")
+val aggregator: Function[String, Row] = flatMap[String, String](_.split(" ")) +
+  agg[String](Seq("value"), Seq(("value", "count")))
+df ++ as[String]() ++ aggregator
+```
+
+which gives plenty of possibilities including reusing of the aggregator Function in any place,
+not only on this df DataFrame.
+
+## Second approach using the Types
+
+Alternatively, we may use the Types:
+
+```scala
+val f0: F0[String] = () => spark.read.text("<path>") ++ as[String]()
+val f1: F1[String, Row] = flatMap[String, String](_.split(" ")) +
+  agg[String](Seq("value"), Seq(("value", "count")))
+(f0 + f1)()
+```
+
+while the last expression might be written like this
+(provided the ++ method in ExtendedDataset is modified to accept F1 instead Function):
+
+```scala
+f0() ++ f1
+```
+
+So, having such API we have more freedom in reusing pieces on implementation
+as well as a possibility to encapsulate series of Spark calls within reusable functions.
+And these are the building blocks of enterprise class systems
+which might be composed on such functions. 
 
 # Versions
 
 |Version|Date      |Description                                             |
 |-------|----------|--------------------------------------------------------|
+|1.5.1  |2021-12-15|Add more tests.                                         |
 |1.5.0  |2021-12-12|Add prototype of core types.                            |
 |1.4.1  |2021-12-11|Clean the code.                                         |
 |1.4.0  |2021-12-08|Update saving and loading of FunctionTransformer.       |

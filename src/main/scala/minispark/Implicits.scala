@@ -20,7 +20,7 @@ object Implicits {
      * @tparam U Type of resulting data.
      * @return Returns the produced Dataset.
      */
-    def ++[U](f: Function[T, U]): Dataset[U] = f(d) // d transform f
+    def ++[U](f: F1[T, U]): Dataset[U] = f(d) // d transform f
 
     /**
      * Unions the other Dataset[T].
