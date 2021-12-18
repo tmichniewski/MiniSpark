@@ -13,7 +13,7 @@ as `Dataset[T] => Dataset[U]`
 and this is equivalent to Scala type (trait) `Function1[Dataset[T], Dataset[U]]`.
 
 One of standard methods in this trait is a method called `andThen` to sequentially apply two functions. In our case for
-such kind of function composition we prefer to use the `+` operator.
+such kind of function composition we prefer to use the `+` operator, but this is just an alias.
 
 Summing up, we define the following type called `Function`:
 
@@ -519,7 +519,8 @@ might be composed of such functions.
 
 |Version|Date      |Description                                             |
 |-------|----------|--------------------------------------------------------|
-|1.5.2  |2021-12-15|Use Dataset.transform in composition methods.           |
+|1.5.3  |2021-12-18|Simplify Function definition.                           |
+|1.5.2  |2021-12-18|Use Dataset.transform in composition methods.           |
 |1.5.1  |2021-12-15|Add more tests.                                         |
 |1.5.0  |2021-12-12|Add prototype of core types.                            |
 |1.4.1  |2021-12-11|Clean the code.                                         |
