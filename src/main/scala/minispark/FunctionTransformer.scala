@@ -38,7 +38,7 @@ class FunctionTransformer(override val uid: String) extends Transformer with Def
    *
    * @return Returns value of the parameter.
    */
-  @SuppressWarnings(Array("AsInstanceOf"))
+  @SuppressWarnings(Array("AsInstanceOf")) // needed to downcast the result of deserialization which is of type Any
   def getSchema: Seq[(String, DataType)] = deserialize($(schema)).asInstanceOf[Seq[(String, DataType)]]
 
   /**
@@ -60,7 +60,7 @@ class FunctionTransformer(override val uid: String) extends Transformer with Def
    *
    * @return Returns value of the parameter.
    */
-  @SuppressWarnings(Array("AsInstanceOf"))
+  @SuppressWarnings(Array("AsInstanceOf")) // needed to downcast the result of deserialization which is of type Any
   def getFunction: Function[Row, Row] = deserialize($(function)).asInstanceOf[Function[Row, Row]]
 
   /**

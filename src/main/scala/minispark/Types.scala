@@ -13,7 +13,7 @@ import org.apache.spark.sql.Dataset
  */
 trait F0[T] extends (() => Dataset[T]) {
   /**
-   * Composition of F0 and F1.
+   * Sequential composition of F0 and F1.
    *
    * @param f1tu F1 function to apply next.
    * @tparam U Type of output data.
@@ -30,7 +30,7 @@ trait F0[T] extends (() => Dataset[T]) {
  */
 trait F1[T, U] extends (Dataset[T] => Dataset[U]) {
   /**
-   * Composition of F1 and F1.
+   * Sequential composition of F1 and F1. Alias to Function1.andThen.
    *
    * @param f1uv F1 function to apply next.
    * @tparam V Type of output data.
@@ -48,7 +48,7 @@ trait F1[T, U] extends (Dataset[T] => Dataset[U]) {
  */
 trait F2[T, U, V] extends ((Dataset[T], Dataset[U]) => Dataset[V]) {
   /**
-   * Composition of F2 and F1.
+   * Sequential composition of F2 and F1.
    *
    * @param f1vw F1 function to apply next.
    * @tparam W Type of output data.
@@ -65,7 +65,7 @@ trait F2[T, U, V] extends ((Dataset[T], Dataset[U]) => Dataset[V]) {
  */
 trait FN[T, U] extends (Seq[Dataset[T]] => Dataset[U]) {
   /**
-   * Composition of FN and F1.
+   * Sequential composition of FN and F1.
    *
    * @param f1uv F1 function to apply next.
    * @tparam V Type of output data.
