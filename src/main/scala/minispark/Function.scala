@@ -20,5 +20,6 @@ trait Function[T, U] extends (Dataset[T] => Dataset[U]) with F1[T, U] with Seria
    * @tparam V Type of resulting data.
    * @return Returns the composed function.
    */
-  def +[V](f: Function[U, V]): Function[T, V] = (d: Dataset[T]) => (this andThen f)(d) // d transform (this andThen f)
+  def +[V](f: Function[U, V]): Function[T, V] = (d: Dataset[T]) => d.transform(this andThen f)
+  // <=> (this andThen f)(d) or andThen(f)(d) or f(apply(d))
 }
