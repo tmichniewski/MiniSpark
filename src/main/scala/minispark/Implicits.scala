@@ -11,7 +11,7 @@ object Implicits {
    * @param d The object to perform some operations on.
    * @tparam T Type of data.
    */
-  @SuppressWarnings(Array("AvoidOperatorOverload"))
+  @SuppressWarnings(Array("AvoidOperatorOverload")) // we deliberately use operators as we construct Dataset operators
   implicit class ExtendedDataset[T](val d: Dataset[T]) extends AnyVal {
     /**
      * Applies the given function to the Dataset.
