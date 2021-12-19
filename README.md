@@ -32,7 +32,7 @@ trait Function[T, U] extends (Dataset[T] => Dataset[U]) {
    * @tparam V Type of resulting data.
    * @return Returns the composed function.
    */
-  def +[V](f: Function[U, V]): Function[T, V] = (d: Dataset[T]) => (this andThen f) (d)
+  def +[V](f: Function[U, V]): Function[T, V] = (d: Dataset[T]) => (this andThen f)(d)
 }
 ```
 
@@ -88,7 +88,7 @@ val addGreeting: Function[PersonWithFullName, PersonWithGreeting] = { (d: Datase
 }
 ```
 
-Then, having defined two such functions we may compose them to achieve one function only:
+Then, having defined two such functions we may compose them, to achieve one function only:
 
 ```scala
 val addFullNameAndGreeting: Function[Person, PersonWithGreeting] = addFullName + addGreeting
