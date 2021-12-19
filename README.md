@@ -146,14 +146,14 @@ shorten and simplify set operators on Datasets as well as joins.
 |---------|--------------------------------------|
 |Union    |def +(other: Dataset[T]): Dataset[T]  |
 |Subtract |def -(other: Dataset[T]): Dataset[T]  |
-|Intersect|def *(other: Dataset[T]): Dataset[T]  |
+|Intersect|def @#42;(other: Dataset[T]): Dataset[T]  |
 |Delta    |def -+-(other: Dataset[T]): Dataset[T]|
 
 ### Dataset joins operators
 
 |Join type       |Signature|
 |----------------|------------------------------------------------------------------|
-|Cross join      |def &#124;*&#124;(other: Dataset[_]): Dataset[Row]                |
+|Cross join      |def &#124;@#42;&#124;(other: Dataset[_]): Dataset[Row]                |
 |Inner join      |def &#124;=&#124;[U](other: Dataset[U]): JoinedDatasetPair[T, U]  |
 |Left outer join |def &#124;=+&#124;[U](other: Dataset[U]): JoinedDatasetPair[T, U] |
 |Right outer join|def &#124;+=&#124;[U](other: Dataset[U]): JoinedDatasetPair[T, U] |
@@ -167,15 +167,15 @@ In addition to implemented `Dataset` operators there are also predefined functio
 |----------------|---------------------------------------------------------------------------------------|
 |Filter rows     |def filter[T](condition: String): Function[T, T]                                       |
 |Filter rows     |def filter[T](condition: Column): Function[T, T]                                       |
-|Select columns  |def select[T](column: String, columns: String*): Function[T, Row]                      |
-|Select columns  |def select[T](columns: Column*): Function[T, Row]                                      |
+|Select columns  |def select[T](column: String, columns: String@#42;): Function[T, Row]                      |
+|Select columns  |def select[T](columns: Column@#42;): Function[T, Row]                                      |
 |Add column      |def add[T](column: String, value: Column): Function[T, Row]                            |
-|Add columns     |def add[T](columns: (String, Column)*): Function[T, Row]                               |
-|Drop columns    |def drop[T](columns: String*): Function[T, Row]                                        |
+|Add columns     |def add[T](columns: (String, Column)@#42;): Function[T, Row]                               |
+|Drop columns    |def drop[T](columns: String@#42;): Function[T, Row]                                        |
 |Rename column   |def rename[T](oldColumn: String, newColumn: String): Function[T, Row]                  |
-|Rename columns  |def rename[T](renameExpr: (String, String)*): Function[T, Row]                         |
+|Rename columns  |def rename[T](renameExpr: (String, String)@#42;): Function[T, Row]                         |
 |Cast column     |def cast[T](column: String, newType: DataType): Function[T, Row]                       |
-|Cast columns    |def cast[T](typesExpr: (String, DataType)*): Function[T, Row]                          |
+|Cast columns    |def cast[T](typesExpr: (String, DataType)@#42;): Function[T, Row]                          |
 |Map rows        |def map[T, U: Encoder](f: T => U): Function[T, U]                                      |
 |FlatMap rows    |def flatMap[T, U: Encoder](f: T => TraversableOnce[U]): Function[T, U]                 |
 |Aggregate       |def agg[T](groupBy: Seq[String], aggregations: Seq[(String, String)]): Function[T, Row]|
@@ -200,9 +200,9 @@ In addition to implemented `Dataset` operators there are also predefined functio
 |Cast Dataset    |def as[T: Encoder] (): Function[Row, T]                                                |
 |Cast Dataset    |def row[T] (): Function[T, Row]                                                        |
 |Cache           |def cache[T] (): Function[T, T]                                                        |
-|Sort            |def sort[T](column: String, columns: String*): Function[T, T]                          |
-|Sort            |def sort[T](columns: Column*): Function[T, T]                                          |
-|Pipeline        |def pipeline[T](f: Function[T, T], fs: Function[T, T]*): Function[T, T]                |
+|Sort            |def sort[T](column: String, columns: String@#42;): Function[T, T]                          |
+|Sort            |def sort[T](columns: Column@#42;): Function[T, T]                                          |
+|Pipeline        |def pipeline[T](f: Function[T, T], fs: Function[T, T]@#42;): Function[T, T]                |
 
 ## The map pattern
 
@@ -227,11 +227,8 @@ case class Record(id: Int, amount: Double, name: String, date: Date, time: Times
 object Adder extends MapPattern {
   override type Input = Int // or any case class defined within the Adder object
   override type Output = Int // or any case class defined within the Adder object
-
   case class AdderParams(delta: Int)
-
   override type Params = AdderParams // or e.g. Option[Nothing] and then None in case of no parameters
-
   override def build(params: Params): Input => Output = _ + params.delta
 }
 
