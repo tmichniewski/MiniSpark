@@ -142,18 +142,18 @@ shorten and simplify set operators on Datasets as well as joins.
 
 ### Dataset set operators
 
-|Operator |Signature                             |
-|---------|--------------------------------------|
-|Union    |def +(other: Dataset[T]): Dataset[T]  |
-|Subtract |def -(other: Dataset[T]): Dataset[T]  |
-|Intersect|def @#42;(other: Dataset[T]): Dataset[T]  |
-|Delta    |def -+-(other: Dataset[T]): Dataset[T]|
+|Operator |Signature                               |
+|---------|----------------------------------------|
+|Union    |def +(other: Dataset[T]): Dataset[T]    |
+|Subtract |def -(other: Dataset[T]): Dataset[T]    |
+|Intersect|def @#42;(other: Dataset[T]): Dataset[T]|
+|Delta    |def -+-(other: Dataset[T]): Dataset[T]  |
 
 ### Dataset joins operators
 
 |Join type       |Signature|
 |----------------|------------------------------------------------------------------|
-|Cross join      |def &#124;@#42;&#124;(other: Dataset[_]): Dataset[Row]                |
+|Cross join      |def &#124;@#42;&#124;(other: Dataset[@#95;]): Dataset[Row]        |
 |Inner join      |def &#124;=&#124;[U](other: Dataset[U]): JoinedDatasetPair[T, U]  |
 |Left outer join |def &#124;=+&#124;[U](other: Dataset[U]): JoinedDatasetPair[T, U] |
 |Right outer join|def &#124;+=&#124;[U](other: Dataset[U]): JoinedDatasetPair[T, U] |
@@ -167,15 +167,15 @@ In addition to implemented `Dataset` operators there are also predefined functio
 |----------------|---------------------------------------------------------------------------------------|
 |Filter rows     |def filter[T](condition: String): Function[T, T]                                       |
 |Filter rows     |def filter[T](condition: Column): Function[T, T]                                       |
-|Select columns  |def select[T](column: String, columns: String@#42;): Function[T, Row]                      |
-|Select columns  |def select[T](columns: Column@#42;): Function[T, Row]                                      |
+|Select columns  |def select[T](column: String, columns: String@#42;): Function[T, Row]                  |
+|Select columns  |def select[T](columns: Column@#42;): Function[T, Row]                                  |
 |Add column      |def add[T](column: String, value: Column): Function[T, Row]                            |
-|Add columns     |def add[T](columns: (String, Column)@#42;): Function[T, Row]                               |
-|Drop columns    |def drop[T](columns: String@#42;): Function[T, Row]                                        |
+|Add columns     |def add[T](columns: (String, Column)@#42;): Function[T, Row]                           |
+|Drop columns    |def drop[T](columns: String@#42;): Function[T, Row]                                    |
 |Rename column   |def rename[T](oldColumn: String, newColumn: String): Function[T, Row]                  |
-|Rename columns  |def rename[T](renameExpr: (String, String)@#42;): Function[T, Row]                         |
+|Rename columns  |def rename[T](renameExpr: (String, String)@#42;): Function[T, Row]                     |
 |Cast column     |def cast[T](column: String, newType: DataType): Function[T, Row]                       |
-|Cast columns    |def cast[T](typesExpr: (String, DataType)@#42;): Function[T, Row]                          |
+|Cast columns    |def cast[T](typesExpr: (String, DataType)@#42;): Function[T, Row]                      |
 |Map rows        |def map[T, U: Encoder](f: T => U): Function[T, U]                                      |
 |FlatMap rows    |def flatMap[T, U: Encoder](f: T => TraversableOnce[U]): Function[T, U]                 |
 |Aggregate       |def agg[T](groupBy: Seq[String], aggregations: Seq[(String, String)]): Function[T, Row]|
@@ -183,26 +183,26 @@ In addition to implemented `Dataset` operators there are also predefined functio
 |Subtract        |def subtract[T](other: Dataset[T]): Function[T, T]                                     |
 |Intersect       |def intersect[T](other: Dataset[T]): Function[T, T]                                    |
 |Delta           |def delta[T](other: Dataset[T]): Function[T, T]                                        |
-|Cross join      |def cross[T](other: Dataset[_]): Function[T, Row]                                      |
+|Cross join      |def cross[T](other: Dataset[@#95;]): Function[T, Row]                                  |
 |Cross join      |def crossTyped[T, U](other: Dataset[U]): Function[T, (T, U)]                           |
-|Inner join      |def inner[T](other: Dataset[_], columns: Seq[String]): Function[T, Row]                |
-|Inner join      |def inner[T](other: Dataset[_], joinExpr: Column): Function[T, Row]                    |
+|Inner join      |def inner[T](other: Dataset[@#95;], columns: Seq[String]): Function[T, Row]            |
+|Inner join      |def inner[T](other: Dataset[@#95;], joinExpr: Column): Function[T, Row]                |
 |Inner join      |def inner[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)]              |
-|Left outer join |def left[T](other: Dataset[_], columns: Seq[String]): Function[T, Row]                 |
-|Left outer join |def left[T](other: Dataset[_], joinExpr: Column): Function[T, Row]                     |
+|Left outer join |def left[T](other: Dataset[@#95;], columns: Seq[String]): Function[T, Row]             |
+|Left outer join |def left[T](other: Dataset[@#95;], joinExpr: Column): Function[T, Row]                 |
 |Left outer join |def leftTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)]          |
-|Right outer join|def right[T](other: Dataset[_], columns: Seq[String]): Function[T, Row]                |
-|Right outer join|def right[T](other: Dataset[_], joinExpr: Column): Function[T, Row]                    |
+|Right outer join|def right[T](other: Dataset[@#95;], columns: Seq[String]): Function[T, Row]            |
+|Right outer join|def right[T](other: Dataset[@#95;], joinExpr: Column): Function[T, Row]                |
 |Right outer join|def rightTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)]         |
-|Full outer join |def full[T](other: Dataset[_], columns: Seq[String]): Function[T, Row]                 |
-|Full outer join |def full[T](other: Dataset[_], joinExpr: Column): Function[T, Row]                     |
+|Full outer join |def full[T](other: Dataset[@#95;], columns: Seq[String]): Function[T, Row]             |
+|Full outer join |def full[T](other: Dataset[@#95;], joinExpr: Column): Function[T, Row]                 |
 |Full outer join |def fullTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)]          |
 |Cast Dataset    |def as[T: Encoder] (): Function[Row, T]                                                |
 |Cast Dataset    |def row[T] (): Function[T, Row]                                                        |
 |Cache           |def cache[T] (): Function[T, T]                                                        |
-|Sort            |def sort[T](column: String, columns: String@#42;): Function[T, T]                          |
-|Sort            |def sort[T](columns: Column@#42;): Function[T, T]                                          |
-|Pipeline        |def pipeline[T](f: Function[T, T], fs: Function[T, T]@#42;): Function[T, T]                |
+|Sort            |def sort[T](column: String, columns: String@#42;): Function[T, T]                      |
+|Sort            |def sort[T](columns: Column@#42;): Function[T, T]                                      |
+|Pipeline        |def pipeline[T](f: Function[T, T], fs: Function[T, T]@#42;): Function[T, T]            |
 
 ## The map pattern
 
