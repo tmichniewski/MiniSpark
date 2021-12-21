@@ -99,7 +99,8 @@ With such a simple concept we may start building more and more useful functions 
 Please notice, that such a function might be also used in Spark `Dataset.transform` method, because our function is
 exactly equal to the type of parameter to the transform method.
 
-In fact, our function might be perceived to be both - an alias to Scala Function1 and a type of Spark transform method.
+In fact, our function might be perceived to be both - an alias to Scala `Function1` and a type of
+Spark `Dataset.transform` method.
 
 ## Dataset composition with the function
 
@@ -429,10 +430,10 @@ Please notice that here we have to stay within untyped API, as in general Spark 
 So far we defined plain functions which together with set of implicits let build any Spark application. Now we go a step
 further and define types which may:
 
-- produce data - F0,
-- process data - F1 (which is equivalent to Function),
-- combine data - F2,
-- reduce data - FN.
+- produce data - `F0`,
+- process data - `F1` (which is equivalent to `Function`),
+- combine data - `F2`,
+- reduce data - `FN`.
 
 Those types are plain aliases to Scala functions of specific number of parameters. Then we supplement them with
 additional method (operator) to compose them with F1 function which in general might go next after any of them, as F1
@@ -462,7 +463,7 @@ As a result we received nice set of operations with a few rules of composing the
 
 As an example toy application we implement word count query which in Spark is a "hello world" application.
 
-## First approach using the Functions
+## First approach using Functions
 
 Let us start from the original simple solution:
 
@@ -471,7 +472,7 @@ val df: DataFrame = spark.read.text("<path>")
 df.as[String].flatMap(_.split(" ")).groupBy("value").count()
 ```
 
-Then we do the same using Functions:
+Then we do the same using `Function`s:
 
 ```scala
 val df: DataFrame = spark.read.text("<path>")
@@ -493,19 +494,19 @@ df ++ as[String]() ++ aggregator
 which gives plenty of possibilities including reusing of the aggregator function in any place, not only on this df
 DataFrame.
 
-## Second approach using the Types
+## Second approach using Types
 
-Alternatively, we may use the Types:
+Alternatively, we may use `Type`s:
 
 ```scala
 val f0: F0[String] = () => spark.read.text("<path>") ++ as[String]()
 val f1: F1[String, Row] = flatMap[String, String](_.split(" ")) +
   agg[String](Seq("value"), Seq(("value", "count")))
-(f0 + f1) ()
+(f0 + f1)()
 ```
 
 while the last expression might be written like this
-(provided the ++ method in `ExtendedDataset` is modified to accept `F1` instead `Function`):
+(provided the ++ method in `ExtendedDataset` is modified to accept `F1` instead of `Function`):
 
 ```scala
 f0() ++ f1
