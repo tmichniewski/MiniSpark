@@ -61,7 +61,7 @@ object Implicits {
      * @return Returns the cross join of the given Datasets.
      */
     def |*|(other: Dataset[_]): Dataset[Row] = d crossJoin other
-    // alternatively this could be called |+| from the cross word,
+    // alternatively this could be called |+| from the "cross" word (meaning plus),
     // but this operator would suggest that there is some union under the neath,
     // while it is not the case
 
