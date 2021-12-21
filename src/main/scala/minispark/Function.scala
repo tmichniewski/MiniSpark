@@ -1,7 +1,7 @@
 package com.github
 package minispark
 
-import org.apache.spark.sql.{Dataset, Row}
+import org.apache.spark.sql.Dataset
 
 /**
  * The function represents any kind of transformation of one Dataset into another.
