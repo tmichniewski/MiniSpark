@@ -7,7 +7,7 @@ import java.util.Base64
 /** Serialization functions. */
 object Serialize {
   /**
-   * Serialize an object.
+   * Serializes and encodes an object.
    *
    * @param o Object to be serialized.
    * @return Returns serialized object.
@@ -21,7 +21,7 @@ object Serialize {
   }
 
   /**
-   * Deserialize an object.
+   * Decodes and deserializes an object.
    *
    * @param s String containing serialized object.
    * @return Returns deserialized object.

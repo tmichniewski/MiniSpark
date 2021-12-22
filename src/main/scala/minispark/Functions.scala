@@ -4,7 +4,7 @@ package minispark
 import org.apache.spark.ml.Transformer
 import org.apache.spark.sql.functions.lit
 import org.apache.spark.sql.types.DataType
-import org.apache.spark.sql.{Column, DataFrame, Dataset, Encoder, Row}
+import org.apache.spark.sql._
 
 /** Contains typical operations. */
 object Functions {
