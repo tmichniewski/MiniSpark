@@ -20,7 +20,7 @@ class FunctionTransformer(override val uid: String) extends Transformer with Def
   def this() = this(Identifiable.randomUID("FunctionTransformer"))
 
   /**
-   * Schema parameter. The function is provided in Seq[(column, type)] form,
+   * Schema parameter. The schema is provided in Seq[(column, type)] form,
    * but stored in serialized form as String, due to limitations of Param.jsonEncode.
    */
   final val schema: Param[String] = new Param[String](this, "schema", "Schema")
