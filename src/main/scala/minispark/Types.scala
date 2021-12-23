@@ -38,7 +38,8 @@ trait F1[T, U] extends (Dataset[T] => Dataset[U]) {
    * @tparam V Type of output data.
    * @return Returns the composed function.
    */
-  def +[V](f1uv: F1[U, V]): F1[T, V] = (d: Dataset[T]) => f1uv(apply(d)) // F1 + F1 = F1
+  def +[V](f1uv: F1[U, V]): F1[T, V] = (d: Dataset[T]) => d.transform(this andThen f1uv) // F1 + F1 = F1
+  // <=> (this andThen f1uv)(d) or andThen(f1uv)(d) or f1uv(apply(d))
 }
 
 /**
