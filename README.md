@@ -228,11 +228,8 @@ case class Record(id: Int, amount: Double, name: String, date: Date, time: Times
 object Adder extends MapPattern {
   override type Input = Int // or any case class defined within the Adder object
   override type Output = Int // or any case class defined within the Adder object
-
   case class AdderParams(delta: Int)
-
   override type Params = AdderParams // or e.g. Option[Nothing] and then None in case of no parameters
-
   override def build(params: Params): Input => Output = _ + params.delta
 }
 
