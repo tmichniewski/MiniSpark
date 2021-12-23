@@ -17,24 +17,26 @@ trait F0[T] extends (() => Dataset[T]) {
    *
    * @param f1tu F1 function to apply next.
    * @tparam U Type of output data.
-   * @return Returns composed function.
+   * @return Returns the composed function.
    */
   def +[U](f1tu: F1[T, U]): F0[U] = () => f1tu(apply()) // F0 + F1 = F0
 }
 
 /**
  * One parameter function. Transformer of data.
+ * Represents any kind of transformation of one Dataset into another.
+ * Such functions are present in any Spark notebook, but here we define a type for them.
  *
  * @tparam T Type of input data.
  * @tparam U Type of output data.
  */
 trait F1[T, U] extends (Dataset[T] => Dataset[U]) {
   /**
-   * Sequential composition of F1 and F1. Alias to Function1.andThen.
+   * Sequential composition of two F1 functions. An alias to Function1.andThen.
    *
    * @param f1uv F1 function to apply next.
    * @tparam V Type of output data.
-   * @return Returns composed function.
+   * @return Returns the composed function.
    */
   def +[V](f1uv: F1[U, V]): F1[T, V] = (d: Dataset[T]) => f1uv(apply(d)) // F1 + F1 = F1
 }
@@ -52,7 +54,7 @@ trait F2[T, U, V] extends ((Dataset[T], Dataset[U]) => Dataset[V]) {
    *
    * @param f1vw F1 function to apply next.
    * @tparam W Type of output data.
-   * @return Returns composed function.
+   * @return Returns the composed function.
    */
   def +[W](f1vw: F1[V, W]): F2[T, U, W] = (d1: Dataset[T], d2: Dataset[U]) => f1vw(apply(d1, d2)) // F2 + F1 = F2
 }
@@ -69,7 +71,7 @@ trait FN[T, U] extends (Seq[Dataset[T]] => Dataset[U]) {
    *
    * @param f1uv F1 function to apply next.
    * @tparam V Type of output data.
-   * @return Returns composed function.
+   * @return Returns the composed function.
    */
   def +[V](f1uv: F1[U, V]): FN[T, V] = (ds: Seq[Dataset[T]]) => f1uv(apply(ds)) // FN + F1 = FN
 }
