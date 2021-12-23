@@ -1,5 +1,3 @@
-import sbt.Keys.classLoaderLayeringStrategy
-
 name := "MiniSpark"
 
 version := "2.0.0"
