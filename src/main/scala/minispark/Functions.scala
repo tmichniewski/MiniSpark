@@ -1,10 +1,9 @@
 package com.github
 package minispark
 
-import org.apache.spark.ml.Transformer
+import org.apache.spark.sql._
 import org.apache.spark.sql.functions.lit
 import org.apache.spark.sql.types.DataType
-import org.apache.spark.sql._
 
 /** Contains typical operations. */
 object Functions {
@@ -412,14 +411,4 @@ object Functions {
    */
   @SuppressWarnings(Array("UnsafeTraversableMethods")) // reduce is safe here, as we call it on non empty collection
   def pipeline[T](f: Function[T, T], fs: Function[T, T]*): Function[T, T] = (f +: fs).reduce(_ + _)
-
-  // ML
-
-  /**
-   * Transforms the given Dataset using given transformer.
-   *
-   * @param transformer The ML transformer tobe used.
-   * @return Returns the function to transform the given Dataset.
-   */
-  def trans(transformer: Transformer): Function[Row, Row] = (d: Dataset[_]) => transformer.transform(d)
 }
