@@ -423,7 +423,7 @@ The `trans` function has the following signature.
 |----------|-------------------------------------------------------|
 |Trans     |def trans(transformer: Transformer): Function[Row, Row]|
 
-Please notice that here we have to stay within untyped API, as in general Spark ML works only on DataFrames.
+Please notice that here we have to stay within untyped API, as in general Spark ML works only on `DataFrame`s.
 
 # Part III - Composition of functions
 
@@ -492,7 +492,7 @@ df ++ as[String]() ++ aggregator
 ```
 
 which gives plenty of possibilities including reusing of the aggregator function in any place, not only on this df
-DataFrame.
+`DataFrame`.
 
 ## Second approach using Types
 
