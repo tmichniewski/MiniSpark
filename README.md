@@ -347,20 +347,20 @@ might be composed of such functions.
 
 # Versions
 
-|Version|Date      |Description                                             |
-|-------|----------|--------------------------------------------------------|
-|2.0.0  |2021-12-24|Remove FunctionTransformer, Types and trans function.   |
-|1.5.6  |2021-12-23|Update comments.                                        |
-|1.5.5  |2021-12-23|Update comments and refactor F1.+ method.               |
-|1.5.4  |2021-12-21|Refactor.                                               |
-|1.5.3  |2021-12-18|Simplify Function definition.                           |
-|1.5.2  |2021-12-18|Use Dataset.transform in composition methods.           |
-|1.5.1  |2021-12-15|Add more tests.                                         |
-|1.5.0  |2021-12-12|Add prototype of core types.                            |
-|1.4.1  |2021-12-11|Clean the code.                                         |
-|1.4.0  |2021-12-08|Update saving and loading of FunctionTransformer.       |
-|1.3.0  |2021-12-07|Replace FunctionTransformer with parameterized version. |
-|1.2.1  |2021-12-06|Amend FunctionTransformer to use extendable class.      |
-|1.2.0  |2021-12-05|Add integration with Spark ML.                          |
-|1.1.0  |2021-12-04|Add joins on Column and typed joins.                    |
-|1.0.0  |2021-11-28|First version.                                          |
+|Version|Date      |Description                                              |
+|-------|----------|---------------------------------------------------------|
+|2.0.0  |2021-12-24|Remove FunctionTransformer, FX Types and trans Function. |
+|1.5.6  |2021-12-23|Update comments.                                         |
+|1.5.5  |2021-12-23|Update comments and refactor F1.+ method.                |
+|1.5.4  |2021-12-21|Refactor.                                                |
+|1.5.3  |2021-12-18|Simplify Function definition.                            |
+|1.5.2  |2021-12-18|Use Dataset.transform in composition methods.            |
+|1.5.1  |2021-12-15|Add more tests.                                          |
+|1.5.0  |2021-12-12|Add prototype of core types.                             |
+|1.4.1  |2021-12-11|Clean the code.                                          |
+|1.4.0  |2021-12-08|Update saving and loading of FunctionTransformer.        |
+|1.3.0  |2021-12-07|Replace FunctionTransformer with parameterized version.  |
+|1.2.1  |2021-12-06|Amend FunctionTransformer to use extendable class.       |
+|1.2.0  |2021-12-05|Add integration with Spark ML.                           |
+|1.1.0  |2021-12-04|Add joins on Column and typed joins.                     |
+|1.0.0  |2021-11-28|First version.                                           |
