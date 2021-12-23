@@ -13,12 +13,8 @@ Global / excludeLintKeys += idePackagePrefix
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.2.10" % Test, // Unit tests
   "org.apache.spark" %% "spark-core" % sparkVersion % "provided", // Spark
-  "org.apache.spark" %% "spark-sql" % sparkVersion % "provided", // Spark SQL
-  "org.apache.spark" %% "spark-mllib" % sparkVersion % "provided" // Spark MLLib
+  "org.apache.spark" %% "spark-sql" % sparkVersion % "provided" // Spark SQL
 )
-
-// To avoid java.lang.ClassNotFoundException
-Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat
 
 // force full test coverage
 coverageMinimumStmtTotal := 100
