@@ -520,7 +520,8 @@ might be composed of such functions.
 
 |Version|Date      |Description                                             |
 |-------|----------|--------------------------------------------------------|
-|1.5.5  |2021-12-21|Update comments and refactor F1.+ method.               |
+|1.5.6  |2021-12-23|Update comments.               |
+|1.5.5  |2021-12-23|Update comments and refactor F1.+ method.               |
 |1.5.4  |2021-12-21|Refactor.                                               |
 |1.5.3  |2021-12-18|Simplify Function definition.                           |
 |1.5.2  |2021-12-18|Use Dataset.transform in composition methods.           |
