@@ -17,6 +17,7 @@ libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-mllib" % sparkVersion % "provided" // Spark MLLib
 )
 
+// To avid java.lang.ClassNotFoundException
 Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat
 
 // force full test coverage
