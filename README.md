@@ -308,162 +308,9 @@ Concluding, this library is not about the API, which hardly brings anything new.
 Instead, it is about the thinking. The thinking about building enterprise class systems and their decomposition into
 smaller parts. Thinking about how to shape the small pieces of the system and then, how to glue them together.
 
-# Part II - Integration with Spark ML
-
-So far we covered typical ETL processing on top of Spark. Now, we will focus on how to integrate with Spark ML. To
-achieve this we try to provide two very simple constructs.
-
-## ML Transformer on Function
-
-Having defined some `Function` we may want to use it as an ML `Transformer`. To do so we use the `FunctionTransformer`
-class which below is presented without the implementation.
-
-```scala
-/**
- * Spark ML transformer which uses the Function.
- * This gives plenty of possibilities to create new ML Transformers.
- *
- * @param uid Transformer id.
- */
-class FunctionTransformer(override val uid: String) extends Transformer with DefaultParamsWritable {
-  /** Additional, default constructor. */
-  def this() = this(Identifiable.randomUID("FunctionTransformer"))
-
-  /**
-   * Schema parameter. The function is provided in Seq[(column, type)] form,
-   * but stored in serialized form as String, due to limitations of Param.jsonEncode.
-   */
-  final val schema: Param[String]
-
-  /**
-   * Setter for the parameter.
-   *
-   * @param value New value of the parameter.
-   * @return Returns this transformer.
-   */
-  def setSchema(value: Seq[(String, DataType)]): this.type
-
-  /**
-   * Getter for the parameter.
-   *
-   * @return Returns value of the parameter.
-   */
-  def getSchema: Seq[(String, DataType)]
-
-  /**
-   * Function parameter. The function is provided in lambda form,
-   * but stored in serialized form as String, due to limitations of Param.jsonEncode.
-   */
-  final val function: Param[String]
-
-  /**
-   * Setter for the parameter.
-   *
-   * @param value New value of the parameter.
-   * @return Returns this transformer.
-   */
-  def setFunction(value: Function[Row, Row]): this.type
-
-  /**
-   * Getter for the parameter.
-   *
-   * @return Returns value of the parameter.
-   */
-  def getFunction: Function[Row, Row]
-
-  /**
-   * Check schema validity and produce the output schema from the input schema.
-   * Raise an exception if something is invalid.
-   *
-   * @param inputSchema Input schema.
-   * @return Return output schema. Raises an exception if input schema is inappropriate.
-   */
-  override def transformSchema(inputSchema: StructType): StructType
-
-  /**
-   * Transforms the input dataset.
-   *
-   * @param dataset Dataset to be transformed.
-   * @return Returns transformed dataset.
-   */
-  override def transform(dataset: Dataset[_]): DataFrame
-
-  /**
-   * Creates a copy of this instance with the same UID and some extra params.
-   *
-   * @param extra Extra parameters.
-   * @return Returns copy of this transformer.
-   */
-  override def copy(extra: ParamMap): Transformer
-}
-```
-
-This way we may produce an ML `Transformer` out of the `Function`.
-
-```scala
-val ft: FunctionTransformer = FunctionTransformer()
-ft.setSchema(Seq(("id", IntegerType)))
-ft.setFunction(filter[Row]("id = 1"))
-val result: DataFrame = ft.transform(ds)
-```
-
-## Function using ML Transformer
-
-We may also use any Spark ML `Transformer` as our `Function`. To do so we use the `trans` function which needs an
-ML `Transformer`. As a result it returns a function.
-
-```scala
-val func: Function[Row, Row] = trans(ft)
-val result: Dataset[Row] = df ++ func
-```
-
-The `trans` function has the following signature.
-
-|Operation |Signature                                              |
-|----------|-------------------------------------------------------|
-|Trans     |def trans(transformer: Transformer): Function[Row, Row]|
-
-Please notice that here we have to stay within untyped API, as in general Spark ML works only on `DataFrame`s.
-
-# Part III - Composition of functions
-
-So far we defined plain functions which together with set of implicits let build any Spark application. Now we go a step
-further and define types which may:
-
-- produce data - `F0`,
-- process data - `F1` (which is equivalent to `Function`),
-- combine data - `F2`,
-- reduce data - `FN`.
-
-Those types are plain aliases to Scala functions of specific number of parameters. Then we supplement them with
-additional method (operator) to compose them with F1 function which in general might go next after any of them, as F1
-will simply modify the result of all of those types.
-
-```scala
-trait F0[T] extends (() => Dataset[T]) {
-  def +[U](f1tu: F1[T, U]): F0[U] = () => f1tu(apply()) // F0 + F1 = F0
-}
-
-trait F1[T, U] extends (Dataset[T] => Dataset[U]) {
-  def +[V](f1uv: F1[U, V]): F1[T, V] = (d: Dataset[T]) => f1uv(apply(d)) // F1 + F1 = F1
-}
-
-trait F2[T, U, V] extends ((Dataset[T], Dataset[U]) => Dataset[V]) {
-  def +[W](f1vw: F1[V, W]): F2[T, U, W] = (d1: Dataset[T], d2: Dataset[U]) => f1vw(apply(d1, d2)) // F2 + F1 = F2
-}
-
-trait FN[T, U] extends (Seq[Dataset[T]] => Dataset[U]) {
-  def +[V](f1uv: F1[U, V]): FN[T, V] = (ds: Seq[Dataset[T]]) => f1uv(apply(ds)) // FN + F1 = FN
-}
-```
-
-As a result we received nice set of operations with a few rules of composing them.
-
-# Part IV - Complete example
+# Part II - Complete example
 
 As an example toy application we implement word count query which in Spark is a "hello world" application.
-
-## First approach using Functions
 
 Let us start from the original simple solution:
 
@@ -494,24 +341,6 @@ df ++ as[String]() ++ aggregator
 which gives plenty of possibilities including reusing of the aggregator function in any place, not only on this df
 `DataFrame`.
 
-## Second approach using Types
-
-Alternatively, we may use `Type`s:
-
-```scala
-val f0: F0[String] = () => spark.read.text("<path>") ++ as[String]()
-val f1: F1[String, Row] = flatMap[String, String](_.split(" ")) +
-  agg[String](Seq("value"), Seq(("value", "count")))
-(f0 + f1)()
-```
-
-while the last expression might be written like this
-(provided the ++ method in `ExtendedDataset` is modified to accept `F1` instead of `Function`):
-
-```scala
-f0() ++ f1
-```
-
 So, having such API we have more freedom in reusing pieces of implementation as well as a possibility to encapsulate
 series of Spark calls within reusable functions. And these are the building blocks of enterprise class systems which
 might be composed of such functions.
@@ -520,7 +349,8 @@ might be composed of such functions.
 
 |Version|Date      |Description                                             |
 |-------|----------|--------------------------------------------------------|
-|1.5.6  |2021-12-23|Update comments.               |
+|2.0.0  |2021-12-24|Remove FunctionTransformer, Types and trans function.   |
+|1.5.6  |2021-12-23|Update comments.                                        |
 |1.5.5  |2021-12-23|Update comments and refactor F1.+ method.               |
 |1.5.4  |2021-12-21|Refactor.                                               |
 |1.5.3  |2021-12-18|Simplify Function definition.                           |
