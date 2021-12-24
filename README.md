@@ -58,7 +58,7 @@ and we want to use them in sequence, we would have to apply them in the reverted
 val result: DataFrame = c(b(a(df)))
 ```
 
-Instead, we would like to use it in more natural way, like in the pseudocode code below:
+Instead, we would like to use them in more natural way, like in the pseudocode code below:
 
 ```scala
 df next a next b next c
