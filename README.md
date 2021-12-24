@@ -122,7 +122,7 @@ Then, having defined two such functions we may compose them, to achieve one func
 val addFullNameAndGreeting: Function[Person, PersonWithGreeting] = addFullName + addGreeting
 ```
 
-And use them:
+and use them:
 
 ```scala
 val result: Dataset[PersonWithGreeting] = addFullNameAndGreeting(df)
