@@ -64,21 +64,27 @@ Instead, we would like to use them in more natural way, like in the pseudocode c
 df next a next b next c
 ```
 
+Moreover, sequence of methods calls like `c(b(a(df)))` sequentially transposes input `df`
+while composed function `a + b + c` may theoretically touch the input `df` only once.
+
 How to achieve this? Instead of such methods we prefer to instantiate lambda expressions of the `Function` type using
 single abstract method of anonymous class:
 
 ```scala
+// input schema
 final case class Person(
   firstName: String,
   lastName: String
 )
 
+// intermediate result schema
 final case class PersonWithFullName(
   firstName: String,
   lastName: String,
   fullName: String
 )
 
+// output schema
 final case class PersonWithGreeting(
   firstName: String,
   lastName: String,
@@ -86,6 +92,7 @@ final case class PersonWithGreeting(
   greeting: String
 )
 
+// first function
 val addFullName: Function[Person, PersonWithFullName] = { (d: Dataset[Person]) =>
   d.map { (p: Person) =>
     PersonWithFullName(
@@ -96,6 +103,7 @@ val addFullName: Function[Person, PersonWithFullName] = { (d: Dataset[Person]) =
   }
 }
 
+// second function
 val addGreeting: Function[PersonWithFullName, PersonWithGreeting] = { (d: Dataset[PersonWithFullName]) =>
   d.map { (p: PersonWithFullName) =>
     PersonWithGreeting(
@@ -114,15 +122,21 @@ Then, having defined two such functions we may compose them, to achieve one func
 val addFullNameAndGreeting: Function[Person, PersonWithGreeting] = addFullName + addGreeting
 ```
 
-And this is equivalent to:
+And use them:
+
+```scala
+val result: Dataset[PersonWithGreeting] = addFullNameAndGreeting(df)
+```
+
+This is equivalent to:
 
 ```scala
 val result: Dataset[PersonWithGreeting] = addGreeting(addFullName(df))
 ```
 
-but as you may see the classical usage requires not only the reverted order of functions, but also the df `DataFrame`
+but as you may see the classical usage requires not only the reverted order of functions, but also the `df` `DataFrame`
 instance to apply the methods on. In our approach we may separate composition of functions from their application, and
-this improves application structuring, code reusage and readability.
+this improves application decomposition, code reusage and readability.
 
 With such a simple concept we may start building more and more useful functions using smaller ones as building blocks.
 
