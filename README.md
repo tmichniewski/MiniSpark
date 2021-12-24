@@ -210,7 +210,9 @@ shorten and simplify set operators on Datasets as well as joins.
 
 ## Sample typical Functions
 
-In addition to implemented `Dataset` operators there are also predefined `Function`s.
+In addition to implemented `Dataset` operators there are also predefined `Function`s. Basically, they only mimic
+Spark `Dataset` methods, but the `Function` type may set an interface to bigger ones and due to the composition operator
+the functions might be bigger and bigger and this way constitute the whole modules or subsystems.
 
 |Operation       |Signature                                                                              |
 |----------------|---------------------------------------------------------------------------------------|
