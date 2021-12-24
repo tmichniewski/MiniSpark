@@ -44,8 +44,28 @@ Surprisingly, this very simple concept is present commonly in any Spark notebook
 def func(d: DataFrame): DataFrame
 ```
 
-But instead of such methods we prefer to instantiate lambda expressions of the `Function` type using single abstract
-method instead of anonymous class:
+However, if we have a few such methods, for example:
+
+```scala
+def a(d: DataFrame): DataFrame
+def b(d: DataFrame): DataFrame
+def c(d: DataFrame): DataFrame
+```
+
+and we want to use them in sequence, we would have to apply them in the reverted order:
+
+```scala
+val result: DataFrame = c(b(a(df)))
+```
+
+Instead, we would like to use it in more natural way, like in the pseudocode code below:
+
+```scala
+df next a next b next c
+```
+
+How to achieve this? Instead of such methods we prefer to instantiate lambda expressions of the `Function` type using
+single abstract method of anonymous class:
 
 ```scala
 final case class Person(
@@ -93,6 +113,16 @@ Then, having defined two such functions we may compose them, to achieve one func
 ```scala
 val addFullNameAndGreeting: Function[Person, PersonWithGreeting] = addFullName + addGreeting
 ```
+
+And this is equivalent to:
+
+```scala
+val result: Dataset[PersonWithGreeting] = addGreeting(addFullName(df))
+```
+
+but as you may see the classical usage requires not only the reverted order of functions,
+but also the df `DataFrame` instance to apply the methods on. In our approach we may separate
+composition of functions from their application, and this improves application structuring, code reusage and readability.
 
 With such a simple concept we may start building more and more useful functions using smaller ones as building blocks.
 
