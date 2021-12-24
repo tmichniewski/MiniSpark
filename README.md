@@ -1,4 +1,4 @@
-# Part I - MiniSpark
+# MiniSpark
 
 This is a Scala library for ETL processing to be used on top of Spark. It is simple in design but quite useful. Most of
 it is implemented in pure Scala functions.
@@ -276,6 +276,56 @@ a bigger function covering some business related use cases and ending on the big
 So, this is the decision of the user where to use it. Moreover, this is also possible to encapsulate functions
 implemented with this pattern inside other functions also implemented with this pattern, and so on.
 
+## Example
+
+As an example toy application we implement word count query which in Spark is a "hello world" application.
+
+Let us start from the original simple solution:
+
+```scala
+val df: DataFrame = spark.read.text("<path>")
+df.as[String].flatMap(_.split(" ")).groupBy("value").count()
+```
+
+Then we do the same using `Function`s:
+
+```scala
+val df: DataFrame = spark.read.text("<path>")
+val castToDataset: Function[Row, String] = as[String]()
+val splitter: Function[String, String] = flatMap[String, String](_.split(" "))
+val aggregator: Function[String, Row] = agg[String](Seq("value"), Seq(("value", "count")))
+df ++ castToDataset ++ splitter ++ aggregator
+```
+
+Please notice that in this example we explicitly definef the types of particular
+functions while there is no such possibility is the stanard Spark
+approach. Alternativelly we could also skip the types and use Scala type inferrence
+mechanism:
+
+```scala
+val df: DataFrame = spark.read.text("<path>")
+val castToDataset = as[String]()
+val splitter = flatMap[String, String](_.split(" "))
+val aggregator = agg[String](Seq("value"), Seq(("value", "count")))
+df ++ castToDataset ++ splitter ++ aggregator
+```
+
+or even in a more compact way:
+
+```scala
+val df: DataFrame = spark.read.text("<path>")
+val aggregator = flatMap[String, String](_.split(" ")) +
+  agg[String](Seq("value"), Seq(("value", "count")))
+df ++ as[String]() ++ aggregator
+```
+
+which gives plenty of possibilities including reusing of the aggregator function in any place, not only on this df
+`DataFrame` instance.
+
+So, having such API we have more freedom in reusing pieces of implementation as well as a possibilitied to encapsulate
+series of Spark calls within reusable functions. And these are the building blocks of enterprise class systems which
+might be composed of such functions.
+
 ## Summary
 
 To sum up, this library consists of:
@@ -312,57 +362,7 @@ If we ask ourselves what is the giggest challenge of modern software engineering
 a complexity, bacouse the systems are big. So how we address this challenge? By decomposition the system into smaller
 parts and we model them via the `Function` type, which then might be composed back to constitute the whole application.
 
-# Part II - Complete example
-
-As an example, toy application we implement word count query which in Spark is a "hello world" application.
-
-Let us start from the original simple solution:
-
-```scala
-val df: DataFrame = spark.read.text("<path>")
-df.as[String].flatMap(_.split(" ")).groupBy("value").count()
-```
-
-Then we do the same using `Function`s:
-
-```scala
-val df: DataFrame = spark.read.text("<path>")
-val castToDataset: Function[Row, String] = as[String]()
-val splitter: Function[String, String] = flatMap[String, String](_.split(" "))
-val aggregator: Function[String, Row] = agg[String](Seq("value"), Seq(("value", "count")))
-df ++ castToDataset ++ splitter ++ aggregator
-```
-
-Please notice that in thus example we explicitly definef the types of particular
-functions while there is no such possibility is the stanard Spark
-approach. Alternativelly we could also skip the types and use Scala type inferrence
-mechanism:
-
-```scala
-val df: DataFrame = spark.read.text("<path>")
-val castToDataset = as[String]()
-val splitter = flatMap[String, String](_.split(" "))
-val aggregator = agg[String](Seq("value"), Seq(("value", "count")))
-df ++ castToDataset ++ splitter ++ aggregator
-```
-
-or even in a more compact way:
-
-```scala
-val df: DataFrame = spark.read.text("<path>")
-val aggregator = flatMap[String, String](_.split(" ")) +
-  agg[String](Seq("value"), Seq(("value", "count")))
-df ++ as[String]() ++ aggregator
-```
-
-which gives plenty of possibilities including reusing of the aggregator function in any place, not only on this df
-`DataFrame` instance.
-
-So, having such API we have more freedom in reusing pieces of implementation as well as a possibilitied to encapsulate
-series of Spark calls within reusable functions. And these are the building blocks of enterprise class systems which
-might be composed of such functions.
-
-# Versions
+## Versions
 
 |Version|Date      |Description                                            |
 |-------|----------|-------------------------------------------------------|
