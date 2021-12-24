@@ -15,7 +15,7 @@ and this is equivalent to Scala one-argument function type `Function1[Dataset[T]
 One of standard methods in this trait is a method called `andThen` to sequentially apply two functions. In our case for
 such kind of function composition we prefer to use the `+` operator, but this is just an alias.
 
-Summing up, we define the following type called `Function`:
+Summing up, we define the following type called the `Function`:
 
 ```scala
 /**
@@ -127,12 +127,12 @@ this improves application structuring, code reusage and readability.
 With such a simple concept we may start building more and more useful functions using smaller ones as building blocks.
 
 Please notice, that such a function might be also used in Spark `Dataset.transform` method, because our function is
-exactly equal to the type of parameter to the transform method.
+exactly equal to the type of parameter to the `Dataset.transform` method.
 
 In fact, our function might be perceived to be both - an alias to Scala `Function1` and a type of
 Spark `Dataset.transform` method.
 
-## Dataset composition with the function
+## Dataset composition with the Function
 
 This library provides also a set of additional operators on Spark Dataset. They mainly provide operator like names for
 other Spark `Dataset` methods and let to use infix notation. One important extension to this set of operators is
@@ -153,8 +153,8 @@ implicit class ExtendedDataset[T](val d: Dataset[T]) extends AnyVal {
 ```
 
 The purpose of this method, which is yet another alias to standard - this time Spark - method called `Dataset.transform`
-is to be able to compose expressions consisting of a `Dataset` with subsequent function, when such an expression will
-produce another Dataset.
+is to be able to compose expressions consisting of a `Dataset` with subsequent `Function`, when such an expression will
+produce another `Dataset`.
 
 ```scala
 val person: Dataset[Person] = spark.read.parquet("person.parquet").as[Person]
@@ -165,8 +165,8 @@ val newPerson2: Dataset[PersonWithGreeting] = person ++ (addFullName + addGreeti
 val newPerson3: Dataset[PersonWithGreeting] = person ++ addFullNameAndGreeting
 ```
 
-This is the core concept to shape Spark applications and express them as composition of such functions. Please notice,
-that such functions are self-existing entities which might be stored as vales and passed within the application, while
+This is the core concept to shape Spark applications and express them as composition of such `Function`s. Please notice,
+that such `Function`s are self-existing entities which might be stored as vales and passed within the application, while
 standard `Dataset` methods have always to be connected to the
 `Dataset` they are called on, and as a consequence they cannot be reused or stored.
 
@@ -194,9 +194,9 @@ shorten and simplify set operators on Datasets as well as joins.
 |Right outer join|def &#124;+=&#124;[U](other: Dataset[U]): JoinedDatasetPair[T, U] |
 |Full outer join |def &#124;+=+&#124;[U](other: Dataset[U]): JoinedDatasetPair[T, U]|
 
-## Sample typical functions
+## Sample typical Functions
 
-In addition to implemented `Dataset` operators there are also predefined functions.
+In addition to implemented `Dataset` operators there are also predefined `Function`s.
 
 |Operation       |Signature                                                                              |
 |----------------|---------------------------------------------------------------------------------------|
@@ -252,7 +252,7 @@ The pattern is a type which defines a common interface to handle such use cases.
 and Output types, the container for parameters, and it expects to provide the function which will build the mapper
 function for the given parameters and Input and Output types.
 
-Then, it also provides the `apply` function which will give in return the map function, provided that it will get a
+Then, it also provides the `apply` method which will give in return the map `Function`, provided that it will get a
 specific `getter` to convert the input record to the Input type and a `constructor` which will convert all the produced
 data to the output record.
 
@@ -293,9 +293,9 @@ Please notice that this logic might be arbitrarily complex and be implemented us
 and the `constructor` are the only interfaces to input and output schemas, and they are provided not during the function
 implementation, but during the real usage in a given context.
 
-In other words, the function implemented according to such a pattern follows the typical pattern of ETL:
+In other words, the `Function` implemented according to such a pattern follows the typical pattern of ETL:
 
-- Extract is the `getter~,
+- Extract is the `getter`,
 - Transform is the mapper function produced by factory method `build`,
 - Load is the `constructor`.
 
@@ -328,8 +328,8 @@ val aggregator: Function[String, Row] = agg[String](Seq("value"), Seq(("value", 
 df ++ castToDataset ++ splitter ++ aggregator
 ```
 
-Please notice that in this example we explicitly definef the types of particular functions while there is no such
-possibility is the standard Spark approach. Alternativelly we could also skip the types and use Scala type inferrence
+Please notice that in this example we explicitly defined the types of particular `Function`s while there is no such
+possibility is the standard Spark approach. Alternatively we could also skip the types and use Scala type inference
 mechanism:
 
 ```scala
@@ -349,12 +349,12 @@ val aggregator = flatMap[String, String](_.split(" ")) +
 df ++ as[String]() ++ aggregator
 ```
 
-which gives plenty of possibilities including reusing of the aggregator function in any place, not only on this df
+which gives plenty of possibilities including reusing of the aggregator `Function` in any place, not only on this df
 `DataFrame` instance.
 
-So, having such API we have more freedom in reusing pieces of implementation as well as a possibilitied to encapsulate
-series of Spark calls within reusable functions. And these are the building blocks of enterprise class systems which
-might be composed of such functions.
+So, having such API we have more freedom in reusing pieces of implementation as well as possibilities to encapsulate
+series of Spark calls within reusable `Function`s. And these are the building blocks of enterprise class systems which
+might be composed of such `Function`s.
 
 ## Summary
 
@@ -365,23 +365,21 @@ To sum up, this library consists of:
 - set of implicits which provide aliases to typical `Dataset` operations,
 - the `Function[T, U]` type which is an alias to Scala `Function1[Dataset[T], Dataset[U]]` type,
 - the `Function.+` composition operator which is an alias to Scala `Function1.andThen`,
-- set of methods producing typical Spark functions as one-liner aliases to Spark counterparts,
+- set of methods producing typical Spark `Function`s as one-liner aliases to Spark counterparts,
 - and finally the map pattern.
 
 In turn, the map pattern has the following features:
 
-- provides the contract or an interface to build the map function,
+- provides the contract or an interface to build the map `Function`,
 - specifies `Input`, `Output` and `Params` containers for data, typically in the form of case class only or some
   standard type,
 - no necessity to create any traits,
 - common API for creating the mapper function in the form of abstract `build` method,
-- standard `apply` method which returns the map function,
+- standard `apply` method which returns the map `Function`,
 - the `apply` method is type parameterized, but those types `[T, U]` do not have to be subclasses of `Input`
-  and `Output`
-  respectively,
-- instead, the `apply` method uses a generic and functional interface to input and output records in the form
-  of `getter` and
-  `constructor` functions.
+  and `Output` respectively,
+- instead, the `apply` method uses the generic and functional interface to input and output records in the form
+  of `getter` and `constructor` functions.
 
 ## Final word
 
@@ -396,37 +394,20 @@ parts, and we model them via the `Function` type, which then might be composed b
 
 ## Versions
 
-|Version|Date      |Description                                            |
-|-------|----------|-------------------------------------------------------|
-|2.0.0  |2021-12-24|Remove FunctionTransformer, FX Types and trans function.  |
-|1.5.6  |2021-12-23|Update comments.                                       |
-|1.5.5  |2021-12-23|Update comments and refactor F1.+ method.              |
-|1.5.4  |2021-12-21|Refactor.                                              |
-|1.5.3  |2021-12-18|Simplify Function definition.                          |
-|1.5.2  |2021-12-18|Use Dataset.transform in composition methods.          |
-|1.5.1  |2021-12-15|Add more tests.                                        |
-|1.5.0  |2021-12-12|Add prototype of core types.                           |
-|1.4.1  |2021-12-11|Clean the code.                                        |
-|1.4.0  |2021-12-08|Update saving and loading of FunctionTransformer.      |
-|1.3.0  |2021-12-07|Replace FunctionTransformer with parameterized version.|
-|1.2.1  |2021-12-06|Amend FunctionTransformer to use extendable class.     |
-|1.2.0  |2021-12-05|Add integration with Spark ML.                         |
-|1.1.0  |2021-12-04|Add joins on Column and typed joins.                   |
-|1.0.0  |2021-11-28|First version.                                         |
-|Version|Date      |Description                                              |
-|-------|----------|---------------------------------------------------------|
-|2.0.0  |2021-12-24|Remove FunctionTransformer, FX Types and trans Function. |
-|1.5.6  |2021-12-23|Update comments.                                         |
-|1.5.5  |2021-12-23|Update comments and refactor F1.+ method.                |
-|1.5.4  |2021-12-21|Refactor.                                                |
-|1.5.3  |2021-12-18|Simplify Function definition.                            |
-|1.5.2  |2021-12-18|Use Dataset.transform in composition methods.            |
-|1.5.1  |2021-12-15|Add more tests.                                          |
-|1.5.0  |2021-12-12|Add prototype of core types.                             |
-|1.4.1  |2021-12-11|Clean the code.                                          |
-|1.4.0  |2021-12-08|Update saving and loading of FunctionTransformer.        |
-|1.3.0  |2021-12-07|Replace FunctionTransformer with parameterized version.  |
-|1.2.1  |2021-12-06|Amend FunctionTransformer to use extendable class.       |
-|1.2.0  |2021-12-05|Add integration with Spark ML.                           |
-|1.1.0  |2021-12-04|Add joins on Column and typed joins.                     |
-|1.0.0  |2021-11-28|First version.                                           |
+|Version|Date      |Description                                             |
+|-------|----------|--------------------------------------------------------|
+|2.0.0  |2021-12-24|Remove FunctionTransformer, FX Types and trans Function.|
+|1.5.6  |2021-12-23|Update comments.                                        |
+|1.5.5  |2021-12-23|Update comments and refactor F1.+ method.               |
+|1.5.4  |2021-12-21|Refactor.                                               |
+|1.5.3  |2021-12-18|Simplify Function definition.                           |
+|1.5.2  |2021-12-18|Use Dataset.transform in composition methods.           |
+|1.5.1  |2021-12-15|Add more tests.                                         |
+|1.5.0  |2021-12-12|Add prototype of core types.                            |
+|1.4.1  |2021-12-11|Clean the code.                                         |
+|1.4.0  |2021-12-08|Update saving and loading of FunctionTransformer.       |
+|1.3.0  |2021-12-07|Replace FunctionTransformer with parameterized version. |
+|1.2.1  |2021-12-06|Amend FunctionTransformer to use extendable class.      |
+|1.2.0  |2021-12-05|Add integration with Spark ML.                          |
+|1.1.0  |2021-12-04|Add joins on Column and typed joins.                    |
+|1.0.0  |2021-11-28|First version.                                          |
