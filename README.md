@@ -120,9 +120,9 @@ And this is equivalent to:
 val result: Dataset[PersonWithGreeting] = addGreeting(addFullName(df))
 ```
 
-but as you may see the classical usage requires not only the reverted order of functions,
-but also the df `DataFrame` instance to apply the methods on. In our approach we may separate
-composition of functions from their application, and this improves application structuring, code reusage and readability.
+but as you may see the classical usage requires not only the reverted order of functions, but also the df `DataFrame`
+instance to apply the methods on. In our approach we may separate composition of functions from their application, and
+this improves application structuring, code reusage and readability.
 
 With such a simple concept we may start building more and more useful functions using smaller ones as building blocks.
 
@@ -135,7 +135,8 @@ Spark `Dataset.transform` method.
 ## Dataset composition with the function
 
 This library provides also a set of additional operators on Spark Dataset. They mainly provide operator like names for
-other Spark `Dataset` methods and let to use infix notation. One important extension to this set of operators is the `++`
+other Spark `Dataset` methods and let to use infix notation. One important extension to this set of operators is
+the `++`
 method, implemented - next to other operators - in the implicit class `ExtendedDataset`
 (BTW - this could be expressed as an extension method in Scala 3, but so far in Spark we are in Scala 2):
 
@@ -164,9 +165,9 @@ val newPerson2: Dataset[PersonWithGreeting] = person ++ (addFullName + addGreeti
 val newPerson3: Dataset[PersonWithGreeting] = person ++ addFullNameAndGreeting
 ```
 
-This is the core concept to shape Spark applications and express them as composition of such functions.
-Please notice, that such functions are self-existing entities which might be stored as vales and
-passed within the application, while stadard `Dataset` methods have always to be connected to the
+This is the core concept to shape Spark applications and express them as composition of such functions. Please notice,
+that such functions are self-existing entities which might be stored as vales and passed within the application, while
+standard `Dataset` methods have always to be connected to the
 `Dataset` they are called on, and as a consequence they cannot be reused or stored.
 
 ## Dataset implicit operators
@@ -244,16 +245,16 @@ The most typical operation being performed on a `Dataset` is the map function. I
 record into output record. This may be enough to perform some not so complex transformation. Moreover, such a map
 operation may work with one input schema and produce another one.
 
-What to do, if we need something more complex, or we would like to be able to use it on a broader range of input or output
-schemas. The answer to such a challenge is the map pattern which is an extension to the map function.
+What to do, if we need something more complex, or we would like to be able to use it on a broader range of input or
+output schemas. The answer to such a challenge is the map pattern which is an extension to the map function.
 
 The pattern is a type which defines a common interface to handle such use cases. It specifies the containers for Input
 and Output types, the container for parameters, and it expects to provide the function which will build the mapper
 function for the given parameters and Input and Output types.
 
 Then, it also provides the `apply` function which will give in return the map function, provided that it will get a
-specific `getter` to convert the input record to the Input type and a `constructor` which will convert all the produced data
-to the output record.
+specific `getter` to convert the input record to the Input type and a `constructor` which will convert all the produced
+data to the output record.
 
 ```scala
 case class Record(id: Int, amount: Double, name: String, date: Date, time: Timestamp)
@@ -288,8 +289,8 @@ output of the mapper function
 Finally, the most important is that the real logic is inside the mapper function which deals with Input and Output types
 and these things are implemented inside the function of this pattern type. This is the logic of this transformation.
 
-Please notice that this logic might be arbitrarily complex and be implemented using pure functions, while the `getter` and
-the `constructor` are the only interfaces to input and output schemas, and they are provided not during the function
+Please notice that this logic might be arbitrarily complex and be implemented using pure functions, while the `getter`
+and the `constructor` are the only interfaces to input and output schemas, and they are provided not during the function
 implementation, but during the real usage in a given context.
 
 In other words, the function implemented according to such a pattern follows the typical pattern of ETL:
@@ -302,9 +303,9 @@ The emphasis is that it is the mapper function - the middle one - that is the mo
 interfaces to input and output schemas - the outside world.
 
 Please notice that such a pattern might be applied to a wide range of use cases, starting from a plain function, through
-a bigger function covering some business related use cases and ending on the big functions representing whole submodules.
-So, this is the decision of the user where to use it. Moreover, this is also possible to encapsulate functions
-implemented with this pattern inside other functions also implemented with this pattern, and so on.
+a bigger function covering some business related use cases and ending on the big functions representing whole
+submodules. So, this is the decision of the user where to use it. Moreover, this is also possible to encapsulate
+functions implemented with this pattern inside other functions also implemented with this pattern, and so on.
 
 ## Example
 
@@ -327,9 +328,8 @@ val aggregator: Function[String, Row] = agg[String](Seq("value"), Seq(("value", 
 df ++ castToDataset ++ splitter ++ aggregator
 ```
 
-Please notice that in this example we explicitly definef the types of particular
-functions while there is no such possibility is the stanard Spark
-approach. Alternativelly we could also skip the types and use Scala type inferrence
+Please notice that in this example we explicitly definef the types of particular functions while there is no such
+possibility is the standard Spark approach. Alternativelly we could also skip the types and use Scala type inferrence
 mechanism:
 
 ```scala
@@ -376,9 +376,11 @@ In turn, the map pattern has the following features:
 - no necessity to create any traits,
 - common API for creating the mapper function in the form of abstract `build` method,
 - standard `apply` method which returns the map function,
-- the `apply` method is type parameterized, but those types `[T, U]` do not have to be subclasses of `Input` and `Output`
+- the `apply` method is type parameterized, but those types `[T, U]` do not have to be subclasses of `Input`
+  and `Output`
   respectively,
-- instead, the `apply` method uses a generic and functional interface to input and output records in the form of `getter` and
+- instead, the `apply` method uses a generic and functional interface to input and output records in the form
+  of `getter` and
   `constructor` functions.
 
 ## Final word
@@ -388,9 +390,9 @@ Concluding, this library is not about the API, which hardly brings anything new.
 Instead, it is about the thinking. The thinking about building enterprise class systems and their decomposition into
 smaller parts. Thinking about how to shape the small pieces of the system and then, how to glue them together.
 
-If we ask ourselves what is the biggest challenge of modern software engineering, it may turn out that this is
-a complexity, because the systems are big. So how we address this challenge? By decomposition the system into smaller
-parts and we model them via the `Function` type, which then might be composed back to constitute the whole application.
+If we ask ourselves what is the biggest challenge of modern software engineering, it may turn out that this is a
+complexity, because the systems are big. So how we address this challenge? By decomposition the system into smaller
+parts, and we model them via the `Function` type, which then might be composed back to constitute the whole application.
 
 ## Versions
 
