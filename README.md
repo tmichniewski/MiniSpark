@@ -13,7 +13,7 @@ as `Dataset[T] => Dataset[U]`
 and this is equivalent to Scala one-argument function type `Function1[Dataset[T], Dataset[U]]`.
 
 One of standard methods in this trait is a method called `andThen` to sequentially apply two functions. In our case for
-such kind of function composition we prefer to use the `+` operator, but this is just an alias.
+such kind of function composition we prefer to use the `+` operator, but this is just an alias to `andThen` mathod.
 
 Summing up, we define the following type called the `Function`:
 
@@ -38,7 +38,7 @@ trait Function[T, U] extends (Dataset[T] => Dataset[U]) {
 
 Please notice that so far we used only an alias to standard `Function1` Scala trait and one of its methods.
 
-Surprisingly, this very simple concept is present commonly in any Spark notebook in the shape of methods like:
+Surprisingly, this very simple concept is present commonly in many Spark notebooks in the shape of methods like:
 
 ```scala
 def func(d: DataFrame): DataFrame
@@ -58,14 +58,14 @@ and we want to use them in sequence, we would have to apply them in the reverted
 val result: DataFrame = c(b(a(df)))
 ```
 
-Instead, we would like to use them in more natural way, like in the pseudocode code below:
+In fact, we would like to use them in more natural way, like in the pseudocode code below:
 
 ```scala
-df next a next b next c
+df first a next b next c
 ```
 
-Moreover, a sequence of method calls like `c(b(a(df)))` sequentially transposes input `df`
-while the composed function `a + b + c` may theoretically touch the input `df` only once.
+where, instead of sequentially apply methods `a`, `b` and `c` to `df`
+we may want to construct one composed function `a + b + c` and apply it on `df` only once.
 
 How to achieve this? Instead of such methods we prefer to instantiate lambda expressions of the `Function` type:
 
@@ -74,7 +74,7 @@ How to achieve this? Instead of such methods we prefer to instantiate lambda exp
 final case class Person(
   firstName: String,
   lastName: String
-)D 
+)
 
 // intermediate result schema
 final case class PersonWithFullName(
@@ -121,7 +121,7 @@ Then, having defined two such functions we may compose them, to achieve one func
 val addFullNameAndGreeting: Function[Person, PersonWithGreeting] = addFullName + addGreeting
 ```
 
-and use them:
+and use it:
 
 ```scala
 val result: Dataset[PersonWithGreeting] = addFullNameAndGreeting(df)
