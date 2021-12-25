@@ -12,10 +12,10 @@ In general, such a function converts `Dataset[T]` into `Dataset[U]`. In Scala, t
 as `Dataset[T] => Dataset[U]`
 and this is equivalent to Scala one-argument function type `Function1[Dataset[T], Dataset[U]]`.
 
-One of standard methods in this trait is a method called `andThen` to sequentially apply two functions. In our case for
-such kind of function composition we prefer to use the `+` operator, but this is just an alias to `andThen` mathod.
+One of the standard methods in this trait is a method called `andThen` to sequentially apply two functions. In our case,
+for such kind of function composition we prefer to use the `+` operator, but this is just an alias to `andThen` method.
 
-Summing up, we define the following type called the `Function`:
+Summing up, we define the following type, called the `Function`:
 
 ```scala
 /**
@@ -36,7 +36,7 @@ trait Function[T, U] extends (Dataset[T] => Dataset[U]) {
 }
 ```
 
-Please notice that so far we used only an alias to standard `Function1` Scala trait and one of its methods.
+Please note that so far we used only an alias to standard `Function1` Scala trait and one of its methods.
 
 Surprisingly, this very simple concept is present commonly in many Spark notebooks in the shape of methods like:
 
@@ -58,13 +58,13 @@ and we want to use them in sequence, we would have to apply them in the reverted
 val result: DataFrame = c(b(a(df)))
 ```
 
-In fact, we would like to use them in more natural way, like in the pseudocode code below:
+In fact, we would like to use them in more natural way, like in the pseudocode below:
 
-```scala
+```
 df first a then b next c
 ```
 
-where, instead of sequentially apply methods `a`, `b` and `c` to `df`
+where, instead of sequential application of methods `a`, `b` and `c` to `df`
 we may want to construct one composed function `a + b + c` and apply it on `df` only once.
 
 How to achieve this? Instead of such methods we prefer to instantiate lambda expressions of the `Function` type:
@@ -135,19 +135,19 @@ val result: Dataset[PersonWithGreeting] = addGreeting(addFullName(df))
 
 but as you may see the classical usage requires not only the reverted order of methods, but also the `df` `DataFrame`
 instance to apply the methods on. In our approach, we may separate the composition of functions from their application,
-and this improves application decomposition, code reusage and readability.
+and this improves application decomposition, code reusability and readability.
 
 With such a simple concept we may start building more and more useful functions using smaller ones as building blocks.
 
-Please notice, that such a function might be also used in Spark `Dataset.transform` method, because our function is
-exactly equal to the type of parameter to the `Dataset.transform` method.
+Please note that such a function might be also used in Spark `Dataset.transform` method, because our function is exactly
+equal to the type of parameter to the `Dataset.transform` method.
 
-In fact, our function might be perceived to be both - an alias to Scala `Function1` and a type of
+In fact, our function might be perceived to be both - an alias to Scala `Function1` and a type of parameter for
 Spark `Dataset.transform` method.
 
 ## Dataset composition with the Function
 
-This library provides also a set of additional operators on Spark Dataset. They mainly provide operator like names for
+This library provides also a set of additional operators on Spark `Dataset`. They mainly provide operator like names for
 other Spark `Dataset` methods and let to use infix notation. One important extension to this set of operators is
 the `++`
 method, implemented - next to other operators - in the implicit class `ExtendedDataset`
@@ -180,13 +180,13 @@ val newPerson3: Dataset[PersonWithGreeting] = person ++ addFullNameAndGreeting
 
 This is the core concept to shape Spark applications and express them as composition of such `Function`s. Please notice,
 that such `Function`s are self-existing entities which might be stored as vales and passed within the application, while
-standard `Dataset` methods have always to be connected to the
+standard `Dataset` methods have always be connected to the
 `Dataset` they are called on, and as a consequence they cannot be reused or stored.
 
 ## Dataset implicit operators
 
-In addition to the composition method on Dataset, there is a bunch of mentioned earlier operators, which are supposed to
-shorten and simplify set operators on Datasets as well as joins.
+In addition to the composition method on `Dataset`, there is a bunch of mentioned earlier operators, which are supposed
+to shorten and simplify set operators on `Datasets` as well as joins.
 
 ### Dataset set operators
 
@@ -210,7 +210,7 @@ shorten and simplify set operators on Datasets as well as joins.
 ## Sample typical Functions
 
 In addition to implemented `Dataset` operators there are also predefined `Function`s. Basically, they only mimic
-Spark `Dataset` methods, but the `Function` type may set an interface to bigger ones and due to the composition operator
+Spark `Dataset` methods, but the `Function` type may set an interface to larger ones and due to the composition operator
 the functions might be bigger and bigger and this way constitute the whole modules or subsystems.
 
 |Operation       |Signature                                                                              |
@@ -257,19 +257,20 @@ the functions might be bigger and bigger and this way constitute the whole modul
 ## The map pattern
 
 The most typical operation being performed on a `Dataset` is the map function. It expects a function to convert input
-record into output record. This may be enough to perform some not so complex transformation. Moreover, such a map
-operation may work with one input schema and produce another one.
+record into output record. This may be enough to perform some not so complex transformations, and such a map operation
+may work with one input schema and produce another one.
 
 What to do, if we need something more complex, or we would like to be able to use it on a broader range of input or
 output schemas. The answer to such a challenge is the map pattern which is an extension to the map function.
 
-The pattern is a type which defines a common interface to handle such use cases. It specifies the containers for Input
-and Output types, the container for parameters, and it expects to provide the function which will build the mapper
-function for the given parameters and Input and Output types.
+The map pattern is a type which defines a common interface to handle such use cases. It specifies the containers
+for `Input`
+and `Output` types, the container for parameters, and it expects to provide the function which will build the mapper
+function for the given parameters and `Input` and `Output` types.
 
 Then, it also provides the `apply` method which will give in return the map `Function`, provided that it will get a
-specific `getter` to convert the input record to the Input type and a `constructor` which will convert all the produced
-data to the output record.
+specific `getter` to convert the input record to the `Input` type and a `constructor` which will convert all the
+produced data to the output record.
 
 ```scala
 case class Record(id: Int, amount: Double, name: String, date: Date, time: Timestamp)
@@ -292,19 +293,20 @@ val result: Dataset[Record] = ds ++ Adder[Record, Record](AdderParams(7), _.id,
 // see the tests for more examples
 ```
 
-Moreover, to make it work, input schema of Record does not have to contain an `id` column. Instead, it is the `getter`
-responsibility to provide value of Adder.Input type, even if this would require to carry this out through some not so
-complex processing. In other words, if the input schema had no `id` column, then the getter method may derive it.
+Moreover, to make it work, input schema of `Record` does not have to contain an `id` column. Instead, it is the `getter`
+responsibility to provide a value of `Adder.Input` type, even if this would require to carry this out through some not
+so complex processing. In other words, if the input schema had no `id` column, then the `getter` method may derive it.
 
-Consequently, the same with the `constructor` method, it is not required that output schema, here of type Record, is a
-subclass of Adder.Output type, as it is the `constructor` responsibility to perform conversion from input record and
+Consequently, the same with the `constructor` method, it is not required that output schema, here of type `Record`, is a
+subclass of `Adder.Output` type, as it is the `constructor` responsibility to perform conversion from input record and
 output of the mapper function
 (produced by `build` factory method) to the output schema.
 
-Finally, the most important is that the real logic is inside the mapper function which deals with Input and Output types
-and these things are implemented inside the function of this pattern type. This is the logic of this transformation.
+Finally, the most important is that the real logic is inside the mapper function which deals with `Input` and `Output`
+types and these things are implemented inside the function of this pattern type. This is the logic of this
+transformation.
 
-Please notice that this logic might be arbitrarily complex and be implemented using pure functions, while the `getter`
+Please note that this logic might be arbitrarily complex and be implemented using pure functions, while the `getter`
 and the `constructor` are the only interfaces to input and output schemas, and they are provided not during the function
 implementation, but during the real usage in a given context.
 
@@ -317,10 +319,10 @@ In other words, the `Function` implemented according to such a pattern follows t
 The emphasis is that it is the mapper function - the middle one - that is the most complex. The other two are just
 interfaces to input and output schemas - the outside world.
 
-Please notice that such a pattern might be applied to a wide range of use cases, starting from a plain function, through
-a bigger function covering some business related use cases and ending on the big functions representing whole
-submodules. So, this is the decision of the user where to use it. Moreover, this is also possible to encapsulate
-functions implemented with this pattern inside other functions also implemented with this pattern, and so on.
+Please note that such a pattern might be applied to a wide range of use cases, starting from a plain function, through a
+bigger function covering some business related use cases and ending on the big functions representing whole submodules.
+So, this is the decision of the user where and how to use it. Moreover, this is also possible to encapsulate functions
+implemented with this pattern inside other functions also implemented with this pattern, and so on.
 
 ## Example
 
@@ -333,7 +335,7 @@ val df: DataFrame = spark.read.text("<path>")
 df.as[String].flatMap(_.split(" ")).groupBy("value").count()
 ```
 
-Then we do the same using `Function`s:
+Then, we do the same using `Function`s:
 
 ```scala
 val df: DataFrame = spark.read.text("<path>")
@@ -343,8 +345,8 @@ val aggregator: Function[String, Row] = agg[String](Seq("value"), Seq(("value", 
 df ++ castToDataset ++ splitter ++ aggregator
 ```
 
-Please notice that in this example we explicitly defined the types of particular `Function`s while there is no such
-possibility is the standard Spark approach. Alternatively we could also skip the types and use Scala type inference
+Please note that in this example we explicitly defined the types of particular `Function`s, while there is no such
+possibility is the standard Spark approach. Alternatively, we could also skip the types and use Scala type inference
 mechanism:
 
 ```scala
@@ -364,7 +366,7 @@ val aggregator = flatMap[String, String](_.split(" ")) +
 df ++ as[String]() ++ aggregator
 ```
 
-which gives plenty of possibilities including reusing of the aggregator `Function` in any place, not only on this df
+which gives plenty of possibilities including reusing of the aggregator `Function` in any place, not only on this `df`
 `DataFrame` instance.
 
 So, having such API we have more freedom in reusing pieces of implementation as well as possibilities to encapsulate
@@ -391,7 +393,7 @@ In turn, the map pattern has the following features:
 - no necessity to create any traits,
 - common API for creating the mapper function in the form of abstract `build` method,
 - standard `apply` method which returns the map `Function`,
-- the `apply` method is type parameterized, but those types `[T, U]` do not have to be subclasses of `Input`
+- the `apply` method which is type parameterized, but those types `[T, U]` do not have to be subclasses of `Input`
   and `Output` respectively,
 - instead, the `apply` method uses the generic and functional interface to input and output records in the form
   of `getter` and `constructor` functions.
@@ -404,8 +406,9 @@ Instead, it is about the thinking. The thinking about building enterprise class 
 smaller parts. Thinking about how to shape the small pieces of the system and then, how to glue them together.
 
 If we ask ourselves what is the biggest challenge of modern software engineering, it may turn out that this is a
-complexity, because the systems are big. So how we address this challenge? By decomposition the system into smaller
-parts, and we model them via the `Function` type, which then might be composed back to constitute the whole application.
+complexity, because the systems are becoming bigger and bigger. So, how we address this challenge? We give a programming
+model to decompose the system into smaller parts and express it via the `Function`s, which then might be composed back
+to constitute the whole application.
 
 ## Versions
 
