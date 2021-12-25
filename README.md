@@ -61,7 +61,7 @@ val result: DataFrame = c(b(a(df)))
 In fact, we would like to use them in more natural way, like in the pseudocode code below:
 
 ```scala
-df first a next b next c
+df first a then b next c
 ```
 
 where, instead of sequentially apply methods `a`, `b` and `c` to `df`
@@ -411,7 +411,7 @@ parts, and we model them via the `Function` type, which then might be composed b
 
 |Version|Date      |Description                                             |
 |-------|----------|--------------------------------------------------------|
-|2.0.0  |2021-12-24|Remove FunctionTransformer, FX Types and trans Function.|
+|2.0.0  |2021-12-25|Remove FunctionTransformer, FX Types and trans Function.|
 |1.5.6  |2021-12-23|Update comments.                                        |
 |1.5.5  |2021-12-23|Update comments and refactor F1.+ method.               |
 |1.5.4  |2021-12-21|Refactor.                                               |
