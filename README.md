@@ -64,11 +64,10 @@ Instead, we would like to use them in more natural way, like in the pseudocode c
 df next a next b next c
 ```
 
-Moreover, sequence of methods calls like `c(b(a(df)))` sequentially transposes input `df`
-while composed function `a + b + c` may theoretically touch the input `df` only once.
+Moreover, sequence of method calls like `c(b(a(df)))` sequentially transposes input `df`
+while the composed function `a + b + c` may theoretically touch the input `df` only once.
 
-How to achieve this? Instead of such methods we prefer to instantiate lambda expressions of the `Function` type using
-single abstract method of anonymous class:
+How to achieve this? Instead of such methods we prefer to instantiate lambda expressions of the `Function` type:
 
 ```scala
 // input schema
@@ -134,9 +133,9 @@ This is equivalent to:
 val result: Dataset[PersonWithGreeting] = addGreeting(addFullName(df))
 ```
 
-but as you may see the classical usage requires not only the reverted order of functions, but also the `df` `DataFrame`
-instance to apply the methods on. In our approach we may separate composition of functions from their application, and
-this improves application decomposition, code reusage and readability.
+but as you may see the classical usage requires not only the reverted order of methods, but also the `df` `DataFrame`
+instance to apply the methods on. In our approach, we may separate the composition of functions from their application,
+and this improves application decomposition, code reusage and readability.
 
 With such a simple concept we may start building more and more useful functions using smaller ones as building blocks.
 
