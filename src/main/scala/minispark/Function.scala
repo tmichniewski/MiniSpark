@@ -12,7 +12,7 @@ import org.apache.spark.sql.Dataset
  * @tparam T Type of input data.
  * @tparam U Type of output data.
  */
-trait Function[T, U] extends (Dataset[T] => Dataset[U]) with F1[T, U] with Serializable {
+trait Function[T, U] extends (Dataset[T] => Dataset[U]) {
   /**
    * Sequential application of two functions. An alias to andThen method.
    *

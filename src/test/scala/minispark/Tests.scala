@@ -4,9 +4,7 @@ package minispark
 import minispark.Adder.{AdderInput, AdderOutput, AdderParams}
 import minispark.Functions._
 import minispark.Implicits.ExtendedDataset
-import minispark.Serialize.{deserialize, serialize}
 
-import org.apache.spark.ml.param.ParamMap
 import org.apache.spark.sql.functions.{col, lit}
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
@@ -301,53 +299,6 @@ class Tests extends AnyFunSuite {
     assert((ds ++ pipeline[Record](cacher, mapper, sorter)).collect()(0).id == -2)
   }
 
-  test("Test Functions: trans") {
-    val ft: FunctionTransformer = FunctionTransformer()
-    ft.setSchema(Seq(("id", IntegerType)))
-    ft.setFunction(filter[Row]("id = 1"))
-    val func: Function[Row, Row] = trans(ft)
-    val result: Dataset[Row] = df ++ func
-    assert(result.count() == 1L)
-  }
-
-  test("Test Functions: trans with copy") {
-    val ft: FunctionTransformer = FunctionTransformer()
-    ft.setSchema(Seq(("id", IntegerType)))
-    ft.setFunction(filter[Row]("id = 1"))
-    val func: Function[Row, Row] = trans(ft.copy(ParamMap()))
-    val result: Dataset[Row] = df ++ func
-    assert(result.count() == 1L)
-  }
-
-  test("Test FunctionTransformer") {
-    val ft: FunctionTransformer = FunctionTransformer()
-    ft.setSchema(Seq(("id", IntegerType)))
-    ft.setFunction(filter[Row]("id = 1"))
-    val result: DataFrame = ft.transform(ds)
-    assert(result.count() == 1L)
-  }
-
-  test("Test FunctionTransformer - incorrect schema") {
-    val ft: FunctionTransformer = FunctionTransformer()
-    ft.setSchema(Seq(("dummy", IntegerType)))
-    ft.setFunction(filter[Row]("id = 1"))
-    assertThrows[RuntimeException](ft.transform(ds))
-  }
-
-  // test("Test FunctionTransformer - save and load") {
-  //   import java.io.File
-  //   import scala.reflect.io.Directory
-  //   def deleteDirectory(path: String): Unit = new Directory(new File(path)).deleteRecursively()
-  //   deleteDirectory("C:/TEMP/transformer.json")
-  //   val ft: FunctionTransformer = FunctionTransformer()
-  //   ft.setSchema(Seq(("id", IntegerType)))
-  //   ft.setFunction(filter[Row]("id = 1"))
-  //   ft.save("C:/TEMP/transformer.json")
-  //   val transformer: FunctionTransformer = FunctionTransformer.load("C:/TEMP/transformer.json")
-  //   val result: DataFrame = transformer.transform(ds)
-  //   assert(result.count() == 1L)
-  // }
-
   test("Test the Pattern") {
     val result: Dataset[Record] = ds ++ Adder[Record, Record](AdderParams(7),
       (r: Record) => AdderInput(r.id),
@@ -362,56 +313,6 @@ class Tests extends AnyFunSuite {
     val adder: Function[Record, Record] = Adder[Record, Record](AdderParams(7), getter, constructor)
     val result: Dataset[Record] = ds ++ adder
     assert(result.map(_.id).collect() sameElements Array(8, 9))
-  }
-
-  test("Test schema serialize and deserialize") {
-    val schema: Seq[(String, DataType)] = Seq(("id", IntegerType), ("amount", DoubleType), ("name", StringType),
-      ("date", DateType), ("time", TimestampType))
-    val serializedSchema: String = serialize(schema)
-    val deserializedSchema: Seq[(String, DataType)] =
-      deserialize(serializedSchema).asInstanceOf[Seq[(String, DataType)]]
-    assert(schema == deserializedSchema)
-  }
-
-  test("Test function serialize and deserialize") {
-    val function: Int => Int = (i: Int) => i + 1
-    val serializedFunction: String = serialize(function)
-    val deserializedFunction: Int => Int = deserialize(serializedFunction).asInstanceOf[Int => Int]
-    assert(function(1) == 2)
-    assert(deserializedFunction(1) == 2)
-  }
-
-  test("Types: F0 + F1") {
-    val f0: F0[Record] = () => ds
-    val f1: F1[Record, Record] = (d: Dataset[Record]) => d.map((r: Record) => r.copy(id = 2 * r.id))
-    val f0f1: F0[Record] = f0 + f1
-    val result: Dataset[Record] = f0f1()
-    assert(result.collect()(0).id == 2)
-  }
-
-  test("Types: F1 + F1") {
-    val f1: F1[Record, Record] = (d: Dataset[Record]) => d.map((r: Record) => r.copy(id = 2 * r.id))
-    val f1f1: F1[Record, Record] = f1 + f1
-    val result: Dataset[Record] = f1f1(ds)
-    assert(result.count() == 2L)
-  }
-
-  test("Types: F2 + F1") {
-    val f2: F2[Record, Record, (Record, Record)] =
-      (d1: Dataset[Record], d2:Dataset[Record]) => d1.joinWith[Record](d2, d1("id") === d2("id"))
-    val f1: F1[(Record, Record), Record] = (d: Dataset[(Record, Record)]) => d.map(_._1)
-    val f2f1: F2[Record, Record, Record] = f2 + f1
-    val result: Dataset[Record] = f2f1(ds, ds)
-    assert(result.count() == 2L)
-    assert(result.collect()(0).id == 1L)
-  }
-
-  test("Types: FN + F1") {
-    val fn: FN[Record, Record] = (ds: Seq[Dataset[Record]]) => ds.reduce(_ union _)
-    val f1: F1[Record, Record] = (d: Dataset[Record]) => d.map((r: Record) => r.copy(id = 2 * r.id))
-    val fnf1: FN[Record, Record] = fn + f1
-    val result: Dataset[Record] = fnf1(Seq(ds, ds))
-    assert(result.count() == 4L)
   }
 
   test("Complete test: Spark") {
@@ -446,22 +347,6 @@ class Tests extends AnyFunSuite {
     val aggregator: Function[String, Row] = flatMap[String, String](_.split(" ")) +
       agg[String](Seq("value"), Seq(("value", "count")))
     val result: Dataset[Row] = text ++ aggregator
-    assert(result.count() == 2L)
-  }
-
-  test("Complete test: composition of functions") {
-    val f0: F0[String] = () => ds.map(_.name)
-    val f1: F1[String, Row] = flatMap[String, String](_.split(" ")) +
-      agg[String](Seq("value"), Seq(("value", "count")))
-    val result: Dataset[Row] = (f0 + f1)()
-    assert(result.count() == 2L)
-  }
-
-  test("Complete test: conversion from function to Dataset") {
-    val f0: F0[String] = () => ds.map(_.name)
-    val f1: F1[String, Row] = flatMap[String, String](_.split(" ")) +
-      agg[String](Seq("value"), Seq(("value", "count")))
-    val result: Dataset[Row] = f0() ++ f1
     assert(result.count() == 2L)
   }
 }
