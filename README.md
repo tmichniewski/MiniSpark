@@ -64,7 +64,7 @@ Instead, we would like to use them in more natural way, like in the pseudocode c
 df next a next b next c
 ```
 
-Moreover, sequence of method calls like `c(b(a(df)))` sequentially transposes input `df`
+Moreover, a sequence of method calls like `c(b(a(df)))` sequentially transposes input `df`
 while the composed function `a + b + c` may theoretically touch the input `df` only once.
 
 How to achieve this? Instead of such methods we prefer to instantiate lambda expressions of the `Function` type:
@@ -74,7 +74,7 @@ How to achieve this? Instead of such methods we prefer to instantiate lambda exp
 final case class Person(
   firstName: String,
   lastName: String
-)
+)D 
 
 // intermediate result schema
 final case class PersonWithFullName(
