@@ -12,7 +12,7 @@ import org.apache.spark.sql.Encoder
  * It is recommend to define Input and Output as a concrete types or containers for data.
  * There is no need to define additional types (traits) for Input and Output types,
  * as it is the getter to provide Input value and it is the constructor to consume the mapper result.
- * This way there is no need to extend T type with type of Input, as this relation is hidden inside the getter.
+ * This way, there is no need to extend T type with type of Input, as this relation is hidden inside the getter.
  * There is also no need to extend U with type of Output, as this relation is hidden inside the constructor.
  */
 trait MapPattern {
