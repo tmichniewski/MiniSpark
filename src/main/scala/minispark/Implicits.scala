@@ -16,6 +16,8 @@ object Implicits {
     /**
      * Applies the given function to the Dataset.
      *
+     * Typed API.
+     *
      * @param f The function which will be applied.
      * @tparam U Type of resulting data.
      * @return Returns the produced Dataset.
@@ -25,6 +27,8 @@ object Implicits {
     /**
      * Unions the other Dataset[T].
      *
+     * Typed API.
+     *
      * @param other The other Dataset to be merged with.
      * @return Returns the united Datasets.
      */
@@ -32,6 +36,8 @@ object Implicits {
 
     /**
      * Subtracts the other Dataset[T].
+     *
+     * Typed API.
      *
      * @param other The other Dataset to be subtracted.
      * @return Returns the subtracted Datasets.
@@ -41,6 +47,8 @@ object Implicits {
     /**
      * Intersects the other Dataset[T].
      *
+     * Typed API.
+     *
      * @param other The other Dataset to be intersected with.
      * @return Returns the intersected Datasets.
      */
@@ -49,6 +57,8 @@ object Implicits {
     /**
      * Delta with the other Dataset[T].
      *
+     * Typed API.
+     *
      * @param other The other Dataset to be checked with.
      * @return Returns the delta of the given Datasets.
      */
@@ -56,6 +66,8 @@ object Implicits {
 
     /**
      * Cross joins with the other Dataset.
+     *
+     * Untyped API.
      *
      * @param other The other Dataset to be cross joined.
      * @return Returns the cross join of the given Datasets.
@@ -68,6 +80,8 @@ object Implicits {
     /**
      * Inner joins with the other Dataset.
      *
+     * For typed API follow with onTyped, otherwise untyped API.
+     *
      * @param other The other Dataset to be inner joined.
      * @tparam U Type of other input data.
      * @return Returns JoinedDatasetPair to perform the real join on.
@@ -76,6 +90,8 @@ object Implicits {
 
     /**
      * Left outer joins with the other Dataset.
+     *
+     * For typed API follow with onTyped, otherwise untyped API.
      *
      * @param other The other Dataset to be left outer joined.
      * @tparam U Type of other input data.
@@ -86,6 +102,8 @@ object Implicits {
     /**
      * Right outer joins with the other Dataset.
      *
+     * For typed API follow with onTyped, otherwise untyped API.
+     *
      * @param other The other Dataset to be left outer joined.
      * @tparam U Type of other input data.
      * @return Returns JoinedDatasetPair to perform the real join on.
@@ -94,6 +112,8 @@ object Implicits {
 
     /**
      * Full outer joins with the other Dataset.
+     *
+     * For typed API follow with onTyped, otherwise untyped API.
      *
      * @param other The other Dataset to be left outer joined.
      * @tparam U Type of other input data.

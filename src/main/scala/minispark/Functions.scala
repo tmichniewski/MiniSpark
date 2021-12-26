@@ -12,6 +12,8 @@ object Functions {
   /**
    * Filters the Dataset.
    *
+   * Typed API.
+   *
    * @param condition Filter condition.
    * @tparam T Type of input and output data.
    * @return Returns the function to filter the Dataset.
@@ -21,6 +23,8 @@ object Functions {
   /**
    * Filters the Dataset.
    *
+   * Typed API.
+   *
    * @param condition Filter condition.
    * @tparam T Type of input and output data.
    * @return Returns the function to filter the Dataset.
@@ -29,6 +33,8 @@ object Functions {
 
   /**
    * Selects the given columns from the Dataset.
+   *
+   * Untyped API. For typed API use map or flatMap functions instead.
    *
    * @param column First column to be retrieved.
    * @param columns Rest of the columns.
@@ -40,6 +46,8 @@ object Functions {
   /**
    * Selects the given columns from the Dataset.
    *
+   * Untyped API. For typed API use map or flatMap functions instead.
+   *
    * @param columns Columns to be retrieved.
    * @tparam T Type of input data.
    * @return Returns the function to select the given columns.
@@ -48,6 +56,8 @@ object Functions {
 
   /**
    * Adds the given column to the Dataset.
+   *
+   * Untyped API. For typed API use map or flatMap functions instead.
    *
    * @param column Column name.
    * @param value Expression to carry out the value.
@@ -58,6 +68,7 @@ object Functions {
 
   /**
    * Adds the given columns to the Dataset.
+   * Untyped API. For typed API use map or flatMap functions instead.
    *
    * @param columns Tuples with column name and the expression to carry out the value.
    * @tparam T Type of input data.
@@ -70,6 +81,8 @@ object Functions {
    * Drops the given columns from the Dataset.
    * If some column does not exist, then this is no operation.
    *
+   * Untyped API. For typed API use map or flatMap functions instead.
+   *
    * @param columns Columns to drop.
    * @tparam T Type of input data.
    * @return Returns the function to drop the given columns.
@@ -78,7 +91,10 @@ object Functions {
 
   /**
    * Renames the given column.
+   *
    * If the column does not exist, then this is no operation.
+   *
+   * Untyped API. For typed API use map or flatMap functions instead.
    *
    * @param oldColumn Column to rename.
    * @param newColumn New name.
@@ -92,6 +108,8 @@ object Functions {
    * Renames the given columns.
    * If the column does not exist, then this is no operation.
    *
+   * Untyped API. For typed API use map or flatMap functions instead.
+   *
    * @param renameExpr Tuples in the form of old name and new name.
    * @tparam T Type of input data.
    * @return Returns the function to rename the given columns.
@@ -101,6 +119,8 @@ object Functions {
 
   /**
    * Casts the given column to the given data type.
+   *
+   * Untyped API. For typed API use map or flatMap functions instead.
    *
    * @param column Column to cast.
    * @param newType New data type.
@@ -113,6 +133,8 @@ object Functions {
   /**
    * Casts the given columns to the given data types.
    *
+   * Untyped API. For typed API use map or flatMap functions instead.
+   *
    * @param typesExpr Tuples in the form of column name and the destination type.
    * @tparam T Type of input data.
    * @return Returns the function to cast the given columns.
@@ -122,6 +144,8 @@ object Functions {
 
   /**
    * Maps using the given function.
+   *
+   * Typed API.
    *
    * @param f Function to convert from input to output.
    * @tparam T Type of input data.
@@ -133,6 +157,8 @@ object Functions {
   /**
    * Flat maps using the given function.
    *
+   * Typed API.
+   *
    * @param f Function to convert from input to output.
    * @tparam T Type of input data.
    * @tparam U Type of output data.
@@ -142,6 +168,8 @@ object Functions {
 
   /**
    * Aggregates using the given specification.
+   *
+   * Untyped API.
    *
    * @param groupBy Collection of columns to group by.
    * @param aggregations Aggregation expressions consisting of column and aggregation function.
@@ -165,6 +193,8 @@ object Functions {
   /**
    * Unions the other Dataset[T].
    *
+   * Typed API.
+   *
    * @param other The other Dataset to be merged with.
    * @tparam T Type of input and output data.
    * @return Returns the function to union the given Datasets.
@@ -173,6 +203,8 @@ object Functions {
 
   /**
    * Subtracts the other Dataset[T].
+   *
+   * Typed API.
    *
    * @param other The other Dataset to be subtracted.
    * @tparam T Type of input and output data.
@@ -183,6 +215,8 @@ object Functions {
   /**
    * Intersects the other Dataset[T].
    *
+   * Typed API.
+   *
    * @param other The other Dataset to be intersected with.
    * @tparam T Type of input and output data.
    * @return Returns the function to intersect the given Datasets.
@@ -191,6 +225,8 @@ object Functions {
 
   /**
    * Delta with the other Dataset[T].
+   *
+   * Typed API.
    *
    * @param other The other Dataset to be checked with.
    * @tparam T Type of input and output data.
@@ -203,6 +239,8 @@ object Functions {
   /**
    * Cross joins with the other Dataset.
    *
+   * Untyped API. For typed use crossTyped instead.
+   *
    * @param other The other Dataset to be cross joined.
    * @tparam T Type of input data.
    * @return Returns the function to cross join the given Datasets.
@@ -211,6 +249,8 @@ object Functions {
 
   /**
    * Cross joins with the other Dataset.
+   *
+   * Typed API.
    *
    * @param other The other Dataset to be cross joined.
    * @tparam T Type of input data.
@@ -223,6 +263,8 @@ object Functions {
   /**
    * Inner joins with the other Dataset.
    *
+   * Untyped API. For typed use innerTyped instead.
+   *
    * @param other The other Dataset to be inner joined.
    * @param columns Columns to make the equijoin on.
    * @tparam T Type of input data.
@@ -234,6 +276,8 @@ object Functions {
   /**
    * Inner joins with the other Dataset.
    *
+   * Untyped API. For typed use innerTyped instead.
+   *
    * @param other The other Dataset to be inner joined.
    * @param joinExpr Join expression.
    * @tparam T Type of input data.
@@ -244,6 +288,8 @@ object Functions {
 
   /**
    * Inner joins with the other Dataset.
+   *
+   * Typed API.
    *
    * @param other The other Dataset to be inner joined.
    * @param joinExpr Join expression.
@@ -257,6 +303,8 @@ object Functions {
   /**
    * Left outer joins with the other Dataset.
    *
+   * Untyped API. For typed use leftTyped instead.
+   *
    * @param other The other Dataset to be left outer joined.
    * @param columns Columns to make the equijoin on.
    * @tparam T Type of input data.
@@ -268,6 +316,8 @@ object Functions {
   /**
    * Left outer joins with the other Dataset.
    *
+   * Untyped API. For typed use leftTyped instead.
+   *
    * @param other The other Dataset to be left outer joined.
    * @param joinExpr Join expression.
    * @tparam T Type of input data.
@@ -278,6 +328,8 @@ object Functions {
 
   /**
    * Left outer joins with the other Dataset.
+   *
+   * Typed API.
    *
    * @param other The other Dataset to be left outer joined.
    * @param joinExpr Join expression.
@@ -291,6 +343,8 @@ object Functions {
   /**
    * Right outer joins with the other Dataset.
    *
+   * Untyped API. For typed use rightTyped instead.
+   *
    * @param other The other Dataset to be right outer joined.
    * @param columns Columns to make the equijoin on.
    * @tparam T Type of input data.
@@ -302,6 +356,8 @@ object Functions {
   /**
    * Right outer joins with the other Dataset.
    *
+   * Untyped API. For typed use rightTyped instead.
+   *
    * @param other The other Dataset to be right outer joined.
    * @param joinExpr Join expression.
    * @tparam T Type of input data.
@@ -312,6 +368,8 @@ object Functions {
 
   /**
    * Right outer joins with the other Dataset.
+   *
+   * Typed API.
    *
    * @param other The other Dataset to be right outer joined.
    * @param joinExpr Join expression.
@@ -325,6 +383,8 @@ object Functions {
   /**
    * Full outer joins with the other Dataset.
    *
+   * Untyped API. For typed use fullTyped instead.
+   *
    * @param other The other Dataset to be full outer joined.
    * @param columns Columns to make the equijoin on.
    * @tparam T Type of input data.
@@ -336,6 +396,8 @@ object Functions {
   /**
    * Full outer joins with the other Dataset.
    *
+   * Untyped API. For typed use fullTyped instead.
+   *
    * @param other The other Dataset to be full outer joined.
    * @param joinExpr Join expression.
    * @tparam T Type of input data.
@@ -346,6 +408,8 @@ object Functions {
 
   /**
    * Full outer joins with the other Dataset.
+   *
+   * Typed API.
    *
    * @param other The other Dataset to be full outer joined.
    * @param joinExpr Join expression.
@@ -361,6 +425,8 @@ object Functions {
   /**
    * Casts the given Dataset[Row] to Dataset[T].
    *
+   * Typed API.
+   *
    * @tparam T Type of output data.
    * @return Returns the function to cast the given Dataset.
    */
@@ -368,6 +434,8 @@ object Functions {
 
   /**
    * Casts the given Dataset[T] to Dataset[Row].
+   *
+   * Untyped API.
    *
    * @tparam T Type of input data.
    * @return Returns the function to cast the given Dataset.
@@ -377,6 +445,8 @@ object Functions {
   /**
    * Caches the given Dataset.
    *
+   * Typed API.
+   *
    * @tparam T Type of input data.
    * @return Returns the function to cache the given Dataset.
    */
@@ -384,6 +454,8 @@ object Functions {
 
   /**
    * Sorts the given Dataset.
+   *
+   * Typed API.
    *
    * @param column First column to sort on.
    * @param columns Rest of the columns.
@@ -395,6 +467,8 @@ object Functions {
   /**
    * Sorts the given Dataset.
    *
+   * Typed API.
+   *
    * @param columns Columns to sort on.
    * @tparam T Type of input and output data.
    * @return Returns the function to sort the given Dataset.
@@ -403,6 +477,8 @@ object Functions {
 
   /**
    * Connects several functions into one composed function.
+   *
+   * Typed API.
    *
    * @param f First function to compose.
    * @param fs Rest of functions to compose.
