@@ -182,10 +182,24 @@ object Functions {
     require(groupBy.nonEmpty)
     require(aggregations.nonEmpty)
 
-    (d: Dataset[T]) =>
-      d
-        .groupBy(groupBy.head, groupBy.tail: _*)
-        .agg(aggregations.head, aggregations.tail: _*)
+    (d: Dataset[T]) => d.groupBy(groupBy.head, groupBy.tail: _*).agg(aggregations.head, aggregations.tail: _*)
+  }
+
+  /**
+   * Aggregates using the given specification.
+   *
+   * Untyped API.
+   *
+   * @param groupBy Collection of columns to group by.
+   * @param expr First aggregation expression.
+   * @param exprs Rest of aggregation expressions.
+   * @tparam T Type of input data.
+   * @return Returns the function to aggregate the Dataset.
+   */
+  @SuppressWarnings(Array("UnsafeTraversableMethods")) // added require to protect head and tail
+  def agg[T](groupBy: Seq[String], expr: Column, exprs: Column*): Function[T, Row] = {
+    require(groupBy.nonEmpty)
+    (d: Dataset[T]) => d.groupBy(groupBy.head, groupBy.tail: _*).agg(expr, exprs: _*)
   }
 
   // set

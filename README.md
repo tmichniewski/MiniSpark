@@ -414,6 +414,7 @@ to constitute the whole application.
 
 |Version|Date      |Description                                             |
 |-------|----------|--------------------------------------------------------|
+|2.1.0  |2021-12-26|Added Column version of agg function.                   |
 |2.0.0  |2021-12-25|Remove FunctionTransformer, FX Types and trans Function.|
 |1.5.6  |2021-12-23|Update comments.                                        |
 |1.5.5  |2021-12-23|Update comments and refactor F1.+ method.               |

@@ -5,7 +5,7 @@ import minispark.Adder.{AdderInput, AdderOutput, AdderParams}
 import minispark.Functions._
 import minispark.Implicits.ExtendedDataset
 
-import org.apache.spark.sql.functions.{col, lit}
+import org.apache.spark.sql.functions.{col, count, lit}
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 import org.scalatest.funsuite.AnyFunSuite
@@ -188,6 +188,10 @@ class Tests extends AnyFunSuite {
 
   test("Test Functions: agg") {
     assert((ds ++ agg[Record](Seq("id"), Seq(("name", "count")))).collect()(0).getAs[Long]("count(name)") == 1L)
+  }
+
+  test("Test Functions: agg on Column") {
+    assert((ds ++ agg[Record](Seq("id"), count(col("name")))).collect()(0).getAs[Long]("count(name)") == 1L)
   }
 
   test("Test Functions: union") {
