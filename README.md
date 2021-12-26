@@ -229,6 +229,7 @@ the functions might be bigger and bigger and this way constitute the whole modul
 |Map rows        |def map[T, U: Encoder](f: T => U): Function[T, U]                                      |
 |FlatMap rows    |def flatMap[T, U: Encoder](f: T => TraversableOnce[U]): Function[T, U]                 |
 |Aggregate       |def agg[T](groupBy: Seq[String], aggregations: Seq[(String, String)]): Function[T, Row]|
+|Aggregate       |def agg[T](groupBy: Seq[String], expr: Column, exprs: Column*): Function[T, Row]       |
 |Union           |def union[T](other: Dataset[T]): Function[T, T]                                        |
 |Subtract        |def subtract[T](other: Dataset[T]): Function[T, T]                                     |
 |Intersect       |def intersect[T](other: Dataset[T]): Function[T, T]                                    |
@@ -414,6 +415,7 @@ to constitute the whole application.
 
 |Version|Date      |Description                                             |
 |-------|----------|--------------------------------------------------------|
+|2.1.0  |2021-12-26|Added Column version of agg function.                   |
 |2.0.0  |2021-12-25|Remove FunctionTransformer, FX Types and trans Function.|
 |1.5.6  |2021-12-23|Update comments.                                        |
 |1.5.5  |2021-12-23|Update comments and refactor F1.+ method.               |

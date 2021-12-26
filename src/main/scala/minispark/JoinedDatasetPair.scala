@@ -16,6 +16,8 @@ private [minispark] class JoinedDatasetPair[T, U](d1: Dataset[T], d2: Dataset[U]
   /**
    * Finishes the join transformation.
    *
+   * Untyped API.
+   *
    * @param columns Collection of columns to join on.
    * @return Returns the joined Datasets.
    */
@@ -26,6 +28,8 @@ private [minispark] class JoinedDatasetPair[T, U](d1: Dataset[T], d2: Dataset[U]
   /**
    * Finishes the join transformation.
    *
+   * Untyped API.
+   *
    * @param joinExpr Join expression.
    * @return Returns the joined Datasets.
    */
@@ -35,6 +39,8 @@ private [minispark] class JoinedDatasetPair[T, U](d1: Dataset[T], d2: Dataset[U]
 
   /**
    * Finishes the join transformation.
+   *
+   * Typed API.
    *
    * @param joinExpr Join expression.
    * @return Returns the joined Datasets which contains tuple of rows from both Datasets.
