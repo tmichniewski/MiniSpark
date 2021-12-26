@@ -229,6 +229,7 @@ the functions might be bigger and bigger and this way constitute the whole modul
 |Map rows        |def map[T, U: Encoder](f: T => U): Function[T, U]                                      |
 |FlatMap rows    |def flatMap[T, U: Encoder](f: T => TraversableOnce[U]): Function[T, U]                 |
 |Aggregate       |def agg[T](groupBy: Seq[String], aggregations: Seq[(String, String)]): Function[T, Row]|
+|Aggregate       |def agg[T](groupBy: Seq[String], expr: Column, exprs: Column*): Function[T, Row]       |
 |Union           |def union[T](other: Dataset[T]): Function[T, T]                                        |
 |Subtract        |def subtract[T](other: Dataset[T]): Function[T, T]                                     |
 |Intersect       |def intersect[T](other: Dataset[T]): Function[T, T]                                    |
