@@ -58,7 +58,7 @@ and we want to use them in sequence, we would have to apply them in the reverted
 val result: DataFrame = c(b(a(df)))
 ```
 
-In fact, we would like to use them in more natural way, like in the pseudocode below:
+In fact, we would like to use them in a more natural way, like in the pseudocode below:
 
 ```
 df first a then b next c
@@ -147,7 +147,7 @@ Spark `Dataset.transform` method.
 
 ## Dataset composition with the Function
 
-This library provides also a set of additional operators on Spark `Dataset`. They mainly provide operator like names for
+This library provides also a set of additional operators on Spark `Dataset`. They mainly provide operator-like names for
 other Spark `Dataset` methods and let to use infix notation. One important extension to this set of operators is
 the `++`
 method, implemented - next to other operators - in the implicit class `ExtendedDataset`
@@ -347,7 +347,7 @@ df ++ castToDataset ++ splitter ++ aggregator
 ```
 
 Please note that in this example we explicitly defined the types of particular `Function`s, while there is no such
-possibility is the standard Spark approach. Alternatively, we could also skip the types and use Scala type inference
+possibility in the standard Spark approach. Alternatively, we could also skip the types and use Scala type inference
 mechanism:
 
 ```scala
@@ -415,6 +415,7 @@ to constitute the whole application.
 
 |Version|Date      |Description                                             |
 |-------|----------|--------------------------------------------------------|
+|2.1.1  |2021-12-27|Update readme.                                          |
 |2.1.0  |2021-12-26|Added Column version of agg function.                   |
 |2.0.0  |2021-12-25|Remove FunctionTransformer, FX Types and trans Function.|
 |1.5.6  |2021-12-23|Update comments.                                        |
