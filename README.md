@@ -61,13 +61,21 @@ val result: DataFrame = c(b(a(df)))
 In fact, we would like to use them in a more natural way, like in the pseudocode below:
 
 ```
-df first a then b next c
+df firstApply a thenApply b nextApply c
+```
+
+or even:
+
+```
+composedABC = a + b + c
+df apply composedABC
 ```
 
 where, instead of sequential application of methods `a`, `b` and `c` to `df`
 we may want to construct one composed function `a + b + c` and apply it on `df` only once.
 
-How to achieve this? Instead of such methods we prefer to instantiate lambda expressions of the `Function` type:
+How to achieve this? Instead of such methods we prefer to instantiate lambda expressions of the `Function` type, while
+to illustrate this we additionally define a few schemas as case classes:
 
 ```scala
 // input schema
@@ -115,25 +123,38 @@ val addGreeting: Function[PersonWithFullName, PersonWithGreeting] = { (d: Datase
 }
 ```
 
-Then, having defined two such functions we may compose them, to achieve one function only:
+Then, having defined two such functions we may apply them in the right sequence:
+
+```scala
+val result: Dataset[PersonWithGreeting] = df ++ addFullName ++ addGreeting
+```
+
+or we may compose them, to achieve one function only:
 
 ```scala
 val addFullNameAndGreeting: Function[Person, PersonWithGreeting] = addFullName + addGreeting
 ```
 
-and use it:
+and use it the classical function-call way:
 
 ```scala
 val result: Dataset[PersonWithGreeting] = addFullNameAndGreeting(df)
 ```
 
-This is equivalent to:
+or using the implicit `ExtendedDataset.++` composition operator:
+
+```scala
+val result: Dataset[PersonWithGreeting] = df ++ addFullNameAndGreeting
+```
+
+All of this is equivalent to:
 
 ```scala
 val result: Dataset[PersonWithGreeting] = addGreeting(addFullName(df))
 ```
 
-but as you may see the classical usage requires not only the reverted order of methods, but also the `df` `DataFrame`
+but as you may see the classical function-call usage requires not only the reverted order of methods, but also
+the `df` `DataFrame`
 instance to apply the methods on. In our approach, we may separate the composition of functions from their application,
 and this improves application decomposition, code reusability and readability.
 
@@ -406,10 +427,14 @@ Concluding, this library is not about the API, which hardly brings anything new.
 Instead, it is about the thinking. The thinking about building enterprise class systems and their decomposition into
 smaller parts. Thinking about how to shape the small pieces of the system and then, how to glue them together.
 
-If we ask ourselves what is the biggest challenge of modern software engineering, it may turn out that this is a
-complexity, because the systems are becoming bigger and bigger. So, how we address this challenge? We give a programming
-model to decompose the system into smaller parts and express it via the `Function`s, which then might be composed back
-to constitute the whole application.
+Nowadays, if we ask ourselves what is the biggest challenge of modern software engineering, it may turn out that this is
+a complexity, because the systems are becoming bigger and bigger. So, how we address this challenge? We give a
+programming model to decompose the system into smaller parts and express them via the `Function`s, which then might be
+composed back to constitute the whole application.
+
+Summing up, this library is a Scala story about systems decomposition or in other words about functions composition,
+while it turns out that the core element of this puzzle is the plain function which is the most fundamental part of any
+system implementation.
 
 ## Versions
 
