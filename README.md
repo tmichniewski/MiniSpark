@@ -432,7 +432,7 @@ a complexity, because the systems are becoming bigger and bigger. So, how we add
 programming model to decompose the system into smaller parts and express them via the `Function`s, which then might be
 composed back to constitute the whole application.
 
-Summing up, this library is a Scala story about systems decomposition or in other words about functions composition,
+Summing up, this library is a Scala story about systems decomposition, or in other words, about functions composition,
 while it turns out that the core element of this puzzle is the plain function which is the most fundamental part of any
 system implementation.
 
