@@ -425,7 +425,7 @@ In turn, the map pattern has the following features:
 Concluding, this library is not about the API, which hardly brings anything new.
 
 Instead, it is about the thinking. The thinking about building enterprise class systems and their decomposition into
-smaller parts. Thinking about how to shape the small pieces of the system and then, how to glue them together.
+smaller parts. Thinking about how to shape the small pieces of the system, and then, how to glue them together.
 
 Nowadays, if we ask ourselves what is the biggest challenge of modern software engineering, it may turn out that this is
 a complexity, because the systems are becoming bigger and bigger. So, how we address this challenge? We give a
