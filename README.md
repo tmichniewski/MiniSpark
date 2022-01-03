@@ -200,8 +200,8 @@ val newPerson3: Dataset[PersonWithGreeting] = person ++ addFullNameAndGreeting
 ```
 
 This is the core concept to shape Spark applications and express them as composition of such `Function`s. Please notice,
-that such `Function`s are self-existing entities which might be stored as vales and passed within the application, while
-standard `Dataset` methods have always be connected to the
+that such `Function`s are self-existing entities which might be stored as values and passed within the application,
+while standard `Dataset` methods have always be connected to the
 `Dataset` they are called on, and as a consequence they cannot be reused or stored.
 
 ## Dataset implicit operators
@@ -400,12 +400,12 @@ might be composed of such `Function`s.
 To sum up, this library consists of:
 
 - usage of the `Dataset` type as the main data representation,
-- the `Dataset.++` operator which is an alias to `Dataset.transform` method,
+- the `ExtendedDataset.++` operator which is an alias to `Dataset.transform` method,
 - set of implicits which provide aliases to typical `Dataset` operations,
 - the `Function[T, U]` type which is an alias to Scala `Function1[Dataset[T], Dataset[U]]` type,
 - the `Function.+` composition operator which is an alias to Scala `Function1.andThen`,
 - set of methods producing typical Spark `Function`s as one-liner aliases to Spark counterparts,
-- and finally the map pattern.
+- and finally the `MapPattern`.
 
 In turn, the map pattern has the following features:
 
