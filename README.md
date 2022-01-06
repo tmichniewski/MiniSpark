@@ -259,7 +259,7 @@ the functions might be bigger and bigger and this way constitute the whole modul
 |Cross join      |def crossTyped[T, U](other: Dataset[U]): Function[T, (T, U)]                           |
 |Inner join      |def inner[T](other: Dataset[_], columns: Seq[String]): Function[T, Row]                |
 |Inner join      |def inner[T](other: Dataset[_], joinExpr: Column): Function[T, Row]                    |
-|Inner join      |def inner[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)]              |
+|Inner join      |def innerTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)]         |
 |Left outer join |def left[T](other: Dataset[_], columns: Seq[String]): Function[T, Row]                 |
 |Left outer join |def left[T](other: Dataset[_], joinExpr: Column): Function[T, Row]                     |
 |Left outer join |def leftTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)]          |
@@ -284,6 +284,46 @@ may work with one input schema and produce another one.
 
 What to do, if we need something more complex, or we would like to be able to use it on a broader range of input or
 output schemas. The answer to such a challenge is the map pattern which is an extension to the map function.
+
+```scala
+/**
+ * Generic map pattern. It uses the concept of getter which converts T into Input
+ * and constructor which converts input record and mapper result into output record.
+ */
+trait MapPattern {
+  /** Type of input data container. */
+  type Input
+  /** Type of output data container. */
+  type Output
+  /** Type of parameters container. */
+  type Params
+
+  /**
+   * Higher order method which returns the mapper function to convert input type into output type.
+   *
+   * @param params Parameters to construct the resulting mapping function.
+   * @return Returns the mapping function to convert input into output.
+   */
+  def build(params: Params): Input => Output
+
+  /**
+   * Factory method which produces the map function.
+   *
+   * @param params Parameters to construct the resulting mapping function.
+   * @param getter Function to convert T into Input.
+   * @param constructor Function to convert T and Output into U.
+   * @tparam T Type of input data.
+   * @tparam U Type of output data.
+   * @return Returns the map function.
+   */
+  def apply[T, U: Encoder](params: Params, getter: T => Input, constructor: (T, Output) => U): Function[T, U] = {
+    map[T, U] {
+      val mapper: Input => Output = build(params)
+      (r: T) => constructor(r, mapper(getter(r)))
+    }
+  }
+}
+```
 
 The map pattern is a type which defines a common interface to handle such use cases. It specifies the containers
 for `Input`
