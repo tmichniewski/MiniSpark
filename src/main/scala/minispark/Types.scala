@@ -27,3 +27,7 @@ trait Combine[T, U, V] extends ((Dataset[T], Dataset[U]) => Dataset[V]) {
   def +[W](transform: Transform[V, W]): Combine[T, U, W] = (d1: Dataset[T], d2: Dataset[U]) => transform(apply(d1, d2)) // C + T = C
   def ++(load: Load[V]): (Dataset[T], Dataset[U]) => Unit = (d1: Dataset[T], d2: Dataset[U]) => load(apply(d1, d2)) // C + L = L2
 }
+
+object types {
+  def join[T, U, V](e1: Extract[T], e2: Extract[U], combine: Combine[T, U, V]): Extract[V] = () => combine(e1(), e2())
+}
