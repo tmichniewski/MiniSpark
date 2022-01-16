@@ -5,29 +5,29 @@ import org.apache.spark.sql.Dataset
 
 trait ETL extends (() => Unit)
 
-trait Extract[X] extends (() => Dataset[X]) {
-  def +[Y](extract: Extract[Y]): ExtractPair[X, Y] = ExtractPair[X, Y](this, extract) // E + E = E2
-  def +[Y](transform: Transform[X, Y]): Extract[Y] = () => transform(apply()) // E + T = E
-  def +(load: Load[X]): ETL = () => load(apply()) // E + L = ETL
-  def split: Split[X] = Split(this)
+trait Extract[T] extends (() => Dataset[T]) {
+  def +[U](extract: Extract[U]): ExtractPair[T, U] = ExtractPair[T, U](this, extract) // E + E = E2
+  def +[U](transform: Transform[T, U]): Extract[U] = () => transform(apply()) // E + T = E
+  def +(load: Load[T]): ETL = () => load(apply()) // E + L = ETL
+  def split: Split[T] = Split(this)
 }
 // E + E * C = E + T = E
 
-case class ExtractPair[X, Y](extract1: Extract[X], extract2: Extract[Y]) {
-  def +[Z](combine: Combine[X, Y, Z]): Extract[Z] = () => combine(extract1(), extract2()) // E + E + C = E
+case class ExtractPair[T, U](extract1: Extract[T], extract2: Extract[U]) {
+  def +[V](combine: Combine[T, U, V]): Extract[V] = () => combine(extract1(), extract2()) // E + E + C = E
 }
 
-case class Split[X](extract: Extract[X]) extends Extract[X] {
-  lazy val d: Dataset[X] = extract().cache()
-  override def apply(): Dataset[X] = d
+case class Split[T](extract: Extract[T]) extends Extract[T] {
+  lazy val d: Dataset[T] = extract().cache()
+  override def apply(): Dataset[T] = d
 }
 
-trait Transform[X, Y] extends (Dataset[X] => Dataset[Y]) {
-  def +[Z](transform: Transform[Y, Z]): Transform[X, Z] = (d: Dataset[X]) => transform(apply(d)) // T + T = T
-  def +(load: Load[Y]): Load[X] = (d: Dataset[X]) => load(apply(d)) // T + L = L
+trait Transform[T, U] extends (Dataset[T] => Dataset[U]) {
+  def +[V](transform: Transform[U, V]): Transform[T, V] = (d: Dataset[T]) => transform(apply(d)) // T + T = T
+  def +(load: Load[U]): Load[T] = (d: Dataset[T]) => load(apply(d)) // T + L = L
 }
 // (T + T) ++ C = T + (T ++ C) ?
 
-trait Load[X] extends (Dataset[X] => Unit)
+trait Load[T] extends (Dataset[T] => Unit)
 
-trait Combine[X, Y, Z] extends ((Dataset[X], Dataset[Y]) => Dataset[Z])
+trait Combine[T, U, V] extends ((Dataset[T], Dataset[U]) => Dataset[V])
