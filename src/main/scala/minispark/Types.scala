@@ -6,12 +6,17 @@ import org.apache.spark.sql.Dataset
 trait ETL extends (() => Unit)
 
 trait Extract[T] extends (() => Dataset[T]) {
+  def +[U](extract: Extract[U]): ExtractPair[T, U] = ExtractPair[T, U](this, extract) // E + E = E2
   def +[U](transform: Transform[T, U]): Extract[U] = () => transform(apply()) // E + T = E
   def +(load: Load[T]): ETL = () => load(apply()) // E + L = ETL
   def *[U, V](combine: Combine[T, U, V]): Transform[U, V] = combine(apply(), _) // E + C = T
   def *[U, V](combine: Combine[U, T, V]): Transform[U, V] = combine(_, apply()) // E + C = T
 }
 // E + E * C = E + T = E
+
+case class ExtractPair[T, U](e1: Extract[T], e2: Extract[U]) {
+  def +[V](combine: Combine[T, U, V]): Extract[V] = () => combine(e1(), e2()) // E + E + C = E
+}
 
 trait Transform[T, U] extends (Dataset[T] => Dataset[U]) {
   def +[V](transform: Transform[U, V]): Transform[T, V] = (d: Dataset[T]) => transform(apply(d)) // T + T = T
