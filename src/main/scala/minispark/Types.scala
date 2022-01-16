@@ -6,15 +6,14 @@ import org.apache.spark.sql.Dataset
 trait ETL extends (() => Unit)
 
 trait Extract[T] extends (() => Dataset[T]) {
-  def +[U](extract: Extract[U]): ExtractPair[T, U] = ExtractPair[T, U](this, extract) // E + E = E2
-  def +[U](transform: Transform[T, U]): Extract[U] = () => transform(apply()) // E + T = E
-  def +(load: Load[T]): ETL = () => load(apply()) // E + L = ETL
-  def split: Split[T] = Split(this)
+  def +[U](extract: Extract[U]): ExtractPair[T, U] = ExtractPair[T, U](this, extract) // E + E => E2
+  def +[U](transform: Transform[T, U]): Extract[U] = () => transform(apply()) // E + T => E
+  def +(load: Load[T]): ETL = () => load(apply()) // E + L => ETL
+  def split: Split[T] = Split(this) // E => cached E
 }
-// E + E * C = E + T = E
 
 case class ExtractPair[T, U](extract1: Extract[T], extract2: Extract[U]) {
-  def +[V](combine: Combine[T, U, V]): Extract[V] = () => combine(extract1(), extract2()) // E + E + C = E
+  def +[V](combine: Combine[T, U, V]): Extract[V] = () => combine(extract1(), extract2()) // E2 + C => E
 }
 
 case class Split[T](extract: Extract[T]) extends Extract[T] {
@@ -23,10 +22,9 @@ case class Split[T](extract: Extract[T]) extends Extract[T] {
 }
 
 trait Transform[T, U] extends (Dataset[T] => Dataset[U]) {
-  def +[V](transform: Transform[U, V]): Transform[T, V] = (d: Dataset[T]) => transform(apply(d)) // T + T = T
-  def +(load: Load[U]): Load[T] = (d: Dataset[T]) => load(apply(d)) // T + L = L
+  def +[V](transform: Transform[U, V]): Transform[T, V] = (d: Dataset[T]) => transform(apply(d)) // T + T => T
+  def +(load: Load[U]): Load[T] = (d: Dataset[T]) => load(apply(d)) // T + L => L
 }
-// (T + T) ++ C = T + (T ++ C) ?
 
 trait Load[T] extends (Dataset[T] => Unit)
 
