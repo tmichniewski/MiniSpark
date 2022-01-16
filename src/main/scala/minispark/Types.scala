@@ -10,7 +10,9 @@ trait E[X] extends (() => Dataset[X]) {
   def +[Y](t: T[X, Y]): E[Y] = () => t(apply()) // E + T = E
   def +(l: L[X]): ETL = () => l(apply()) // E + L = ETL
   def split: S[X] = S(this)
+  @deprecated
   def *[Y, Z](c: C[X, Y, Z]): T[Y, Z] = c(apply(), _) // E + C = T
+  @deprecated
   def *[Y, Z](c: C[Y, X, Z]): T[Y, Z] = c(_, apply()) // E + C = T
 }
 // E + E * C = E + T = E
@@ -27,7 +29,9 @@ case class S[X](e: E[X]) extends E[X] {
 trait T[X, Y] extends (Dataset[X] => Dataset[Y]) {
   def +[Z](t: T[Y, Z]): T[X, Z] = (d: Dataset[X]) => t(apply(d)) // T + T = T
   def +(l: L[Y]): L[X] = (d: Dataset[X]) => l(apply(d)) // T + L = L
+  @deprecated
   def ++[Z, W](c: C[Y, Z, W]): C[X, Z, W] = (d1: Dataset[X], d2: Dataset[Z]) => c(apply(d1), d2) // T + C = C
+  @deprecated
   def ++[Z, W](c: C[Z, Y, W]): C[Z, X, W] = (d1: Dataset[Z], d2: Dataset[X]) => c(d1, apply(d2)) // T + C = C
 }
 // (T + T) ++ C = T + (T ++ C) ?
@@ -35,7 +39,9 @@ trait T[X, Y] extends (Dataset[X] => Dataset[Y]) {
 trait L[X] extends (Dataset[X] => Unit)
 
 trait C[X, Y, Z] extends ((Dataset[X], Dataset[Y]) => Dataset[Z]) {
+  @deprecated
   def +[W](t: T[Z, W]): C[X, Y, W] = (d1: Dataset[X], d2: Dataset[Y]) => t(apply(d1, d2)) // C + T = C
+  @deprecated
   def ++(l: L[Z]): (Dataset[X], Dataset[Y]) => Unit = (d1: Dataset[X], d2: Dataset[Y]) => l(apply(d1, d2)) // C + L = L2
 }
 
