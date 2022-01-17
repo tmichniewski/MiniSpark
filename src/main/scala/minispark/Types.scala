@@ -12,11 +12,20 @@ trait Extract[T] extends (() => Dataset[T]) {
   def split: Split[T] = Split(this) // E => cached E
 }
 
-case class ExtractPair[T, U](extract1: Extract[T], extract2: Extract[U]) {
+object ExtractPair {
+  def apply[T, U](extract1: Extract[T], extract2: Extract[U]): ExtractPair[T, U] =
+    new ExtractPair[T, U](extract1, extract2)
+}
+
+class ExtractPair[T, U](extract1: Extract[T], extract2: Extract[U]) {
   def +[V](combine: Combine[T, U, V]): Extract[V] = () => combine(extract1(), extract2()) // E2 + C => E
 }
 
-case class Split[T](extract: Extract[T]) extends Extract[T] {
+object Split {
+  def apply[T](extract: Extract[T]): Split[T] = new Split[T](extract)
+}
+
+class Split[T](extract: Extract[T]) extends Extract[T] {
   lazy val d: Dataset[T] = extract().cache()
   override def apply(): Dataset[T] = d
 }
