@@ -1,4 +1,4 @@
-# MiniSpark
+# MiniSpark Fundamentals
 
 This is a Scala library for ETL processing to be used on top of Spark. It is simple in design but quite useful. Most of
 it is implemented in pure Scala functions.
@@ -476,10 +476,15 @@ Summing up, this library is a Scala story about systems decomposition, or in oth
 while it turns out that the core element of this puzzle is the plain function which is the most fundamental part of any
 system implementation.
 
-## Versions
+# MiniSpark Algebra
+
+
+
+# Versions
 
 |Version|Date      |Description                                             |
 |-------|----------|--------------------------------------------------------|
+|3.0.0  |2022-01-20|Add algebra of ETL operations.                          |
 |2.1.1  |2021-12-27|Update readme.                                          |
 |2.1.0  |2021-12-26|Added Column version of agg function.                   |
 |2.0.0  |2021-12-25|Remove FunctionTransformer, FX Types and trans Function.|
