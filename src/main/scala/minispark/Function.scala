@@ -4,7 +4,7 @@ package minispark
 import org.apache.spark.sql.Dataset
 
 /**
- * The function represents any kind of transformation of one Dataset into another.
+ * The function represents any kind of transformation from one Dataset into another.
  * Such functions are present in any Spark notebook, but here we define a type for them.
  * We call this type the Function.
  *
