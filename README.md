@@ -478,6 +478,78 @@ system implementation.
 
 ## Algebra
 
+So far we described the `Function` and how it is interacting with the `Dataset`. Now we try to go  a step further and
+try to define complete set of operations covering the classical approach of `ETl` which stands for:
+- Extract,
+- Transfor and
+- Load.
+
+First, we define the `Extract` part which stands for producing the data. In our case we model this as a parameterless
+function which returns a `Dataset`.
+
+```scala
+trait Extract[T] extends (() => Dataset[T])
+```
+
+Then, we define the `Transform` part which stands for transforming the data. In our case we model this as a function
+from one `Dataset` into another one.
+
+```scala
+trait Transform[T, U] extends Function[T, U]
+```
+
+Next, we define the `Load` part which stands for consuming the data. In our case we also model this as a function, this
+time from a `Dataset` into `Unit`, as in this case we are not interested in any result, but call it only to perform the
+side effects of saving the data somewhere.
+
+```scala
+trait Load[T] extends (Dataset[T] => Unit)
+```
+
+Additionally, we define a type for composition of functions `Extract` and `Load` called `ETL`:
+
+```scala
+trait ETL extends (() => Unit)
+```
+
+and a type for function to combine two `Dataset`s:
+
+```scala
+trait Combine[T, U, V] extends ((Dataset[T], Dataset[U]) => Dataset[V])
+```
+
+Finally, we define types for modeling a pair of `Extract` instances:
+
+```scala
+class ExtractPair[T, U](e1: Extract[T], e2: Extract[U])
+```
+
+and a type for splitting data into more than one process:
+
+```scala
+class Split[T](e: Extract[T]) extends Extract[T]
+```
+
+We also define a conversion function from the `Function` to the `Transform` type, to let use all the functions as
+`Transform` instances.
+
+```scala
+implicit def functionToTransform[T, U](f: Function[T, U]): T Transform U = (d: Dataset[T]) => f(d)
+```
+
+At the end we define a set of operations on those types which in general serve as composition operators. Their purpose
+is to let compose those types together in the following scenarios:
+- `Extract[T]` + `Extract[U]` gives `ExtractPair[T, U]`,
+- `Extract[T]` + `Transform[T, U]` gives `Extract[U]`,
+- `Extract[T` + `Load[U]` gives `ETL`,
+- `Transform[T, U]` + `Transform[U, V]` gives `Transform[T, V]`,
+- `Transform[T, U]` + `Load[U]` gives `Load[U]`,
+- `ExtractPair[T, U]` + `Combine[T, U, V]` gives `Extract[V]`.
+
+and some helper methods,for example to get split `Extract`.
+
+Below is the structure of those types together with the methods they automatically provide.
+
 ```scala
 trait ETL extends (() => Unit)
 
@@ -497,23 +569,19 @@ trait Load[T] extends (Dataset[T] => Unit)
 
 trait Combine[T, U, V] extends ((Dataset[T], Dataset[U]) => Dataset[V])
 
-object ExtractPair {
-  def apply[T, U](e1: Extract[T], e2: Extract[U]): ExtractPair[T, U] = new ExtractPair[T, U](e1, e2)
-}
 class ExtractPair[T, U](e1: Extract[T], e2: Extract[U]) {
   def +[V](c: Combine[T, U, V]): Extract[V] = () => c(e1(), e2()) // E2 + C => E
 }
-
-object Split {
-  def apply[T](e: Extract[T]): Split[T] = new Split[T](e)
+object ExtractPair {
+  def apply[T, U](e1: Extract[T], e2: Extract[U]): ExtractPair[T, U] = new ExtractPair[T, U](e1, e2)
 }
+
 class Split[T](e: Extract[T]) extends Extract[T] {
   lazy val d: Dataset[T] = e().cache()
   override def apply(): Dataset[T] = d
 }
-
-object Types {
-  implicit def functionToTransform[T, U](f: Function[T, U]): T Transform U = (d: Dataset[T]) => f(d)
+object Split {
+  def apply[T](e: Extract[T]): Split[T] = new Split[T](e)
 }
 ```
 
