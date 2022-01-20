@@ -481,7 +481,7 @@ system implementation.
 So far we described the `Function` and how it is interacting with the `Dataset`. Now we try to go  a step further and
 try to define complete set of operations covering the classical approach of `ETl` which stands for:
 - Extract,
-- Transfor and
+- Transform,
 - Load.
 
 First, we define the `Extract` part which stands for producing the data. In our case we model this as a parameterless
@@ -537,7 +537,7 @@ We also define a conversion function from the `Function` to the `Transform` type
 implicit def functionToTransform[T, U](f: Function[T, U]): T Transform U = (d: Dataset[T]) => f(d)
 ```
 
-At the end we define a set of operations on those types which in general serve as composition operators. Their purpose
+At the end, we define a set of operations on those types which in general serve as composition operators. Their purpose
 is to let compose those types together in the following scenarios:
 - `Extract[T]` + `Extract[U]` gives `ExtractPair[T, U]`,
 - `Extract[T]` + `Transform[T, U]` gives `Extract[U]`,
@@ -546,7 +546,7 @@ is to let compose those types together in the following scenarios:
 - `Transform[T, U]` + `Load[U]` gives `Load[U]`,
 - `ExtractPair[T, U]` + `Combine[T, U, V]` gives `Extract[V]`.
 
-and some helper methods,for example to get split `Extract`.
+and some helper methods, for example to get split of s`Extract`.
 
 Below is the structure of those types together with the methods they automatically provide.
 
