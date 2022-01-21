@@ -478,8 +478,8 @@ system implementation.
 
 ## Algebra
 
-So far we described the `Function` and how it is interacting with the `Dataset`. Now we try to go  a step further and
-try to define complete set of operations covering the classical approach of `ETl` which stands for:
+So far we described the `Function` and how it interacts with the `Dataset`. Now, we try to go a step further and try to
+define a complete set of operations covering the classical approach of `ETL` which stands for:
 - Extract,
 - Transform,
 - Load.
@@ -506,13 +506,13 @@ side effects of saving the data somewhere.
 trait Load[T] extends (Dataset[T] => Unit)
 ```
 
-Additionally, we define a type for composition of functions `Extract` and `Load` called `ETL`:
+Additionally, we define a type for composition of functions `Extract`,`Transform` and `Load` called `ETL`:
 
 ```scala
 trait ETL extends (() => Unit)
 ```
 
-and a type for function to combine two `Dataset`s:
+and a type for the function to combine two `Dataset`s:
 
 ```scala
 trait Combine[T, U, V] extends ((Dataset[T], Dataset[U]) => Dataset[V])
@@ -541,12 +541,12 @@ At the end, we define a set of operations on those types which in general serve 
 is to let compose those types together in the following scenarios:
 - `Extract[T]` + `Extract[U]` gives `ExtractPair[T, U]`,
 - `Extract[T]` + `Transform[T, U]` gives `Extract[U]`,
-- `Extract[T` + `Load[U]` gives `ETL`,
+- `Extract[T]` + `Load[U]` gives `ETL`,
 - `Transform[T, U]` + `Transform[U, V]` gives `Transform[T, V]`,
 - `Transform[T, U]` + `Load[U]` gives `Load[U]`,
 - `ExtractPair[T, U]` + `Combine[T, U, V]` gives `Extract[V]`.
 
-and some helper methods, for example to get split of s`Extract`.
+and some helper methods, for example to get split of an `Extract` instance.
 
 Below is the structure of those types together with the methods they automatically provide.
 
@@ -589,7 +589,7 @@ object Split {
 
 |Version|Date      |Description                                             |
 |-------|----------|--------------------------------------------------------|
-|3.0.0  |2022-01-20|Add algebra of ETL operations.                          |
+|2.2.0  |2022-01-20|Add algebra of ETL operations.                          |
 |2.1.1  |2021-12-27|Update readme.                                          |
 |2.1.0  |2021-12-26|Added Column version of agg function.                   |
 |2.0.0  |2021-12-25|Remove FunctionTransformer, FX Types and trans Function.|
