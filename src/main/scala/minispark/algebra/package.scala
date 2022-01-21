@@ -5,6 +5,7 @@ import org.apache.spark.sql.Dataset
 
 import scala.language.implicitConversions
 
+// $COVERAGE-OFF$
 /** Contains ETL types and operations which constitute the complete algebra. */
 package object algebra {
   /**
@@ -17,3 +18,4 @@ package object algebra {
    */
   implicit def functionToTransform[T, U](f: Function[T, U]): Transform[T, U] = (d: Dataset[T]) => f(d)
 }
+// $COVERAGE-ON$

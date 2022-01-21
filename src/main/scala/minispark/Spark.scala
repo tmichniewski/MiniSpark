@@ -8,7 +8,7 @@ import java.lang.System.getenv
 import java.util.Properties
 import scala.io.Source
 
-// $COVERAGE-OFF$Left for integration tests in Databricks
+// $COVERAGE-OFF$
 /** Contains helper functions connected with Spark. */
 object Spark {
   /** Global spark session. */

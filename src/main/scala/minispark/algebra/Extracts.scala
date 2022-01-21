@@ -5,7 +5,7 @@ import minispark.Spark.spark
 
 import org.apache.spark.sql.{Encoder, Row}
 
-// $COVERAGE-OFF$Left for integration tests in Databricks
+// $COVERAGE-OFF$
 /** Contains typical extracts. */
 object Extracts {
   /**

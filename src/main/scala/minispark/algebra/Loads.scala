@@ -3,7 +3,7 @@ package minispark.algebra
 
 import org.apache.spark.sql.Dataset
 
-// $COVERAGE-OFF$Left for integration tests in Databricks
+// $COVERAGE-OFF$
 /** Contains typical loads. */
 object Loads {
   /**

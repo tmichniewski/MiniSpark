@@ -3,6 +3,7 @@ package minispark.algebra
 
 import org.apache.spark.sql.Dataset
 
+// $COVERAGE-OFF$
 /**
  * Represents a function from one Dataset into another.
  * It is the second part of ETL - the transform phase.
@@ -27,3 +28,4 @@ trait Transform[T, U] extends (Dataset[T] => Dataset[U]) {
    */
   def +(l: Load[U]): Load[T] = (d: Dataset[T]) => (this andThen l)(d) // T + L => L
 }
+// $COVERAGE-ON$

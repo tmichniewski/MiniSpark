@@ -3,6 +3,7 @@ package minispark.algebra
 
 import org.apache.spark.sql.Dataset
 
+// $COVERAGE-OFF$
 /**
  * Represents caches extract data.
  *
@@ -32,3 +33,4 @@ object Split {
    */
   def apply[T](e: Extract[T]): Split[T] = new Split[T](e)
 }
+// $COVERAGE-ON$

@@ -3,6 +3,7 @@ package minispark.algebra
 
 import org.apache.spark.sql.Dataset
 
+// $COVERAGE-OFF$
 /**
  * Represents a parameterless function which produces a Dataset.
  * It is the first part of ETL - the extract phase.
@@ -43,3 +44,4 @@ trait Extract[T] extends (() => Dataset[T]) {
    */
   def split: Split[T] = Split(this) // E => cached E
 }
+// $COVERAGE-ON$
