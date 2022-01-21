@@ -585,6 +585,20 @@ object Split {
 }
 ```
 
+### Example
+
+Having defined such operations we may start building higher level pipelines of operations, for example (assuming that
+`Ei` stand for instances of `Extract`, `Ti` stand for instances of `Transform`, `Li` stand for instances of `Load` and
+so forth):
+
+```scala
+val e1: Extract[Row] = e0 + t1 + t2 + t3
+val e: Extract[Row] = e0 + e1 + c1
+val t: Transform[Row, Row] = t5 + t6
+val l: Load[Row] = t7 + l1
+val etl: ETL = e + t + l
+```
+
 ## Versions
 
 |Version|Date      |Description                                             |
