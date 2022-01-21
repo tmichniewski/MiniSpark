@@ -597,6 +597,7 @@ val e: Extract[Row] = e0 + e1 + c1
 val t: Transform[Row, Row] = t5 + t6
 val l: Load[Row] = t7 + l1
 val etl: ETL = e + t + l
+etl()
 ```
 
 ## Versions
