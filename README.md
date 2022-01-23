@@ -21,7 +21,7 @@ Summing up, we define the following type, called `Transform`:
 
 ```scala
 trait Transform[T, U] extends (Dataset[T] => Dataset[U]) {
-  def +[V](f: Transform[U, V]): Transform[T, V] = (d: Dataset[T]) => (this andThen f)(d)
+  def +[V](t: Transform[U, V]): Transform[T, V] = (d: Dataset[T]) => (this andThen t)(d)
 }
 ```
 
@@ -165,14 +165,7 @@ method, implemented - next to other operators - in the implicit class `ExtendedD
 
 ```scala
 implicit class ExtendedDataset[T](val d: Dataset[T]) extends AnyVal {
-  /**
-   * Applies the given function to the Dataset.
-   *
-   * @param f The function which will be applied.
-   * @tparam U Type of resulting data.
-   * @return Returns the produced Dataset.
-   */
-  def ++[U](f: Transform[T, U]): Dataset[U] = d transform f
+  def ++[U](t: Transform[T, U]): Dataset[U] = d transform t
 ```
 
 The purpose of this method, which is yet another alias to standard - this time Spark - method called `Dataset.transform`
@@ -263,7 +256,7 @@ the functions might be bigger and bigger and this way constitute the whole modul
 |Cache           |def cache[T] (): Transform[T, T]                                                        |
 |Sort            |def sort[T](column: String, columns: String*): Transform[T, T]                          |
 |Sort            |def sort[T](columns: Column*): Transform[T, T]                                          |
-|Pipeline        |def pipeline[T](f: Transform[T, T], fs: Transform[T, T]*): Transform[T, T]              |
+|Pipeline        |def pipeline[T](t: Transform[T, T], ts: Transform[T, T]*): Transform[T, T]              |
 
 ## The map pattern
 
@@ -275,36 +268,13 @@ What to do, if we need something more complex, or we would like to be able to us
 output schemas. The answer to such a challenge is the map pattern which is an extension to the map function.
 
 ```scala
-/**
- * Generic map pattern. It uses the concept of getter which converts T into Input
- * and constructor which converts input record and mapper result into output record.
- */
 trait MapPattern {
-  /** Type of input data container. */
   type Input
-  /** Type of output data container. */
   type Output
-  /** Type of parameters container. */
   type Params
 
-  /**
-   * Higher order method which returns the mapper function to convert input type into output type.
-   *
-   * @param params Parameters to construct the resulting mapping function.
-   * @return Returns the mapping function to convert input into output.
-   */
   def build(params: Params): Input => Output
 
-  /**
-   * Factory method which produces the map function.
-   *
-   * @param params Parameters to construct the resulting mapping function.
-   * @param getter Function to convert T into Input.
-   * @param constructor Function to convert T and Output into U.
-   * @tparam T Type of input data.
-   * @tparam U Type of output data.
-   * @return Returns the map function.
-   */
   def apply[T, U: Encoder](params: Params, getter: T => Input, constructor: (T, Output) => U): Transform[T, U] = {
     map[T, U] {
       val mapper: Input => Output = build(params)

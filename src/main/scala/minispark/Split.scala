@@ -5,7 +5,7 @@ import org.apache.spark.sql.Dataset
 
 // $COVERAGE-OFF$
 /**
- * Represents caches extract data.
+ * Represents caching extract instance.
  *
  * @param e Extract instance to cache.
  * @tparam T Type of input data.
