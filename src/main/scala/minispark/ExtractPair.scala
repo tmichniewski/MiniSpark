@@ -1,5 +1,5 @@
 package com.github
-package minispark.algebra
+package minispark
 
 // $COVERAGE-OFF$
 /**

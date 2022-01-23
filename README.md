@@ -3,7 +3,7 @@
 This is a Scala library for ETL processing to be used on top of Spark. It is simple in design but quite useful. Most of
 it is implemented in pure Scala functions.
 
-## The Function
+## Transform
 
 The main concept of this library is an observation that every Spark query might be expressed as some sequence of
 functions converting one `Dataset` into another.
@@ -12,27 +12,16 @@ In general, such a function converts `Dataset[T]` into `Dataset[U]`. In Scala, t
 as `Dataset[T] => Dataset[U]`
 and this is equivalent to Scala one-argument function type `Function1[Dataset[T], Dataset[U]]`.
 
+In fact this is the second part of classical ETL approach.
+
 One of the standard methods in this trait is a method called `andThen` to sequentially apply two functions. In our case,
 for such kind of function composition we prefer to use the `+` operator, but this is just an alias to `andThen` method.
 
-Summing up, we define the following type, called the `Function`:
+Summing up, we define the following type, called `Transform`:
 
 ```scala
-/**
- * The function represents any kind of transformation from one Dataset into another.
- *
- * @tparam T Type of input data.
- * @tparam U Type of output data.
- */
-trait Function[T, U] extends (Dataset[T] => Dataset[U]) {
-  /**
-   * Sequential application of two functions. An alias to andThen method.
-   *
-   * @param f The function which will be applied next.
-   * @tparam V Type of resulting data.
-   * @return Returns the composed function.
-   */
-  def +[V](f: Function[U, V]): Function[T, V] = (d: Dataset[T]) => (this andThen f)(d)
+trait Transform[T, U] extends (Dataset[T] => Dataset[U]) {
+  def +[V](f: Transform[U, V]): Transform[T, V] = (d: Dataset[T]) => (this andThen f)(d)
 }
 ```
 
@@ -74,7 +63,7 @@ df apply composedABC
 where, instead of sequential application of methods `a`, `b` and `c` to `df`
 we may want to construct one composed function `a + b + c` and apply it on `df` only once.
 
-How to achieve this? Instead of such methods we prefer to instantiate lambda expressions of the `Function` type, while
+How to achieve this? Instead of such methods we prefer to instantiate lambda expressions of the `Transform` type, while
 to illustrate this we additionally define a few schemas as case classes:
 
 ```scala
@@ -100,7 +89,7 @@ final case class PersonWithGreeting(
 )
 
 // first function
-val addFullName: Function[Person, PersonWithFullName] = { (d: Dataset[Person]) =>
+val addFullName: Transform[Person, PersonWithFullName] = { (d: Dataset[Person]) =>
   d.map { (p: Person) =>
     PersonWithFullName(
       firstName = p.firstName,
@@ -111,7 +100,7 @@ val addFullName: Function[Person, PersonWithFullName] = { (d: Dataset[Person]) =
 }
 
 // second function
-val addGreeting: Function[PersonWithFullName, PersonWithGreeting] = { (d: Dataset[PersonWithFullName]) =>
+val addGreeting: Transform[PersonWithFullName, PersonWithGreeting] = { (d: Dataset[PersonWithFullName]) =>
   d.map { (p: PersonWithFullName) =>
     PersonWithGreeting(
       firstName = p.firstName,
@@ -132,7 +121,7 @@ val result: Dataset[PersonWithGreeting] = df ++ addFullName ++ addGreeting
 or we may compose them, to achieve one function only:
 
 ```scala
-val addFullNameAndGreeting: Function[Person, PersonWithGreeting] = addFullName + addGreeting
+val addFullNameAndGreeting: Transform[Person, PersonWithGreeting] = addFullName + addGreeting
 ```
 
 and use it the classical function-call way:
@@ -166,7 +155,7 @@ equal to the type of parameter to the `Dataset.transform` method.
 In fact, our function might be perceived to be both - an alias to Scala `Function1` and a type of parameter for
 Spark `Dataset.transform` method.
 
-## Dataset composition with the Function
+## Dataset composition with Transform
 
 This library provides also a set of additional operators on Spark `Dataset`. They mainly provide operator-like names for
 other Spark `Dataset` methods and let to use infix notation. One important extension to this set of operators is
@@ -183,11 +172,11 @@ implicit class ExtendedDataset[T](val d: Dataset[T]) extends AnyVal {
    * @tparam U Type of resulting data.
    * @return Returns the produced Dataset.
    */
-  def ++[U](f: Function[T, U]): Dataset[U] = d transform f
+  def ++[U](f: Transform[T, U]): Dataset[U] = d transform f
 ```
 
 The purpose of this method, which is yet another alias to standard - this time Spark - method called `Dataset.transform`
-is to be able to compose expressions consisting of a `Dataset` with subsequent `Function`, when such an expression will
+is to be able to compose expressions consisting of a `Dataset` with subsequent `Transform`, when such an expression will
 produce another `Dataset`.
 
 ```scala
@@ -199,8 +188,8 @@ val newPerson2: Dataset[PersonWithGreeting] = person ++ (addFullName + addGreeti
 val newPerson3: Dataset[PersonWithGreeting] = person ++ addFullNameAndGreeting
 ```
 
-This is the core concept to shape Spark applications and express them as composition of such `Function`s. Please notice,
-that such `Function`s are self-existing entities which might be stored as values and passed within the application,
+This is the core concept to shape Spark applications and express them as composition of such `Transform`s. Please notice,
+that such `Transform`s are self-existing entities which might be stored as values and passed within the application,
 while standard `Dataset` methods have always be connected to the
 `Dataset` they are called on, and as a consequence they cannot be reused or stored.
 
@@ -228,53 +217,53 @@ to shorten and simplify set operators on `Datasets` as well as joins.
 |Right outer join|def &#124;+=&#124;[U](other: Dataset[U]): JoinedDatasetPair[T, U] |
 |Full outer join |def &#124;+=+&#124;[U](other: Dataset[U]): JoinedDatasetPair[T, U]|
 
-## Sample typical Functions
+## Sample typical Transforms
 
-In addition to implemented `Dataset` operators there are also predefined `Function`s. Basically, they only mimic
-Spark `Dataset` methods, but the `Function` type may set an interface to larger ones and due to the composition operator
+In addition to implemented `Dataset` operators there are also predefined `Transform`s. Basically, they only mimic
+Spark `Dataset` methods, but the `Transform` type may set an interface to larger ones and due to the composition operator
 the functions might be bigger and bigger and this way constitute the whole modules or subsystems.
 
 |Operation       |Signature                                                                              |
 |----------------|---------------------------------------------------------------------------------------|
-|Filter rows     |def filter[T](condition: String): Function[T, T]                                       |
-|Filter rows     |def filter[T](condition: Column): Function[T, T]                                       |
-|Select columns  |def select[T](column: String, columns: String*): Function[T, Row]                      |
-|Select columns  |def select[T](columns: Column*): Function[T, Row]                                      |
-|Add column      |def add[T](column: String, value: Column): Function[T, Row]                            |
-|Add columns     |def add[T](columns: (String, Column)*): Function[T, Row]                               |
-|Drop columns    |def drop[T](columns: String*): Function[T, Row]                                        |
-|Rename column   |def rename[T](oldColumn: String, newColumn: String): Function[T, Row]                  |
-|Rename columns  |def rename[T](renameExpr: (String, String)*): Function[T, Row]                         |
-|Cast column     |def cast[T](column: String, newType: DataType): Function[T, Row]                       |
-|Cast columns    |def cast[T](typesExpr: (String, DataType)*): Function[T, Row]                          |
-|Map rows        |def map[T, U: Encoder](f: T => U): Function[T, U]                                      |
-|FlatMap rows    |def flatMap[T, U: Encoder](f: T => TraversableOnce[U]): Function[T, U]                 |
-|Aggregate       |def agg[T](groupBy: Seq[String], aggregations: Seq[(String, String)]): Function[T, Row]|
-|Aggregate       |def agg[T](groupBy: Seq[String], expr: Column, exprs: Column*): Function[T, Row]       |
-|Union           |def union[T](other: Dataset[T]): Function[T, T]                                        |
-|Subtract        |def subtract[T](other: Dataset[T]): Function[T, T]                                     |
-|Intersect       |def intersect[T](other: Dataset[T]): Function[T, T]                                    |
-|Delta           |def delta[T](other: Dataset[T]): Function[T, T]                                        |
-|Cross join      |def cross[T](other: Dataset[_]): Function[T, Row]                                      |
-|Cross join      |def crossTyped[T, U](other: Dataset[U]): Function[T, (T, U)]                           |
-|Inner join      |def inner[T](other: Dataset[_], columns: Seq[String]): Function[T, Row]                |
-|Inner join      |def inner[T](other: Dataset[_], joinExpr: Column): Function[T, Row]                    |
-|Inner join      |def innerTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)]         |
-|Left outer join |def left[T](other: Dataset[_], columns: Seq[String]): Function[T, Row]                 |
-|Left outer join |def left[T](other: Dataset[_], joinExpr: Column): Function[T, Row]                     |
-|Left outer join |def leftTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)]          |
-|Right outer join|def right[T](other: Dataset[_], columns: Seq[String]): Function[T, Row]                |
-|Right outer join|def right[T](other: Dataset[_], joinExpr: Column): Function[T, Row]                    |
-|Right outer join|def rightTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)]         |
-|Full outer join |def full[T](other: Dataset[_], columns: Seq[String]): Function[T, Row]                 |
-|Full outer join |def full[T](other: Dataset[_], joinExpr: Column): Function[T, Row]                     |
-|Full outer join |def fullTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)]          |
-|Cast Dataset    |def as[T: Encoder] (): Function[Row, T]                                                |
-|Cast Dataset    |def row[T] (): Function[T, Row]                                                        |
-|Cache           |def cache[T] (): Function[T, T]                                                        |
-|Sort            |def sort[T](column: String, columns: String*): Function[T, T]                          |
-|Sort            |def sort[T](columns: Column*): Function[T, T]                                          |
-|Pipeline        |def pipeline[T](f: Function[T, T], fs: Function[T, T]*): Function[T, T]                |
+|Filter rows     |def filter[T](condition: String): Transform[T, T]                                       |
+|Filter rows     |def filter[T](condition: Column): Transform[T, T]                                       |
+|Select columns  |def select[T](column: String, columns: String*): Transform[T, Row]                      |
+|Select columns  |def select[T](columns: Column*): Transform[T, Row]                                      |
+|Add column      |def add[T](column: String, value: Column): Transform[T, Row]                            |
+|Add columns     |def add[T](columns: (String, Column)*): Transform[T, Row]                               |
+|Drop columns    |def drop[T](columns: String*): Transform[T, Row]                                        |
+|Rename column   |def rename[T](oldColumn: String, newColumn: String): Transform[T, Row]                  |
+|Rename columns  |def rename[T](renameExpr: (String, String)*): Transform[T, Row]                         |
+|Cast column     |def cast[T](column: String, newType: DataType): Transform[T, Row]                       |
+|Cast columns    |def cast[T](typesExpr: (String, DataType)*): Transform[T, Row]                          |
+|Map rows        |def map[T, U: Encoder](f: T => U): Transform[T, U]                                      |
+|FlatMap rows    |def flatMap[T, U: Encoder](f: T => TraversableOnce[U]): Transform[T, U]                 |
+|Aggregate       |def agg[T](groupBy: Seq[String], aggregations: Seq[(String, String)]): Transform[T, Row]|
+|Aggregate       |def agg[T](groupBy: Seq[String], expr: Column, exprs: Column*): Transform[T, Row]       |
+|Union           |def union[T](other: Dataset[T]): Transform[T, T]                                        |
+|Subtract        |def subtract[T](other: Dataset[T]): Transform[T, T]                                     |
+|Intersect       |def intersect[T](other: Dataset[T]): Transform[T, T]                                    |
+|Delta           |def delta[T](other: Dataset[T]): Transform[T, T]                                        |
+|Cross join      |def cross[T](other: Dataset[_]): Transform[T, Row]                                      |
+|Cross join      |def crossTyped[T, U](other: Dataset[U]): Transform[T, (T, U)]                           |
+|Inner join      |def inner[T](other: Dataset[_], columns: Seq[String]): Transform[T, Row]                |
+|Inner join      |def inner[T](other: Dataset[_], joinExpr: Column): Transform[T, Row]                    |
+|Inner join      |def innerTyped[T, U](other: Dataset[U], joinExpr: Column): Transform[T, (T, U)]         |
+|Left outer join |def left[T](other: Dataset[_], columns: Seq[String]): Transform[T, Row]                 |
+|Left outer join |def left[T](other: Dataset[_], joinExpr: Column): Transform[T, Row]                     |
+|Left outer join |def leftTyped[T, U](other: Dataset[U], joinExpr: Column): Transform[T, (T, U)]          |
+|Right outer join|def right[T](other: Dataset[_], columns: Seq[String]): Transform[T, Row]                |
+|Right outer join|def right[T](other: Dataset[_], joinExpr: Column): Transform[T, Row]                    |
+|Right outer join|def rightTyped[T, U](other: Dataset[U], joinExpr: Column): Transform[T, (T, U)]         |
+|Full outer join |def full[T](other: Dataset[_], columns: Seq[String]): Transform[T, Row]                 |
+|Full outer join |def full[T](other: Dataset[_], joinExpr: Column): Transform[T, Row]                     |
+|Full outer join |def fullTyped[T, U](other: Dataset[U], joinExpr: Column): Transform[T, (T, U)]          |
+|Cast Dataset    |def as[T: Encoder] (): Transform[Row, T]                                                |
+|Cast Dataset    |def row[T] (): Transform[T, Row]                                                        |
+|Cache           |def cache[T] (): Transform[T, T]                                                        |
+|Sort            |def sort[T](column: String, columns: String*): Transform[T, T]                          |
+|Sort            |def sort[T](columns: Column*): Transform[T, T]                                          |
+|Pipeline        |def pipeline[T](f: Transform[T, T], fs: Transform[T, T]*): Transform[T, T]              |
 
 ## The map pattern
 
@@ -316,7 +305,7 @@ trait MapPattern {
    * @tparam U Type of output data.
    * @return Returns the map function.
    */
-  def apply[T, U: Encoder](params: Params, getter: T => Input, constructor: (T, Output) => U): Function[T, U] = {
+  def apply[T, U: Encoder](params: Params, getter: T => Input, constructor: (T, Output) => U): Transform[T, U] = {
     map[T, U] {
       val mapper: Input => Output = build(params)
       (r: T) => constructor(r, mapper(getter(r)))
@@ -330,7 +319,7 @@ for `Input`
 and `Output` types, the container for parameters, and it expects to provide the function which will build the mapper
 function for the given parameters and `Input` and `Output` types.
 
-Then, it also provides the `apply` method which will give in return the map `Function`, provided that it will get a
+Then, it also provides the `apply` method which will give in return the map `Transform`, provided that it will get a
 specific `getter` to convert the input record to the `Input` type and a `constructor` which will convert all the
 produced data to the output record.
 
@@ -347,7 +336,7 @@ object Adder extends MapPattern {
 
 val getter: Record => Int = (r: Record) => r.id
 val constructor: (Record, Int) => Record = (r: Record, output: Adder.Output) => r.copy(id = output)
-val adder: Function[Record, Record] = Adder[Record, Record](AdderParams(7), getter, constructor)
+val adder: Transform[Record, Record] = Adder[Record, Record](AdderParams(7), getter, constructor)
 val result: Dataset[Record] = ds ++ adder
 // or in shorter version:
 val result: Dataset[Record] = ds ++ Adder[Record, Record](AdderParams(7), _.id,
@@ -372,7 +361,7 @@ Please note that this logic might be arbitrarily complex and be implemented usin
 and the `constructor` are the only interfaces to input and output schemas, and they are provided not during the function
 implementation, but during the real usage in a given context.
 
-In other words, the `Function` implemented according to such a pattern follows the typical pattern of ETL:
+In other words, the `Transform` implemented according to such a pattern follows the typical pattern of ETL:
 
 - Extract is the `getter`,
 - Transform is the mapper function produced by factory method `build`,
@@ -397,17 +386,17 @@ val df: DataFrame = spark.read.text("<path>")
 df.as[String].flatMap(_.split(" ")).groupBy("value").count()
 ```
 
-Then, we do the same using `Function`s:
+Then, we do the same using `Transform`s:
 
 ```scala
 val df: DataFrame = spark.read.text("<path>")
-val castToDataset: Function[Row, String] = as[String]()
-val splitter: Function[String, String] = flatMap[String, String](_.split(" "))
-val aggregator: Function[String, Row] = agg[String](Seq("value"), Seq(("value", "count")))
+val castToDataset: Transform[Row, String] = as[String]()
+val splitter: Transform[String, String] = flatMap[String, String](_.split(" "))
+val aggregator: Transform[String, Row] = agg[String](Seq("value"), Seq(("value", "count")))
 df ++ castToDataset ++ splitter ++ aggregator
 ```
 
-Please note that in this example we explicitly defined the types of particular `Function`s, while there is no such
+Please note that in this example we explicitly defined the types of particular `Transform`s, while there is no such
 possibility in the standard Spark approach. Alternatively, we could also skip the types and use Scala type inference
 mechanism:
 
@@ -428,12 +417,12 @@ val aggregator = flatMap[String, String](_.split(" ")) +
 df ++ as[String]() ++ aggregator
 ```
 
-which gives plenty of possibilities including reusing of the aggregator `Function` in any place, not only on this `df`
+which gives plenty of possibilities including reusing of the aggregator `Transform` in any place, not only on this `df`
 `DataFrame` instance.
 
 So, having such API we have more freedom in reusing pieces of implementation as well as possibilities to encapsulate
-series of Spark calls within reusable `Function`s. And these are the building blocks of enterprise class systems which
-might be composed of such `Function`s.
+series of Spark calls within reusable `Transform`s. And these are the building blocks of enterprise class systems which
+might be composed of such `Transform`s.
 
 ## Summary
 
@@ -442,19 +431,19 @@ To sum up, this library consists of:
 - usage of the `Dataset` type as the main data representation,
 - the `ExtendedDataset.++` operator which is an alias to `Dataset.transform` method,
 - set of implicits which provide aliases to typical `Dataset` operations,
-- the `Function[T, U]` type which is an alias to Scala `Function1[Dataset[T], Dataset[U]]` type,
-- the `Function.+` composition operator which is an alias to Scala `Function1.andThen`,
-- set of methods producing typical Spark `Function`s as one-liner aliases to Spark counterparts,
+- the `Transform[T, U]` type which is an alias to Scala `Function1[Dataset[T], Dataset[U]]` type,
+- the `Transform.+` composition operator which is an alias to Scala `Function1.andThen`,
+- set of methods producing typical Spark `Transform`s as one-liner aliases to Spark counterparts,
 - and finally the `MapPattern`.
 
 In turn, the map pattern has the following features:
 
-- provides the contract or an interface to build the map `Function`,
+- provides the contract or an interface to build the map `Transform`,
 - specifies `Input`, `Output` and `Params` containers for data, typically in the form of case class only or some
   standard type,
 - no necessity to create any traits,
 - common API for creating the mapper function in the form of abstract `build` method,
-- standard `apply` method which returns the map `Function`,
+- standard `apply` method which returns the map `Transform`,
 - the `apply` method which is type parameterized, but those types `[T, U]` do not have to be subclasses of `Input`
   and `Output` respectively,
 - instead, the `apply` method uses the generic and functional interface to input and output records in the form
@@ -469,7 +458,7 @@ smaller parts. Thinking about how to shape the small pieces of the system, and t
 
 Nowadays, if we ask ourselves what is the biggest challenge of modern software engineering, it may turn out that this is
 a complexity, because the systems are becoming bigger and bigger. So, how we address this challenge? We give a
-programming model to decompose the system into smaller parts and express them via the `Function`s, which then might be
+programming model to decompose the system into smaller parts and express them via the `Transform`s, which then might be
 composed back to constitute the whole application.
 
 Summing up, this library is a Scala story about systems decomposition, or in other words, about functions composition,
@@ -478,7 +467,7 @@ system implementation.
 
 ## Algebra
 
-So far we described the `Function` and how it interacts with the `Dataset`. Now, we try to go a step further and try to
+So far we described the `Transform` and how it interacts with the `Dataset`. Now, we try to go a step further and try to
 define a complete set of operations covering the classical approach of `ETL` which stands for:
 - Extract,
 - Transform,
@@ -495,7 +484,7 @@ Then, we define the `Transform` part which stands for transforming the data. In 
 from one `Dataset` into another one.
 
 ```scala
-trait Transform[T, U] extends Function[T, U]
+trait Transform[T, U] extends (Dataset[T] => Dataset[U])
 ```
 
 Next, we define the `Load` part which stands for consuming the data. In our case we also model this as a function, this
@@ -530,13 +519,6 @@ and a type for splitting data into more than one process:
 class Split[T](e: Extract[T]) extends Extract[T]
 ```
 
-We also define a conversion function from the `Function` to the `Transform` type, to let use all the functions as
-`Transform` instances.
-
-```scala
-implicit def functionToTransform[T, U](f: Function[T, U]): T Transform U = (d: Dataset[T]) => f(d)
-```
-
 At the end, we define a set of operations on those types which in general serve as composition operators. Their purpose
 is to let compose those types together in the following scenarios:
 - `Extract[T]` + `Extract[U]` gives `ExtractPair[T, U]`,
@@ -560,7 +542,7 @@ trait Extract[T] extends (() => Dataset[T]) {
   def split: Split[T] = Split(this) // E => cached E
 }
 
-trait Transform[T, U] extends Function[T, U] {
+trait Transform[T, U] extends (Dataset[T] => Dataset[U]) {
   def +[V](t: Transform[U, V]): Transform[T, V] = (d: Dataset[T]) => d.transform(this andThen t) // T + T => T
   def +(l: Load[U]): Load[T] = (d: Dataset[T]) => (this andThen l)(d) // T + L => L
 }
@@ -604,6 +586,7 @@ etl()
 
 |Version|Date      |Description                                             |
 |-------|----------|--------------------------------------------------------|
+|3.0.0  |2022-01-23|Merge Function into Transform. Remove algebra package.  |
 |2.2.0  |2022-01-20|Add algebra of ETL operations.                          |
 |2.1.1  |2021-12-27|Update readme.                                          |
 |2.1.0  |2021-12-26|Added Column version of agg function.                   |

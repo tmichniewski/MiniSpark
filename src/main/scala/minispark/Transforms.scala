@@ -6,7 +6,7 @@ import org.apache.spark.sql.functions.lit
 import org.apache.spark.sql.types.DataType
 
 /** Contains typical operations. */
-object Functions {
+object Transforms {
   // basic
 
   /**
@@ -18,7 +18,7 @@ object Functions {
    * @tparam T Type of input and output data.
    * @return Returns the function to filter the Dataset.
    */
-  def filter[T](condition: String): Function[T, T] = (d: Dataset[T]) => d filter condition
+  def filter[T](condition: String): Transform[T, T] = (d: Dataset[T]) => d filter condition
 
   /**
    * Filters the Dataset.
@@ -29,7 +29,7 @@ object Functions {
    * @tparam T Type of input and output data.
    * @return Returns the function to filter the Dataset.
    */
-  def filter[T](condition: Column): Function[T, T] = (d: Dataset[T]) => d filter condition
+  def filter[T](condition: Column): Transform[T, T] = (d: Dataset[T]) => d filter condition
 
   /**
    * Selects the given columns from the Dataset.
@@ -41,7 +41,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to select the given columns.
    */
-  def select[T](column: String, columns: String*): Function[T, Row] = (d: Dataset[T]) => d.select(column, columns: _*)
+  def select[T](column: String, columns: String*): Transform[T, Row] = (d: Dataset[T]) => d.select(column, columns: _*)
 
   /**
    * Selects the given columns from the Dataset.
@@ -52,7 +52,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to select the given columns.
    */
-  def select[T](columns: Column*): Function[T, Row] = (d: Dataset[T]) => d.select(columns: _*)
+  def select[T](columns: Column*): Transform[T, Row] = (d: Dataset[T]) => d.select(columns: _*)
 
   /**
    * Adds the given column to the Dataset.
@@ -64,7 +64,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to add the given column.
    */
-  def add[T](column: String, value: Column): Function[T, Row] = (d: Dataset[T]) => d.withColumn(column, value)
+  def add[T](column: String, value: Column): Transform[T, Row] = (d: Dataset[T]) => d.withColumn(column, value)
 
   /**
    * Adds the given columns to the Dataset.
@@ -74,7 +74,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to add the given columns.
    */
-  def add[T](columns: (String, Column)*): Function[T, Row] = (d: Dataset[T]) =>
+  def add[T](columns: (String, Column)*): Transform[T, Row] = (d: Dataset[T]) =>
     columns.foldLeft(d.toDF()) { case (a: DataFrame, e: (String, Column)) => add(e._1, e._2)(a) }
 
   /**
@@ -87,7 +87,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to drop the given columns.
    */
-  def drop[T](columns: String*): Function[T, Row] = (d: Dataset[T]) => d.drop(columns: _*)
+  def drop[T](columns: String*): Transform[T, Row] = (d: Dataset[T]) => d.drop(columns: _*)
 
   /**
    * Renames the given column.
@@ -101,7 +101,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to rename the given column.
    */
-  def rename[T](oldColumn: String, newColumn: String): Function[T, Row] =
+  def rename[T](oldColumn: String, newColumn: String): Transform[T, Row] =
     (d: Dataset[T]) => d.withColumnRenamed(oldColumn, newColumn)
 
   /**
@@ -114,7 +114,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to rename the given columns.
    */
-  def rename[T](renameExpr: (String, String)*): Function[T, Row] = (d: Dataset[T]) =>
+  def rename[T](renameExpr: (String, String)*): Transform[T, Row] = (d: Dataset[T]) =>
     renameExpr.foldLeft(d.toDF()) { case (a: DataFrame, e: (String, String)) => rename(e._1, e._2)(a) }
 
   /**
@@ -127,7 +127,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to cast the given column.
    */
-  def cast[T](column: String, newType: DataType): Function[T, Row] =
+  def cast[T](column: String, newType: DataType): Transform[T, Row] =
     (d: Dataset[T]) => d.withColumn(column, d(column).cast(newType))
 
   /**
@@ -139,7 +139,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to cast the given columns.
    */
-  def cast[T](typesExpr: (String, DataType)*): Function[T, Row] = (d: Dataset[T]) =>
+  def cast[T](typesExpr: (String, DataType)*): Transform[T, Row] = (d: Dataset[T]) =>
     typesExpr.foldLeft(d.toDF()) { case (a: DataFrame, e: (String, DataType)) => cast(e._1, e._2)(a) }
 
   /**
@@ -147,12 +147,12 @@ object Functions {
    *
    * Typed API.
    *
-   * @param f Function to convert from input to output.
+   * @param f Transform to convert from input to output.
    * @tparam T Type of input data.
    * @tparam U Type of output data.
    * @return Returns the function to map the Dataset.
    */
-  def map[T, U: Encoder](f: T => U): Function[T, U] = (d: Dataset[T]) => d map f
+  def map[T, U: Encoder](f: T => U): Transform[T, U] = (d: Dataset[T]) => d map f
 
   /**
    * Flat maps using the given function.
@@ -164,7 +164,7 @@ object Functions {
    * @tparam U Type of output data.
    * @return Returns the function to flatMap the Dataset.
    */
-  def flatMap[T, U: Encoder](f: T => TraversableOnce[U]): Function[T, U] = (d: Dataset[T]) => d flatMap f
+  def flatMap[T, U: Encoder](f: T => TraversableOnce[U]): Transform[T, U] = (d: Dataset[T]) => d flatMap f
 
   /**
    * Aggregates using the given specification.
@@ -178,7 +178,7 @@ object Functions {
    * @return Returns the function to aggregate the Dataset.
    */
   @SuppressWarnings(Array("UnsafeTraversableMethods")) // added require to protect head and tail
-  def agg[T](groupBy: Seq[String], aggregations: Seq[(String, String)]): Function[T, Row] = {
+  def agg[T](groupBy: Seq[String], aggregations: Seq[(String, String)]): Transform[T, Row] = {
     require(groupBy.nonEmpty)
     require(aggregations.nonEmpty)
 
@@ -197,7 +197,7 @@ object Functions {
    * @return Returns the function to aggregate the Dataset.
    */
   @SuppressWarnings(Array("UnsafeTraversableMethods")) // added require to protect head and tail
-  def agg[T](groupBy: Seq[String], expr: Column, exprs: Column*): Function[T, Row] = {
+  def agg[T](groupBy: Seq[String], expr: Column, exprs: Column*): Transform[T, Row] = {
     require(groupBy.nonEmpty)
     (d: Dataset[T]) => d.groupBy(groupBy.head, groupBy.tail: _*).agg(expr, exprs: _*)
   }
@@ -213,7 +213,7 @@ object Functions {
    * @tparam T Type of input and output data.
    * @return Returns the function to union the given Datasets.
    */
-  def union[T](other: Dataset[T]): Function[T, T] = (d: Dataset[T]) => d union other
+  def union[T](other: Dataset[T]): Transform[T, T] = (d: Dataset[T]) => d union other
 
   /**
    * Subtracts the other Dataset[T].
@@ -224,7 +224,7 @@ object Functions {
    * @tparam T Type of input and output data.
    * @return Returns the function to subtract the given Datasets.
    */
-  def subtract[T](other: Dataset[T]): Function[T, T] = (d: Dataset[T]) => d except other
+  def subtract[T](other: Dataset[T]): Transform[T, T] = (d: Dataset[T]) => d except other
 
   /**
    * Intersects the other Dataset[T].
@@ -235,7 +235,7 @@ object Functions {
    * @tparam T Type of input and output data.
    * @return Returns the function to intersect the given Datasets.
    */
-  def intersect[T](other: Dataset[T]): Function[T, T] = (d: Dataset[T]) => d intersect other
+  def intersect[T](other: Dataset[T]): Transform[T, T] = (d: Dataset[T]) => d intersect other
 
   /**
    * Delta with the other Dataset[T].
@@ -246,7 +246,7 @@ object Functions {
    * @tparam T Type of input and output data.
    * @return Returns the function to find delta of the given Datasets.
    */
-  def delta[T](other: Dataset[T]): Function[T, T] = (d: Dataset[T]) => (d except other) union (other except d)
+  def delta[T](other: Dataset[T]): Transform[T, T] = (d: Dataset[T]) => (d except other) union (other except d)
 
   // joins
 
@@ -259,7 +259,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to cross join the given Datasets.
    */
-  def cross[T](other: Dataset[_]): Function[T, Row] = (d: Dataset[T]) => d crossJoin other
+  def cross[T](other: Dataset[_]): Transform[T, Row] = (d: Dataset[T]) => d crossJoin other
 
   /**
    * Cross joins with the other Dataset.
@@ -271,7 +271,7 @@ object Functions {
    * @tparam U Type of input data.
    * @return Returns the function to cross join the given Datasets.
    */
-  def crossTyped[T, U](other: Dataset[U]): Function[T, (T, U)] =
+  def crossTyped[T, U](other: Dataset[U]): Transform[T, (T, U)] =
     (d: Dataset[T]) => d.joinWith(other, lit(true), "cross")
 
   /**
@@ -284,7 +284,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to inner join the given Datasets.
    */
-  def inner[T](other: Dataset[_], columns: Seq[String]): Function[T, Row] =
+  def inner[T](other: Dataset[_], columns: Seq[String]): Transform[T, Row] =
     (d: Dataset[T]) => d.join(other, columns, "inner")
 
   /**
@@ -297,7 +297,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to inner join the given Datasets.
    */
-  def inner[T](other: Dataset[_], joinExpr: Column): Function[T, Row] =
+  def inner[T](other: Dataset[_], joinExpr: Column): Transform[T, Row] =
     (d: Dataset[T]) => d.join(other, joinExpr, "inner")
 
   /**
@@ -311,7 +311,7 @@ object Functions {
    * @tparam U Type of input data.
    * @return Returns the function to inner join the given Datasets.
    */
-  def innerTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)] =
+  def innerTyped[T, U](other: Dataset[U], joinExpr: Column): Transform[T, (T, U)] =
     (d: Dataset[T]) => d.joinWith(other, joinExpr, "inner")
 
   /**
@@ -324,7 +324,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to left outer join the given Datasets.
    */
-  def left[T](other: Dataset[_], columns: Seq[String]): Function[T, Row] =
+  def left[T](other: Dataset[_], columns: Seq[String]): Transform[T, Row] =
     (d: Dataset[T]) => d.join(other, columns, "left")
 
   /**
@@ -337,7 +337,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to left outer join the given Datasets.
    */
-  def left[T](other: Dataset[_], joinExpr: Column): Function[T, Row] =
+  def left[T](other: Dataset[_], joinExpr: Column): Transform[T, Row] =
     (d: Dataset[T]) => d.join(other, joinExpr, "left")
 
   /**
@@ -351,7 +351,7 @@ object Functions {
    * @tparam U Type of input data.
    * @return Returns the function to left outer join the given Datasets.
    */
-  def leftTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T,U)] =
+  def leftTyped[T, U](other: Dataset[U], joinExpr: Column): Transform[T, (T,U)] =
     (d: Dataset[T]) => d.joinWith(other, joinExpr, "left")
 
   /**
@@ -364,7 +364,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to right outer join the given Datasets.
    */
-  def right[T](other: Dataset[_], columns: Seq[String]): Function[T, Row] =
+  def right[T](other: Dataset[_], columns: Seq[String]): Transform[T, Row] =
     (d: Dataset[T]) => d.join(other, columns, "right")
 
   /**
@@ -377,7 +377,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to right outer join the given Datasets.
    */
-  def right[T](other: Dataset[_], joinExpr: Column): Function[T, Row] =
+  def right[T](other: Dataset[_], joinExpr: Column): Transform[T, Row] =
     (d: Dataset[T]) => d.join(other, joinExpr, "right")
 
   /**
@@ -391,7 +391,7 @@ object Functions {
    * @tparam U Type of input data.
    * @return Returns the function to right outer join the given Datasets.
    */
-  def rightTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)] =
+  def rightTyped[T, U](other: Dataset[U], joinExpr: Column): Transform[T, (T, U)] =
     (d: Dataset[T]) => d.joinWith(other, joinExpr, "right")
 
   /**
@@ -404,7 +404,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to full outer join the given Datasets.
    */
-  def full[T](other: Dataset[_], columns: Seq[String]): Function[T, Row] =
+  def full[T](other: Dataset[_], columns: Seq[String]): Transform[T, Row] =
     (d: Dataset[T]) => d.join(other, columns, "full")
 
   /**
@@ -417,7 +417,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to full outer join the given Datasets.
    */
-  def full[T](other: Dataset[_], joinExpr: Column): Function[T, Row] =
+  def full[T](other: Dataset[_], joinExpr: Column): Transform[T, Row] =
     (d: Dataset[T]) => d.join(other, joinExpr, "full")
 
   /**
@@ -431,7 +431,7 @@ object Functions {
    * @tparam U Type of input data.
    * @return Returns the function to full outer join the given Datasets.
    */
-  def fullTyped[T, U](other: Dataset[U], joinExpr: Column): Function[T, (T, U)] =
+  def fullTyped[T, U](other: Dataset[U], joinExpr: Column): Transform[T, (T, U)] =
     (d: Dataset[T]) => d.joinWith(other, joinExpr, "full")
 
   // utility
@@ -444,7 +444,7 @@ object Functions {
    * @tparam T Type of output data.
    * @return Returns the function to cast the given Dataset.
    */
-  def as[T: Encoder](): Function[Row, T] = (d: Dataset[Row]) => d.as[T]
+  def as[T: Encoder](): Transform[Row, T] = (d: Dataset[Row]) => d.as[T]
 
   /**
    * Casts the given Dataset[T] to Dataset[Row].
@@ -454,7 +454,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to cast the given Dataset.
    */
-  def row[T](): Function[T, Row] = (d: Dataset[T]) => d.toDF()
+  def row[T](): Transform[T, Row] = (d: Dataset[T]) => d.toDF()
 
   /**
    * Caches the given Dataset.
@@ -464,7 +464,7 @@ object Functions {
    * @tparam T Type of input data.
    * @return Returns the function to cache the given Dataset.
    */
-  def cache[T](): Function[T, T] = (d: Dataset[T]) => d.cache()
+  def cache[T](): Transform[T, T] = (d: Dataset[T]) => d.cache()
 
   /**
    * Sorts the given Dataset.
@@ -476,7 +476,7 @@ object Functions {
    * @tparam T Type of input and output data.
    * @return Returns the function to sort the given Dataset.
    */
-  def sort[T](column: String, columns: String*): Function[T, T] = (d: Dataset[T]) => d.orderBy(column, columns: _*)
+  def sort[T](column: String, columns: String*): Transform[T, T] = (d: Dataset[T]) => d.orderBy(column, columns: _*)
 
   /**
    * Sorts the given Dataset.
@@ -487,7 +487,7 @@ object Functions {
    * @tparam T Type of input and output data.
    * @return Returns the function to sort the given Dataset.
    */
-  def sort[T](columns: Column*): Function[T, T] = (d: Dataset[T]) => d.orderBy(columns: _*)
+  def sort[T](columns: Column*): Transform[T, T] = (d: Dataset[T]) => d.orderBy(columns: _*)
 
   /**
    * Connects several functions into one composed function.
@@ -500,5 +500,5 @@ object Functions {
    * @return Returns composition of input functions.
    */
   @SuppressWarnings(Array("UnsafeTraversableMethods")) // reduce is safe here, as we call it on non empty collection
-  def pipeline[T](f: Function[T, T], fs: Function[T, T]*): Function[T, T] = (f +: fs).reduce(_ + _)
+  def pipeline[T](f: Transform[T, T], fs: Transform[T, T]*): Transform[T, T] = (f +: fs).reduce(_ + _)
 }

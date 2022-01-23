@@ -14,15 +14,15 @@ object Implicits {
   @SuppressWarnings(Array("AvoidOperatorOverload")) // we deliberately use operators as we construct Dataset operators
   implicit class ExtendedDataset[T](val d: Dataset[T]) extends AnyVal {
     /**
-     * Applies the given function to the Dataset.
+     * Applies the given transform function to the Dataset.
      *
      * Typed API.
      *
-     * @param f The function which will be applied.
+     * @param t The transform function which will be applied.
      * @tparam U Type of resulting data.
      * @return Returns the produced Dataset.
      */
-    def ++[U](f: Function[T, U]): Dataset[U] = d transform f // <=> f(d)
+    def ++[U](t: Transform[T, U]): Dataset[U] = d transform t // <=> t(d)
 
     /**
      * Unions the other Dataset[T].

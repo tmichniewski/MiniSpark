@@ -1,5 +1,5 @@
 package com.github
-package minispark.algebra
+package minispark
 
 import org.apache.spark.sql.Dataset
 
