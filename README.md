@@ -181,9 +181,9 @@ val newPerson2: Dataset[PersonWithGreeting] = person ++ (addFullName + addGreeti
 val newPerson3: Dataset[PersonWithGreeting] = person ++ addFullNameAndGreeting
 ```
 
-This is the core concept to shape Spark applications and express them as composition of such `Transform`s. Please notice,
-that such `Transform`s are self-existing entities which might be stored as values and passed within the application,
-while standard `Dataset` methods have always be connected to the
+This is the core concept to shape Spark applications and express them as composition of such `Transform`s. Please
+notice, that such `Transform`s are self-existing entities which might be stored as values and passed within the
+application, while standard `Dataset` methods have always be connected to the
 `Dataset` they are called on, and as a consequence they cannot be reused or stored.
 
 ## Dataset implicit operators
@@ -213,8 +213,8 @@ to shorten and simplify set operators on `Datasets` as well as joins.
 ## Sample typical Transforms
 
 In addition to implemented `Dataset` operators there are also predefined `Transform`s. Basically, they only mimic
-Spark `Dataset` methods, but the `Transform` type may set an interface to larger ones and due to the composition operator
-the functions might be bigger and bigger and this way constitute the whole modules or subsystems.
+Spark `Dataset` methods, but the `Transform` type may set an interface to larger ones and due to the composition
+operator the functions might be bigger and bigger and this way constitute the whole modules or subsystems.
 
 |Operation       |Signature                                                                              |
 |----------------|---------------------------------------------------------------------------------------|
@@ -439,6 +439,7 @@ system implementation.
 
 So far we described the `Transform` and how it interacts with the `Dataset`. Now, we try to go a step further and try to
 define a complete set of operations covering the classical approach of `ETL` which stands for:
+
 - Extract,
 - Transform,
 - Load.
@@ -491,6 +492,7 @@ class Split[T](e: Extract[T]) extends Extract[T]
 
 At the end, we define a set of operations on those types which in general serve as composition operators. Their purpose
 is to let compose those types together in the following scenarios:
+
 - `Extract[T]` + `Extract[U]` gives `ExtractPair[T, U]`,
 - `Extract[T]` + `Transform[T, U]` gives `Extract[U]`,
 - `Extract[T]` + `Load[U]` gives `ETL`,
