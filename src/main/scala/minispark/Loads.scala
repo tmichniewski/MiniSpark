@@ -6,11 +6,11 @@ import org.apache.spark.sql.Dataset
 /** Contains typical loads. */
 object Loads {
   /**
-   * Produces load instance.
+   * Produces load.
    *
    * @param filename Filename to save.
    * @tparam T Type of output data.
-   * @return Returns load instance.
+   * @return Returns load.
    */
   def loadParquet[T](filename: String): Load[T] = (d: Dataset[T]) => d.write.parquet(filename)
 }

@@ -14,22 +14,22 @@ import org.apache.spark.sql.Dataset
  */
 trait Transform[T, U] extends (Dataset[T] => Dataset[U]) {
   /**
-   * Composes this transform instance with the other one.
+   * Composes this transform with the other one.
    * An alias to andThen to andThen method.
    *
-   * @param t Transform instance to apply next.
+   * @param t Transform to apply next.
    * @tparam V Resulting type of data.
-   * @return Returns composed transform instance.
+   * @return Returns composed transform.
    */
   def +[V](t: Transform[U, V]): Transform[T, V] = (d: Dataset[T]) => d.transform(this andThen t) // T + T => T
   // <=> (this andThen t)(d) or andThen(t)(d) or t(apply(d))
 
   /**
-   * Composes this transform instance with the load instance.
+   * Composes this transform with load.
    * An alias to andThen to andThen method.
    *
-   * @param l Load instance to use and produce final results.
-   * @return Returns composed load instance.
+   * @param l Load to use and produce final results.
+   * @return Returns composed load.
    */
   def +(l: Load[U]): Load[T] = (d: Dataset[T]) => (this andThen l)(d) // T + L => L
   // <=> (this andThen l)(d) or andThen(l)(d) or l(apply(d))

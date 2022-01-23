@@ -5,9 +5,9 @@ import org.apache.spark.sql.Dataset
 
 // $COVERAGE-OFF$
 /**
- * Represents caching extract instance.
+ * Represents caching extract.
  *
- * @param e Extract instance to cache.
+ * @param e Extract to cache.
  * @tparam T Type of input data.
  */
 class Split[T](e: Extract[T]) extends Extract[T] {
@@ -15,9 +15,9 @@ class Split[T](e: Extract[T]) extends Extract[T] {
   lazy val d: Dataset[T] = e().cache()
 
   /**
-   * Produces cached dataset.
+   * Produces cached Dataset.
    *
-   * @return Returns cached dataset.
+   * @return Returns cached Dataset.
    */
   override def apply(): Dataset[T] = d
 }
@@ -25,11 +25,11 @@ class Split[T](e: Extract[T]) extends Extract[T] {
 /** Companion object. */
 object Split {
   /**
-   * Constructor of split instance.
+   * Constructor of split.
    *
-   * @param e Extract instance to cache.
+   * @param e Extract to cache.
    * @tparam T Typeof input data.
-   * @return Return split instance.
+   * @return Return split.
    */
   def apply[T](e: Extract[T]): Split[T] = new Split[T](e)
 }

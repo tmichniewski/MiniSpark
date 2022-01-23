@@ -1,5 +1,5 @@
 package com.github
 
-/** Contains the library implementation. */
+/** Contains the library types and implementation. */
 package object minispark {
 }

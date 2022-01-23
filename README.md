@@ -478,7 +478,7 @@ and a type for the function to combine two `Dataset`s:
 trait Combine[T, U, V] extends ((Dataset[T], Dataset[U]) => Dataset[V])
 ```
 
-Finally, we define types for modeling a pair of `Extract` instances:
+Finally, we define types for modeling a pair of `Extract`s:
 
 ```scala
 class ExtractPair[T, U](e1: Extract[T], e2: Extract[U])
@@ -500,7 +500,7 @@ is to let compose those types together in the following scenarios:
 - `Transform[T, U]` + `Load[U]` gives `Load[U]`,
 - `ExtractPair[T, U]` + `Combine[T, U, V]` gives `Extract[V]`.
 
-and some helper methods, for example to get split of an `Extract` instance.
+and some helper methods, for example to get split of an `Extract`.
 
 Below is the structure of those types together with the methods they automatically provide.
 
@@ -542,8 +542,7 @@ object Split {
 ### Example
 
 Having defined such operations we may start building higher level pipelines of operations, for example (assuming that
-`Ei` stand for instances of `Extract`, `Ti` stand for instances of `Transform`, `Li` stand for instances of `Load` and
-so forth):
+`Ei` stands for `Extract`s, `Ti` stands for `Transform`s, `Li` stands for `Load`s and so forth):
 
 ```scala
 val e1: Extract[Row] = e0 + t1 + t2 + t3

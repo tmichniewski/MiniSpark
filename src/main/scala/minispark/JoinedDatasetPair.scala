@@ -12,7 +12,7 @@ import org.apache.spark.sql.{Column, Dataset, Row}
  * @tparam T Type of first data.
  * @tparam U Type of second data.
  */
-private [minispark] class JoinedDatasetPair[T, U](d1: Dataset[T], d2: Dataset[U], joinType: String) {
+class JoinedDatasetPair[T, U](d1: Dataset[T], d2: Dataset[U], joinType: String) {
   /**
    * Finishes the join transformation.
    *
@@ -51,7 +51,7 @@ private [minispark] class JoinedDatasetPair[T, U](d1: Dataset[T], d2: Dataset[U]
 }
 
 /** Companion object with apply. */
-private [minispark] object JoinedDatasetPair {
+object JoinedDatasetPair {
   /**
    * Constructs the instance.
    *

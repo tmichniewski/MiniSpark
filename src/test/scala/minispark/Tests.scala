@@ -325,7 +325,7 @@ class Tests extends AnyFunSuite {
     assert(result.count() == 2L)
   }
 
-  test("Complete test: separate transform instances") {
+  test("Complete test: separate transforms") {
     val text: Dataset[String] = ds.map(_.name)
     val splitter: Transform[String, String] = flatMap[String, String](_.split(" "))
     val aggregator: Transform[String, Row] = agg[String](Seq("value"), Seq(("value", "count")))
@@ -333,20 +333,20 @@ class Tests extends AnyFunSuite {
     assert(result.count() == 2L)
   }
 
-  test("Complete test: series of typed transform instances") {
+  test("Complete test: series of typed transforms") {
     val text: Dataset[String] = ds.map(_.name)
     val result: Dataset[Row] = text ++ flatMap[String, String](_.split(" ")) ++
       agg[String](Seq("value"), Seq(("value", "count")))
     assert(result.count() == 2L)
   }
 
-  test("Complete test: series of untyped transform instances") {
+  test("Complete test: series of untyped transforms") {
     val text: Dataset[String] = ds.map(_.name)
     val result: Dataset[Row] = text ++ flatMap(_.split(" ")) ++ agg(Seq("value"), Seq(("value", "count")))
     assert(result.count() == 2L)
   }
 
-  test("Complete test: one composite transform instance") {
+  test("Complete test: one composite transform") {
     val text: Dataset[String] = ds.map(_.name)
     val aggregator: Transform[String, Row] = flatMap[String, String](_.split(" ")) +
       agg[String](Seq("value"), Seq(("value", "count")))
