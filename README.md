@@ -553,6 +553,31 @@ val etl: ETL = e + t + l
 etl()
 ```
 
+## How to use the library
+
+If you implement a relatively small plain processing in a notebook, you may use the sole concept of Transform composed
+with `Dataset` via `++` operator and use it together with standard `Dataset` IO operations like:
+
+```scala
+val dsEmployee: Dataset[Employee] = spark.read.parquet("<path>")
+val tr: Transform[Employee, Department] = map((e: Employee) => Department(e.deptNo))
+val dsDepartment: Dataset[Department] = dsEmployee ++ tr
+```
+
+However, if you implement an enterprise class system, you may want to consider the full flavour of this API including
+abstractions for extracting and loading like this:
+
+```scala
+val e: Extract[Employee] = extractParquet("<input_path>")
+val t: Transform[Employee, Department] = map((e: Employee) => Department(e.deptNo))
+val l: Load[Department] = loadParquet("<output_path>")
+val etl: ETL = e + t + l
+etl()
+```
+
+where you have more options to compose larger extractors, transformer and loaders, and ths have more freedom to
+elegantly compose them to build large application.
+
 ## Versions
 
 |Version|Date      |Description                                             |
