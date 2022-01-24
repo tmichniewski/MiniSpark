@@ -575,7 +575,7 @@ val etl: ETL = e + t + l
 etl()
 ```
 
-where you have more options to compose larger extractors, transformer and loaders, and ths have more freedom to
+where you have more options to compose larger extractors, transformers and loaders, and thus have more freedom to
 elegantly compose them to build large application.
 
 ## Versions
