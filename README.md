@@ -495,9 +495,9 @@ is to let compose those types together in the following scenarios:
 
 - `Extract[T]` + `Extract[U]` gives `ExtractPair[T, U]`,
 - `Extract[T]` + `Transform[T, U]` gives `Extract[U]`,
-- `Extract[T]` + `Load[U]` gives `ETL`,
+- `Extract[T]` + `Load[T]` gives `ETL`,
 - `Transform[T, U]` + `Transform[U, V]` gives `Transform[T, V]`,
-- `Transform[T, U]` + `Load[U]` gives `Load[U]`,
+- `Transform[T, U]` + `Load[U]` gives `Load[T]`,
 - `ExtractPair[T, U]` + `Combine[T, U, V]` gives `Extract[V]`.
 
 and some helper methods, for example to get split of an `Extract`.
