@@ -12,7 +12,7 @@ In general, such a function converts `Dataset[T]` into `Dataset[U]`. In Scala, t
 as `Dataset[T] => Dataset[U]`
 and this is equivalent to Scala one-argument function type `Function1[Dataset[T], Dataset[U]]`.
 
-In fact this is the second part of classical ETL approach.
+In fact this is the second part of classical ETL approach - Extract, Transform, Load.
 
 One of the standard methods in this trait is a method called `andThen` to sequentially apply two functions. In our case,
 for such kind of function composition we prefer to use the `+` operator, but this is just an alias to `andThen` method.
