@@ -2,12 +2,15 @@ package com.github
 package minispark
 
 import minispark.Adder.{AdderInput, AdderOutput, AdderParams}
-import minispark.Transforms._
+import minispark.Extracts.extractParquet
 import minispark.Implicits.ExtendedDataset
+import minispark.Loads.loadParquet
+import minispark.Spark.spark
+import minispark.Transforms._
 
+import org.apache.spark.sql._
 import org.apache.spark.sql.functions.{col, count, lit}
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.sql.{Date, Timestamp}
@@ -25,8 +28,9 @@ object Adder extends MapPattern {
     (r: AdderInput) => AdderOutput(r.value + params.delta)
 }
 
+case class CC(id: Long)
+
 class Tests extends AnyFunSuite {
-  val spark: SparkSession = SparkSession.builder().master("local[*]").getOrCreate()
   import spark.implicits._
 
   val d: Date = Date.valueOf("2021-11-28")
@@ -352,5 +356,16 @@ class Tests extends AnyFunSuite {
       agg[String](Seq("value"), Seq(("value", "count")))
     val result: Dataset[Row] = text ++ aggregator
     assert(result.count() == 2L)
+  }
+
+  test("Test of extract and load") {
+    val ds: Dataset[CC] = spark.range(1).as[CC]
+    val ex: Extract[CC] = () => ds
+    val etl: ETL = ex.split + loadParquet[CC]("C:/TEMP/test.parquet")
+    etl()
+
+    val output: Extract[CC] = extractParquet[CC]("C:/TEMP/test.parquet")
+    val delta: Dataset[CC] = output() -+- ds
+    assert(delta.count() == 0L)
   }
 }
