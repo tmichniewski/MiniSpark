@@ -3,7 +3,6 @@ package minispark
 
 import org.apache.spark.sql.Dataset
 
-// $COVERAGE-OFF$
 /**
  * Represents caching extract.
  *
@@ -33,4 +32,3 @@ object Split {
    */
   def apply[T](e: Extract[T]): Split[T] = new Split[T](e)
 }
-// $COVERAGE-ON$

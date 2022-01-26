@@ -1,7 +1,6 @@
 package com.github
 package minispark
 
-// $COVERAGE-OFF$
 /**
  * Represent a pair of extracts.
  *
@@ -34,4 +33,3 @@ object ExtractPair {
    */
   def apply[T, U](e1: Extract[T], e2: Extract[U]): ExtractPair[T, U] = new ExtractPair[T, U](e1, e2)
 }
-// $COVERAGE-ON$

@@ -8,7 +8,6 @@ import java.lang.System.getenv
 import java.util.Properties
 import scala.io.Source
 
-// $COVERAGE-OFF$
 /** Contains helper functions connected with Spark. */
 object Spark {
   /** Global spark session. */
@@ -34,4 +33,3 @@ object Spark {
     sparkConf
   }
 }
-// $COVERAGE-ON
