@@ -2,7 +2,7 @@ package com.github
 package minispark
 
 import minispark.Adder.{AdderInput, AdderOutput, AdderParams}
-import minispark.Extracts.extractParquet
+import minispark.Extracts.{extractParquet, extractRowParquet}
 import minispark.Implicits.ExtendedDataset
 import minispark.Loads.loadParquet
 import minispark.Spark.spark
@@ -13,6 +13,7 @@ import org.apache.spark.sql.functions.{col, count, lit}
 import org.apache.spark.sql.types._
 import org.scalatest.funsuite.AnyFunSuite
 
+import java.lang.System.getenv
 import java.sql.{Date, Timestamp}
 
 case class Record(id: Int, amount: Double, name: String, date: Date, time: Timestamp)
@@ -39,6 +40,10 @@ class Tests extends AnyFunSuite {
   val rows: Seq[Record] = Seq(Record(1, 1.23, "Name1", d, t), Record(2, 2.46, "Name2", d, t))
   val df: DataFrame = rows.toDF().alias("df")
   val ds: Dataset[Record] = rows.toDS().alias("ds")
+
+  import java.io.File
+  import scala.reflect.io.Directory
+  def deleteDirectory(path: String): Unit = new Directory(new File(path)).deleteRecursively()
 
   test("Test Spark") {
     assert(spark.range(1).count() == 1L)
@@ -359,13 +364,23 @@ class Tests extends AnyFunSuite {
   }
 
   test("Test of extract and load") {
-    val ds: Dataset[CC] = spark.range(1).as[CC]
-    val ex: Extract[CC] = () => ds
-    val etl: ETL = ex.split + loadParquet[CC]("C:/TEMP/test.parquet")
-    etl()
+    val ds1: Dataset[CC] = spark.range(1).as[CC]
+    val ex1: Extract[CC] = () => ds1
+    ex1.split + loadParquet[CC](getenv("TEMP") + "/test1.parquet") run()
 
-    val output: Extract[CC] = extractParquet[CC]("C:/TEMP/test.parquet")
-    val delta: Dataset[CC] = output() -+- ds
-    assert(delta.count() == 0L)
+    val df2: DataFrame = spark.range(1).toDF()
+    val ex2: Extract[Row] = () => df2
+    val tr2: Transform[Row, Row] = (d: DataFrame) => d
+    ex2 + (tr2 + loadParquet[Row](getenv("TEMP") + "/test2.parquet")) run()
+
+    val d1: Extract[CC] = extractParquet[CC](getenv("TEMP") + "/test1.parquet")
+    val d2: Extract[CC] = extractRowParquet(getenv("TEMP") + "/test2.parquet") + as[CC]()
+    val comb: Combine[CC, CC, CC] = (d1: Dataset[CC], d2: Dataset[CC]) => d1 union d2
+    val output: Extract[CC] = d1 + d2 + comb
+
+    assert(output().count() == 2L)
+
+    deleteDirectory(getenv("TEMP") + "/test1.parquet")
+    deleteDirectory(getenv("TEMP") + "/test2.parquet")
   }
 }
