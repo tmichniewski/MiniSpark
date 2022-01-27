@@ -203,12 +203,12 @@ to shorten and simplify set operators on `Datasets` as well as joins.
 ### Dataset joins operators
 
 |Join type       |Signature|
-|----------------|------------------------------------------------------------------|
-|Cross join      |def &#124;*&#124;(other: Dataset[_]): Dataset[Row]                |
-|Inner join      |def &#124;=&#124;[U](other: Dataset[U]): JoinedDatasetPair[T, U]  |
-|Left outer join |def &#124;=+&#124;[U](other: Dataset[U]): JoinedDatasetPair[T, U] |
-|Right outer join|def &#124;+=&#124;[U](other: Dataset[U]): JoinedDatasetPair[T, U] |
-|Full outer join |def &#124;+=+&#124;[U](other: Dataset[U]): JoinedDatasetPair[T, U]|
+|----------------|------------------------------------------------------------|
+|Cross join      |def &#124;*&#124;(other: Dataset[_]): Dataset[Row]          |
+|Inner join      |def &#124;=&#124;[U](other: Dataset[U]): DatasetPair[T, U]  |
+|Left outer join |def &#124;=+&#124;[U](other: Dataset[U]): DatasetPair[T, U] |
+|Right outer join|def &#124;+=&#124;[U](other: Dataset[U]): DatasetPair[T, U] |
+|Full outer join |def &#124;+=+&#124;[U](other: Dataset[U]): DatasetPair[T, U]|
 
 ## Sample typical Transforms
 
