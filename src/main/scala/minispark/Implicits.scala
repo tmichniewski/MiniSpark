@@ -86,7 +86,7 @@ object Implicits {
      * @tparam U Type of other input data.
      * @return Returns JoinedDatasetPair to perform the real join on.
      */
-    def |=|[U](other: Dataset[U]): JoinedDatasetPair[T, U] = JoinedDatasetPair(d, other, "inner")
+    def |=|[U](other: Dataset[U]): DatasetPair[T, U] = DatasetPair(d, other, "inner")
 
     /**
      * Left outer joins with the other Dataset.
@@ -97,7 +97,7 @@ object Implicits {
      * @tparam U Type of other input data.
      * @return Returns JoinedDatasetPair to perform the real join on.
      */
-    def |=+|[U](other: Dataset[U]): JoinedDatasetPair[T, U] = JoinedDatasetPair(d, other, "left")
+    def |=+|[U](other: Dataset[U]): DatasetPair[T, U] = DatasetPair(d, other, "left")
 
     /**
      * Right outer joins with the other Dataset.
@@ -108,7 +108,7 @@ object Implicits {
      * @tparam U Type of other input data.
      * @return Returns JoinedDatasetPair to perform the real join on.
      */
-    def |+=|[U](other: Dataset[U]): JoinedDatasetPair[T, U] = JoinedDatasetPair(d, other, "right")
+    def |+=|[U](other: Dataset[U]): DatasetPair[T, U] = DatasetPair(d, other, "right")
 
     /**
      * Full outer joins with the other Dataset.
@@ -119,6 +119,6 @@ object Implicits {
      * @tparam U Type of other input data.
      * @return Returns JoinedDatasetPair to perform the real join on.
      */
-    def |+=+|[U](other: Dataset[U]): JoinedDatasetPair[T, U] = JoinedDatasetPair(d, other, "full")
+    def |+=+|[U](other: Dataset[U]): DatasetPair[T, U] = DatasetPair(d, other, "full")
   }
 }
