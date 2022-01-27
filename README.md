@@ -505,7 +505,9 @@ and some helper methods, for example to get split of an `Extract`.
 Below is the structure of those types together with the methods they automatically provide.
 
 ```scala
-trait ETL extends (() => Unit)
+trait ETL extends (() => Unit) {
+  def run(): Unit = apply()
+}
 
 trait Extract[T] extends (() => Dataset[T]) {
   def +[U](e: Extract[U]): ExtractPair[T, U] = ExtractPair[T, U](this, e) // E + E => E2
@@ -551,6 +553,10 @@ val t: Transform[Row, Row] = t5 + t6
 val l: Load[Row] = t7 + l1
 val etl: ETL = e + t + l
 etl()
+// or
+etl.run()
+// or simply
+e + t + l run() // to avoid instantiating of etl variable
 ```
 
 ## How to use the library
@@ -571,8 +577,7 @@ abstractions for extracting and loading like this:
 val e: Extract[Employee] = extractParquet("<input_path>")
 val t: Transform[Employee, Department] = map((e: Employee) => Department(e.deptNo))
 val l: Load[Department] = loadParquet("<output_path>")
-val etl: ETL = e + t + l
-etl()
+e + t + l run()
 ```
 
 where you have more options to compose larger extractors, transformers and loaders, and thus have more freedom to
