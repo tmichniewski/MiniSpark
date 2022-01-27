@@ -6,4 +6,7 @@ package minispark
  * It is a complete ETL process.
  * Once triggered, it extracts, transforms and loads.
  */
-trait ETL extends (() => Unit)
+trait ETL extends (() => Unit) {
+  /** Triggers this ETL pipeline. An alias to apply. */
+  def run(): Unit = apply()
+}
