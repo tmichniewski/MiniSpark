@@ -371,13 +371,13 @@ class Tests extends AnyFunSuite {
     val df2: DataFrame = spark.range(1).toDF()
     val ex2: Extract[Row] = () => df2
     val tr2: Transform[Row, Row] = (d: DataFrame) => d
-    ex2 + (tr2 + loadParquet[Row](getenv("TEMP") + "/test2.parquet")) run()
+    val lo2: Load[Row] = tr2 + loadParquet[Row](getenv("TEMP") + "/test2.parquet")
+    ex2 + lo2 run()
 
     val d1: Extract[CC] = extractParquet[CC](getenv("TEMP") + "/test1.parquet")
     val d2: Extract[CC] = extractRowParquet(getenv("TEMP") + "/test2.parquet") + as[CC]()
     val comb: Combine[CC, CC, CC] = (d1: Dataset[CC], d2: Dataset[CC]) => d1 union d2
     val output: Extract[CC] = d1 + d2 + comb
-
     assert(output().count() == 2L)
 
     deleteDirectory(getenv("TEMP") + "/test1.parquet")
