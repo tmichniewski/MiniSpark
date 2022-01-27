@@ -41,5 +41,8 @@ trait Extract[T] extends (() => Dataset[T]) {
    *
    * @return Returns split version of the given extract.
    */
-  def split: Split[T] = Split(this) // E => cached E
+  def split: Extract[T] = { // E => cached E
+    lazy val d: Dataset[T] = apply().cache()
+    () => d
+  }
 }

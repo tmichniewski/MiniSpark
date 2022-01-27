@@ -478,16 +478,10 @@ and a type for the function to combine two `Dataset`s:
 trait Combine[T, U, V] extends ((Dataset[T], Dataset[U]) => Dataset[V])
 ```
 
-Finally, we define types for modeling a pair of `Extract`s:
+Finally, we define the type for modeling a pair of `Extract`s:
 
 ```scala
 class ExtractPair[T, U](e1: Extract[T], e2: Extract[U])
-```
-
-and a type for splitting data into more than one process:
-
-```scala
-class Split[T](e: Extract[T]) extends Extract[T]
 ```
 
 At the end, we define a set of operations on those types which in general serve as composition operators. Their purpose
@@ -513,7 +507,10 @@ trait Extract[T] extends (() => Dataset[T]) {
   def +[U](e: Extract[U]): ExtractPair[T, U] = ExtractPair[T, U](this, e) // E + E => E2
   def +[U](t: Transform[T, U]): Extract[U] = () => t(apply()) // E + T => E
   def +(l: Load[T]): ETL = () => l(apply()) // E + L => ETL
-  def split: Split[T] = Split(this) // E => cached E
+  def split: Extract[T] = { // E => cached E
+    lazy val d: Dataset[T] = apply().cache()
+    () => d
+  }
 }
 
 trait Transform[T, U] extends (Dataset[T] => Dataset[U]) {
@@ -530,14 +527,6 @@ class ExtractPair[T, U](e1: Extract[T], e2: Extract[U]) {
 }
 object ExtractPair {
   def apply[T, U](e1: Extract[T], e2: Extract[U]): ExtractPair[T, U] = new ExtractPair[T, U](e1, e2)
-}
-
-class Split[T](e: Extract[T]) extends Extract[T] {
-  lazy val d: Dataset[T] = e().cache()
-  override def apply(): Dataset[T] = d
-}
-object Split {
-  def apply[T](e: Extract[T]): Split[T] = new Split[T](e)
 }
 ```
 
