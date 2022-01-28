@@ -345,7 +345,7 @@ bigger function covering some business related use cases and ending on the big f
 So, this is the decision of the user where and how to use it. Moreover, this is also possible to encapsulate functions
 implemented with this pattern inside other functions also implemented with this pattern, and so on.
 
-## Example
+## Example of using Transform type
 
 As an example toy application we implement word count query which in Spark is a "hello world" application.
 
@@ -393,47 +393,6 @@ which gives plenty of possibilities including reusing of the aggregator `Transfo
 So, having such API we have more freedom in reusing pieces of implementation as well as possibilities to encapsulate
 series of Spark calls within reusable `Transform`s. And these are the building blocks of enterprise class systems which
 might be composed of such `Transform`s.
-
-## Summary
-
-To sum up, this library consists of:
-
-- usage of the `Dataset` type as the main data representation,
-- the `ExtendedDataset.++` operator which is an alias to `Dataset.transform` method,
-- set of implicits which provide aliases to typical `Dataset` operations,
-- the `Transform[T, U]` type which is an alias to Scala `Function1[Dataset[T], Dataset[U]]` type,
-- the `Transform.+` composition operator which is an alias to Scala `Function1.andThen`,
-- set of methods producing typical Spark `Transform`s as one-liner aliases to Spark counterparts,
-- and finally the `MapPattern`.
-
-In turn, the map pattern has the following features:
-
-- provides the contract or an interface to build the map `Transform`,
-- specifies `Input`, `Output` and `Params` containers for data, typically in the form of case class only or some
-  standard type,
-- no necessity to create any traits,
-- common API for creating the mapper function in the form of abstract `build` method,
-- standard `apply` method which returns the map `Transform`,
-- the `apply` method which is type parameterized, but those types `[T, U]` do not have to be subclasses of `Input`
-  and `Output` respectively,
-- instead, the `apply` method uses the generic and functional interface to input and output records in the form
-  of `getter` and `constructor` functions.
-
-## Final word
-
-Concluding, this library is not about the API, which hardly brings anything new.
-
-Instead, it is about the thinking. The thinking about building enterprise class systems and their decomposition into
-smaller parts. Thinking about how to shape the small pieces of the system, and then, how to glue them together.
-
-Nowadays, if we ask ourselves what is the biggest challenge of modern software engineering, it may turn out that this is
-a complexity, because the systems are becoming bigger and bigger. So, how we address this challenge? We give a
-programming model to decompose the system into smaller parts and express them via the `Transform`s, which then might be
-composed back to constitute the whole application.
-
-Summing up, this library is a Scala story about systems decomposition, or in other words, about functions composition,
-while it turns out that the core element of this puzzle is the plain function which is the most fundamental part of any
-system implementation.
 
 ## Algebra
 
@@ -530,7 +489,7 @@ object ExtractPair {
 }
 ```
 
-### Example
+## Example of using algebra types
 
 Having defined such operations we may start building higher level pipelines of operations, for example (assuming that
 `Ei` stands for `Extract`s, `Ti` stands for `Transform`s, `Li` stands for `Load`s and so forth):
@@ -571,6 +530,47 @@ e + t + l run()
 
 where you have more options to compose larger extractors, transformers and loaders, and thus have more freedom to
 elegantly compose them to build large application.
+
+## Summary
+
+To sum up, this library consists of:
+
+- usage of the `Dataset` type as the main data representation,
+- the `ExtendedDataset.++` operator which is an alias to `Dataset.transform` method,
+- set of implicits which provide aliases to typical `Dataset` operations,
+- the `Transform[T, U]` type which is an alias to Scala `Function1[Dataset[T], Dataset[U]]` type,
+- the `Transform.+` composition operator which is an alias to Scala `Function1.andThen`,
+- set of methods producing typical Spark `Transform`s as one-liner aliases to Spark counterparts,
+- and finally the `MapPattern`.
+
+In turn, the map pattern has the following features:
+
+- provides the contract or an interface to build the map `Transform`,
+- specifies `Input`, `Output` and `Params` containers for data, typically in the form of case class only or some
+  standard type,
+- no necessity to create any traits,
+- common API for creating the mapper function in the form of abstract `build` method,
+- standard `apply` method which returns the map `Transform`,
+- the `apply` method which is type parameterized, but those types `[T, U]` do not have to be subclasses of `Input`
+  and `Output` respectively,
+- instead, the `apply` method uses the generic and functional interface to input and output records in the form
+  of `getter` and `constructor` functions.
+
+## Final word
+
+Concluding, this library is not about the API, which hardly brings anything new.
+
+Instead, it is about the thinking. The thinking about building enterprise class systems and their decomposition into
+smaller parts. Thinking about how to shape the small pieces of the system, and then, how to glue them together.
+
+Nowadays, if we ask ourselves what is the biggest challenge of modern software engineering, it may turn out that this is
+a complexity, because the systems are becoming bigger and bigger. So, how we address this challenge? We give a
+programming model to decompose the system into smaller parts and express them via the `Transform`s, which then might be
+composed back to constitute the whole application.
+
+Summing up, this library is a Scala story about systems decomposition, or in other words, about functions composition,
+while it turns out that the core element of this puzzle is the plain function which is the most fundamental part of any
+system implementation.
 
 ## Versions
 
