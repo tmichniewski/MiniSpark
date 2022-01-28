@@ -257,8 +257,8 @@ The most typical operation being performed on a `Dataset` is the map function. I
 record into output record. This may be enough to perform some not so complex transformations, and such a map operation
 may work with one input schema and produce another one.
 
-What to do, if we need something more complex, or we would like to be able to use on a broader range of input or
-output schemas. The answer to such challenge is the map pattern which is an extension to the map function.
+What to do, if we need something more complex, or we would like to be able to use on a broader range of input or output
+schemas. The answer to such challenge is the map pattern which is an extension to the map function.
 
 ```scala
 trait MapPattern {
