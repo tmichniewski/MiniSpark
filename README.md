@@ -8,14 +8,13 @@ it is implemented in pure Scala functions.
 The main concept of this library is an observation that every Spark query might be expressed as some sequence of
 functions converting one `Dataset` into another.
 
-In general, such a function converts `Dataset[T]` into `Dataset[U]`. In Scala, this might be expressed
-as `Dataset[T] => Dataset[U]`
-and this is equivalent to Scala one-argument function type `Function1[Dataset[T], Dataset[U]]`.
+In general, such functions converts `Dataset[T]` into `Dataset[U]`. In Scala, this might be expressed as
+`Dataset[T] => Dataset[U]` and is equivalent to Scala one-argument function type `Function1[Dataset[T], Dataset[U]]`.
 
-In fact this is the second part of classical ETL approach - Extract, Transform, Load.
+In fact, this is the second part - `Transform` - of classical `ETL` approach - `Extract`, `Transform`, `Load`.
 
-One of the standard methods in this trait is a method called `andThen` to sequentially apply two functions. In our case,
-for such kind of function composition we prefer to use the `+` operator, but this is just an alias to `andThen` method.
+One of standard methods in this trait is a method called `andThen` to sequentially apply two functions. In our case, for
+such kind of function composition we prefer to use the `+` operator, but this is just an alias to `andThen` method.
 
 Summing up, we define the following type, called `Transform`:
 
@@ -25,7 +24,7 @@ trait Transform[T, U] extends (Dataset[T] => Dataset[U]) {
 }
 ```
 
-Please note that so far we used only an alias to standard `Function1` Scala trait and one of its methods.
+Please note that so far we used only an alias to standard `Function1` Scala trait and its `andThen` method.
 
 Surprisingly, this very simple concept is present commonly in many Spark notebooks in the shape of methods like:
 
@@ -41,13 +40,13 @@ def b(d: DataFrame): DataFrame
 def c(d: DataFrame): DataFrame
 ```
 
-and we want to use them in sequence, we would have to apply them in the reverted order:
+and we want to use them in sequence, we would have to write them in the reverted order:
 
 ```scala
 val result: DataFrame = c(b(a(df)))
 ```
 
-In fact, we would like to use them in a more natural way, like in the pseudocode below:
+while instead, we would like to use them in a more natural way, like in the pseudocode below:
 
 ```
 df firstApply a thenApply b nextApply c
@@ -112,13 +111,7 @@ val addGreeting: Transform[PersonWithFullName, PersonWithGreeting] = { (d: Datas
 }
 ```
 
-Then, having defined two such functions we may apply them in the right sequence:
-
-```scala
-val result: Dataset[PersonWithGreeting] = df ++ addFullName ++ addGreeting
-```
-
-or we may compose them, to achieve one function only:
+Then, having defined two such functions we may compose them, to achieve one function only:
 
 ```scala
 val addFullNameAndGreeting: Transform[Person, PersonWithGreeting] = addFullName + addGreeting
@@ -130,7 +123,7 @@ and use it the classical function-call way:
 val result: Dataset[PersonWithGreeting] = addFullNameAndGreeting(df)
 ```
 
-or using the implicit `ExtendedDataset.++` composition operator:
+or using the implicit `ExtendedDataset.++` composition operator defined later:
 
 ```scala
 val result: Dataset[PersonWithGreeting] = df ++ addFullNameAndGreeting
@@ -181,10 +174,10 @@ val newPerson2: Dataset[PersonWithGreeting] = person ++ (addFullName + addGreeti
 val newPerson3: Dataset[PersonWithGreeting] = person ++ addFullNameAndGreeting
 ```
 
-This is the core concept to shape Spark applications and express them as composition of such `Transform`s. Please
-notice, that such `Transform`s are self-existing entities which might be stored as values and passed within the
-application, while standard `Dataset` methods have always be connected to the
-`Dataset` they are called on, and as a consequence they cannot be reused or stored.
+This is the core concept to shape Spark applications and express them as composition of such `Transform`s. Please note
+that such `Transform`s are self-existing entities which might be stored as values and passed within the application,
+while standard `Dataset` methods have always to be connected to the `Dataset` they are called on, and as a consequence
+they cannot be reused or stored.
 
 ## Dataset implicit operators
 
@@ -216,8 +209,8 @@ In addition to implemented `Dataset` operators there are also predefined `Transf
 Spark `Dataset` methods, but the `Transform` type may set an interface to larger ones and due to the composition
 operator the functions might be bigger and bigger and this way constitute the whole modules or subsystems.
 
-|Operation       |Signature                                                                              |
-|----------------|---------------------------------------------------------------------------------------|
+|Operation       |Signature                                                                               |
+|----------------|----------------------------------------------------------------------------------------|
 |Filter rows     |def filter[T](condition: String): Transform[T, T]                                       |
 |Filter rows     |def filter[T](condition: Column): Transform[T, T]                                       |
 |Select columns  |def select[T](column: String, columns: String*): Transform[T, Row]                      |
@@ -327,8 +320,8 @@ Finally, the most important is that the real logic is inside the mapper function
 types and these things are implemented inside the function of this pattern type. This is the logic of this
 transformation.
 
-Please note that this logic might be arbitrarily complex and be implemented using pure functions, while the `getter`
-and the `constructor` are the only interfaces to input and output schemas, and they are provided not during the function
+Please note that this logic might be arbitrarily complex and be implemented using pure functions, while the `getter` and
+the `constructor` are the only interfaces to input and output schemas, and they are provided not during the function
 implementation, but during the real usage in a given context.
 
 In other words, the `Transform` implemented according to such a pattern follows the typical pattern of ETL:
@@ -541,7 +534,9 @@ To sum up, this library consists of:
 - the `Transform[T, U]` type which is an alias to Scala `Function1[Dataset[T], Dataset[U]]` type,
 - the `Transform.+` composition operator which is an alias to Scala `Function1.andThen`,
 - set of methods producing typical Spark `Transform`s as one-liner aliases to Spark counterparts,
-- and finally the `MapPattern`.
+- set of types extending `Transform` type to cover the whole `ETL` process: `Extract`, `Load`, `Combine`,
+- set of composition `+` operators to glue together different types of the algebra,
+- and finally the `MapPattern` which seems to cover the most typical use cases.
 
 In turn, the map pattern has the following features:
 
