@@ -572,7 +572,7 @@ system implementation.
 
 |Version|Date      |Description                                             |
 |-------|----------|--------------------------------------------------------|
-|3.0.0  |2022-01-23|Merge Function into Transform. Remove algebra package.  |
+|3.0.0  |2022-01-28|Merge Function into Transform. Remove algebra package.  |
 |2.2.0  |2022-01-20|Add algebra of ETL operations.                          |
 |2.1.1  |2021-12-27|Update readme.                                          |
 |2.1.0  |2021-12-26|Added Column version of agg function.                   |
