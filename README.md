@@ -8,7 +8,7 @@ it is implemented in pure Scala functions.
 The main concept of this library is an observation that every Spark query might be expressed as some sequence of
 functions converting one `Dataset` into another.
 
-In general, such functions converts `Dataset[T]` into `Dataset[U]`. In Scala, this might be expressed as
+In general, such functions convert `Dataset[T]` into `Dataset[U]`. In Scala, this might be expressed as
 `Dataset[T] => Dataset[U]` and is equivalent to Scala one-argument function type `Function1[Dataset[T], Dataset[U]]`.
 
 In fact, this is the second part - `Transform` - of classical `ETL` approach - `Extract`, `Transform`, `Load`.
@@ -150,7 +150,7 @@ Spark `Dataset.transform` method.
 
 ## Dataset composition with Transform
 
-This library provides also a set of additional operators on Spark `Dataset`. They mainly provide operator-like names for
+The library provides also set of additional operators on Spark `Dataset`. They mainly provide operator-like names for
 other Spark `Dataset` methods and let to use infix notation. One important extension to this set of operators is
 the `++`
 method, implemented - next to other operators - in the implicit class `ExtendedDataset`
@@ -161,9 +161,9 @@ implicit class ExtendedDataset[T](val d: Dataset[T]) extends AnyVal {
   def ++[U](t: Transform[T, U]): Dataset[U] = d transform t
 ```
 
-The purpose of this method, which is yet another alias to standard - this time Spark - method called `Dataset.transform`
-is to be able to compose expressions consisting of a `Dataset` with subsequent `Transform`, when such an expression will
-produce another `Dataset`.
+The purpose of this method, which is yet another alias to standard - this time Spark - method called
+`Dataset.transform`, is to be able to compose expressions consisting of `Dataset` with subsequent `Transform`, when such
+an expression will produce another `Dataset`.
 
 ```scala
 val person: Dataset[Person] = spark.read.parquet("person.parquet").as[Person]
@@ -257,8 +257,8 @@ The most typical operation being performed on a `Dataset` is the map function. I
 record into output record. This may be enough to perform some not so complex transformations, and such a map operation
 may work with one input schema and produce another one.
 
-What to do, if we need something more complex, or we would like to be able to use it on a broader range of input or
-output schemas. The answer to such a challenge is the map pattern which is an extension to the map function.
+What to do, if we need something more complex, or we would like to be able to use on a broader range of input or
+output schemas. The answer to such challenge is the map pattern which is an extension to the map function.
 
 ```scala
 trait MapPattern {
@@ -535,7 +535,7 @@ To sum up, this library consists of:
 - the `Transform.+` composition operator which is an alias to Scala `Function1.andThen`,
 - set of methods producing typical Spark `Transform`s as one-liner aliases to Spark counterparts,
 - set of types extending `Transform` type to cover the whole `ETL` process: `Extract`, `Load`, `Combine`,
-- set of composition `+` operators to glue together different types of the algebra,
+- set of composition `+` operators to glue together different types of the `ETL` algebra,
 - and finally the `MapPattern` which seems to cover the most typical use cases.
 
 In turn, the map pattern has the following features:
