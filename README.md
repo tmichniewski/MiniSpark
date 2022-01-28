@@ -159,6 +159,7 @@ method, implemented - next to other operators - in the implicit class `ExtendedD
 ```scala
 implicit class ExtendedDataset[T](val d: Dataset[T]) extends AnyVal {
   def ++[U](t: Transform[T, U]): Dataset[U] = d transform t
+}
 ```
 
 The purpose of this method, which is yet another alias to standard - this time Spark - method called
