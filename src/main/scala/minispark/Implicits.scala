@@ -14,15 +14,15 @@ object Implicits {
   @SuppressWarnings(Array("AvoidOperatorOverload")) // we deliberately use operators as we construct Dataset operators
   implicit class ExtendedDataset[T](val d: Dataset[T]) extends AnyVal {
     /**
-     * Applies the given function to the Dataset.
+     * Applies the given transform function to the Dataset.
      *
      * Typed API.
      *
-     * @param f The function which will be applied.
+     * @param t The transform function which will be applied.
      * @tparam U Type of resulting data.
      * @return Returns the produced Dataset.
      */
-    def ++[U](f: Function[T, U]): Dataset[U] = d transform f // <=> f(d)
+    def ++[U](t: Transform[T, U]): Dataset[U] = d transform t // <=> t(d)
 
     /**
      * Unions the other Dataset[T].
@@ -86,7 +86,7 @@ object Implicits {
      * @tparam U Type of other input data.
      * @return Returns JoinedDatasetPair to perform the real join on.
      */
-    def |=|[U](other: Dataset[U]): JoinedDatasetPair[T, U] = JoinedDatasetPair(d, other, "inner")
+    def |=|[U](other: Dataset[U]): DatasetPair[T, U] = DatasetPair(d, other, "inner")
 
     /**
      * Left outer joins with the other Dataset.
@@ -97,7 +97,7 @@ object Implicits {
      * @tparam U Type of other input data.
      * @return Returns JoinedDatasetPair to perform the real join on.
      */
-    def |=+|[U](other: Dataset[U]): JoinedDatasetPair[T, U] = JoinedDatasetPair(d, other, "left")
+    def |=+|[U](other: Dataset[U]): DatasetPair[T, U] = DatasetPair(d, other, "left")
 
     /**
      * Right outer joins with the other Dataset.
@@ -108,7 +108,7 @@ object Implicits {
      * @tparam U Type of other input data.
      * @return Returns JoinedDatasetPair to perform the real join on.
      */
-    def |+=|[U](other: Dataset[U]): JoinedDatasetPair[T, U] = JoinedDatasetPair(d, other, "right")
+    def |+=|[U](other: Dataset[U]): DatasetPair[T, U] = DatasetPair(d, other, "right")
 
     /**
      * Full outer joins with the other Dataset.
@@ -119,6 +119,6 @@ object Implicits {
      * @tparam U Type of other input data.
      * @return Returns JoinedDatasetPair to perform the real join on.
      */
-    def |+=+|[U](other: Dataset[U]): JoinedDatasetPair[T, U] = JoinedDatasetPair(d, other, "full")
+    def |+=+|[U](other: Dataset[U]): DatasetPair[T, U] = DatasetPair(d, other, "full")
   }
 }

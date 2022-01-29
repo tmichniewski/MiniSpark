@@ -1,7 +1,7 @@
 package com.github
 package minispark
 
-import minispark.Functions.map
+import minispark.Transforms.map
 
 import org.apache.spark.sql.Encoder
 
@@ -41,7 +41,7 @@ trait MapPattern {
    * @tparam U Type of output data.
    * @return Returns the map function.
    */
-  def apply[T, U: Encoder](params: Params, getter: T => Input, constructor: (T, Output) => U): Function[T, U] = {
+  def apply[T, U: Encoder](params: Params, getter: T => Input, constructor: (T, Output) => U): Transform[T, U] = {
     map[T, U] {
       val mapper: Input => Output = build(params)
       (r: T) => constructor(r, mapper(getter(r)))
