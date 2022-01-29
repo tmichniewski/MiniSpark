@@ -194,7 +194,7 @@ to shorten and simplify set operators on `Datasets` as well as joins.
 |Intersect|def *(other: Dataset[T]): Dataset[T]  |
 |Delta    |def -+-(other: Dataset[T]): Dataset[T]|
 
-### Dataset joins operators
+### Dataset join operators
 
 |Join type       |Signature|
 |----------------|------------------------------------------------------------|
