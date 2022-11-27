@@ -12,7 +12,7 @@ object Implicits {
    * @tparam T Type of data.
    */
   @SuppressWarnings(Array("AvoidOperatorOverload")) // we deliberately use operators as we construct Dataset operators
-  implicit class ExtendedDataset[T](val d: Dataset[T]) extends AnyVal {
+  implicit class ExtendedDataset[T](private val d: Dataset[T]) extends AnyVal {
     /**
      * Applies the given transform function to the Dataset.
      *

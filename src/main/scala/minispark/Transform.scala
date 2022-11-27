@@ -15,7 +15,7 @@ import org.apache.spark.sql.Dataset
 trait Transform[T, U] extends (Dataset[T] => Dataset[U]) {
   /**
    * Composes this transform with the other one.
-   * An alias to andThen to andThen method.
+   * An alias to andThen method.
    *
    * @param t Transform to apply next.
    * @tparam V Resulting type of data.
@@ -26,7 +26,7 @@ trait Transform[T, U] extends (Dataset[T] => Dataset[U]) {
 
   /**
    * Composes this transform with load.
-   * An alias to andThen to andThen method.
+   * An alias to andThen method.
    *
    * @param l Load to use and produce final results.
    * @return Returns composed load.

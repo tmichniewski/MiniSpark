@@ -67,20 +67,20 @@ to illustrate this we additionally define a few schemas as case classes:
 
 ```scala
 // input schema
-final case class Person(
+case class Person(
   firstName: String,
   lastName: String
 )
 
 // intermediate result schema
-final case class PersonWithFullName(
+case class PersonWithFullName(
   firstName: String,
   lastName: String,
   fullName: String
 )
 
 // output schema
-final case class PersonWithGreeting(
+case class PersonWithGreeting(
   firstName: String,
   lastName: String,
   fullName: String,
@@ -179,78 +179,6 @@ This is the core concept to shape Spark applications and express them as composi
 that such `Transform`s are self-existing entities which might be stored as values and passed within the application,
 while standard `Dataset` methods have always to be connected to the `Dataset` they are called on, and as a consequence
 they cannot be reused or stored.
-
-## Dataset implicit operators
-
-In addition to the composition method on `Dataset`, there is a bunch of mentioned earlier operators, which are supposed
-to shorten and simplify set operators on `Datasets` as well as joins.
-
-### Dataset set operators
-
-|Operator |Signature                             |
-|---------|--------------------------------------|
-|Union    |def +(other: Dataset[T]): Dataset[T]  |
-|Subtract |def -(other: Dataset[T]): Dataset[T]  |
-|Intersect|def *(other: Dataset[T]): Dataset[T]  |
-|Delta    |def -+-(other: Dataset[T]): Dataset[T]|
-
-### Dataset join operators
-
-|Join type       |Signature|
-|----------------|------------------------------------------------------------|
-|Cross join      |def &#124;*&#124;(other: Dataset[_]): Dataset[Row]          |
-|Inner join      |def &#124;=&#124;[U](other: Dataset[U]): DatasetPair[T, U]  |
-|Left outer join |def &#124;=+&#124;[U](other: Dataset[U]): DatasetPair[T, U] |
-|Right outer join|def &#124;+=&#124;[U](other: Dataset[U]): DatasetPair[T, U] |
-|Full outer join |def &#124;+=+&#124;[U](other: Dataset[U]): DatasetPair[T, U]|
-
-## Sample typical Transforms
-
-In addition to implemented `Dataset` operators there are also predefined `Transform`s. Basically, they only mimic
-Spark `Dataset` methods, but the `Transform` type may set an interface to larger ones and due to the composition
-operator the functions might be bigger and bigger and this way constitute the whole modules or subsystems.
-
-|Operation       |Signature                                                                               |
-|----------------|----------------------------------------------------------------------------------------|
-|Filter rows     |def filter[T](condition: String): Transform[T, T]                                       |
-|Filter rows     |def filter[T](condition: Column): Transform[T, T]                                       |
-|Select columns  |def select[T](column: String, columns: String*): Transform[T, Row]                      |
-|Select columns  |def select[T](columns: Column*): Transform[T, Row]                                      |
-|Add column      |def add[T](column: String, value: Column): Transform[T, Row]                            |
-|Add columns     |def add[T](columns: (String, Column)*): Transform[T, Row]                               |
-|Drop columns    |def drop[T](columns: String*): Transform[T, Row]                                        |
-|Rename column   |def rename[T](oldColumn: String, newColumn: String): Transform[T, Row]                  |
-|Rename columns  |def rename[T](renameExpr: (String, String)*): Transform[T, Row]                         |
-|Cast column     |def cast[T](column: String, newType: DataType): Transform[T, Row]                       |
-|Cast columns    |def cast[T](typesExpr: (String, DataType)*): Transform[T, Row]                          |
-|Map rows        |def map[T, U: Encoder](f: T => U): Transform[T, U]                                      |
-|FlatMap rows    |def flatMap[T, U: Encoder](f: T => TraversableOnce[U]): Transform[T, U]                 |
-|Aggregate       |def agg[T](groupBy: Seq[String], aggregations: Seq[(String, String)]): Transform[T, Row]|
-|Aggregate       |def agg[T](groupBy: Seq[String], expr: Column, exprs: Column*): Transform[T, Row]       |
-|Union           |def union[T](other: Dataset[T]): Transform[T, T]                                        |
-|Subtract        |def subtract[T](other: Dataset[T]): Transform[T, T]                                     |
-|Intersect       |def intersect[T](other: Dataset[T]): Transform[T, T]                                    |
-|Delta           |def delta[T](other: Dataset[T]): Transform[T, T]                                        |
-|Cross join      |def cross[T](other: Dataset[_]): Transform[T, Row]                                      |
-|Cross join      |def crossTyped[T, U](other: Dataset[U]): Transform[T, (T, U)]                           |
-|Inner join      |def inner[T](other: Dataset[_], columns: Seq[String]): Transform[T, Row]                |
-|Inner join      |def inner[T](other: Dataset[_], joinExpr: Column): Transform[T, Row]                    |
-|Inner join      |def innerTyped[T, U](other: Dataset[U], joinExpr: Column): Transform[T, (T, U)]         |
-|Left outer join |def left[T](other: Dataset[_], columns: Seq[String]): Transform[T, Row]                 |
-|Left outer join |def left[T](other: Dataset[_], joinExpr: Column): Transform[T, Row]                     |
-|Left outer join |def leftTyped[T, U](other: Dataset[U], joinExpr: Column): Transform[T, (T, U)]          |
-|Right outer join|def right[T](other: Dataset[_], columns: Seq[String]): Transform[T, Row]                |
-|Right outer join|def right[T](other: Dataset[_], joinExpr: Column): Transform[T, Row]                    |
-|Right outer join|def rightTyped[T, U](other: Dataset[U], joinExpr: Column): Transform[T, (T, U)]         |
-|Full outer join |def full[T](other: Dataset[_], columns: Seq[String]): Transform[T, Row]                 |
-|Full outer join |def full[T](other: Dataset[_], joinExpr: Column): Transform[T, Row]                     |
-|Full outer join |def fullTyped[T, U](other: Dataset[U], joinExpr: Column): Transform[T, (T, U)]          |
-|Cast Dataset    |def as[T: Encoder] (): Transform[Row, T]                                                |
-|Cast Dataset    |def row[T] (): Transform[T, Row]                                                        |
-|Cache           |def cache[T] (): Transform[T, T]                                                        |
-|Sort            |def sort[T](column: String, columns: String*): Transform[T, T]                          |
-|Sort            |def sort[T](columns: Column*): Transform[T, T]                                          |
-|Pipeline        |def pipeline[T](t: Transform[T, T], ts: Transform[T, T]*): Transform[T, T]              |
 
 ## The map pattern
 
@@ -434,7 +362,7 @@ trait Combine[T, U, V] extends ((Dataset[T], Dataset[U]) => Dataset[V])
 Finally, we define the type for modeling a pair of `Extract`s:
 
 ```scala
-class ExtractPair[T, U](e1: Extract[T], e2: Extract[U])
+case class ExtractPair[T, U](e1: Extract[T], e2: Extract[U])
 ```
 
 At the end, we define a set of operations on those types which in general serve as composition operators. Their purpose
@@ -475,11 +403,8 @@ trait Load[T] extends (Dataset[T] => Unit)
 
 trait Combine[T, U, V] extends ((Dataset[T], Dataset[U]) => Dataset[V])
 
-class ExtractPair[T, U](e1: Extract[T], e2: Extract[U]) {
+case class ExtractPair[T, U](e1: Extract[T], e2: Extract[U]) {
   def +[V](c: Combine[T, U, V]): Extract[V] = () => c(e1(), e2()) // E2 + C => E
-}
-object ExtractPair {
-  def apply[T, U](e1: Extract[T], e2: Extract[U]): ExtractPair[T, U] = new ExtractPair[T, U](e1, e2)
 }
 ```
 
@@ -572,6 +497,7 @@ system implementation.
 
 |Version|Date      |Description                                             |
 |-------|----------|--------------------------------------------------------|
+|3.1.0  |2022-11-27|Upgrade of plugins. Small refactor.                     |
 |3.0.0  |2022-01-28|Merge Function into Transform. Remove algebra package.  |
 |2.2.0  |2022-01-20|Add algebra of ETL operations.                          |
 |2.1.1  |2021-12-27|Update readme.                                          |
