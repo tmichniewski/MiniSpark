@@ -18,7 +18,7 @@ object Transforms {
    * @tparam T Type of input and output data.
    * @return Returns transform to filter the Dataset.
    */
-  def filter[T](condition: String): Transform[T, T] = (d: Dataset[T]) => d filter condition
+  def filter[T](condition: String): Transform[T, T] = _ filter condition
 
   /**
    * Filters the Dataset.
@@ -29,7 +29,7 @@ object Transforms {
    * @tparam T Type of input and output data.
    * @return Returns transform to filter the Dataset.
    */
-  def filter[T](condition: Column): Transform[T, T] = (d: Dataset[T]) => d filter condition
+  def filter[T](condition: Column): Transform[T, T] = _ filter condition
 
   /**
    * Selects the given columns from the Dataset.
@@ -41,7 +41,7 @@ object Transforms {
    * @tparam T Type of input data.
    * @return Returns transform to select the given columns.
    */
-  def select[T](column: String, columns: String*): Transform[T, Row] = (d: Dataset[T]) => d.select(column, columns: _*)
+  def select[T](column: String, columns: String*): Transform[T, Row] = _.select(column, columns: _*)
 
   /**
    * Selects the given columns from the Dataset.
@@ -52,7 +52,7 @@ object Transforms {
    * @tparam T Type of input data.
    * @return Returns transform to select the given columns.
    */
-  def select[T](columns: Column*): Transform[T, Row] = (d: Dataset[T]) => d.select(columns: _*)
+  def select[T](columns: Column*): Transform[T, Row] = _.select(columns: _*)
 
   /**
    * Adds the given column to the Dataset.
@@ -64,7 +64,7 @@ object Transforms {
    * @tparam T Type of input data.
    * @return Returns transform to add the given column.
    */
-  def add[T](column: String, value: Column): Transform[T, Row] = (d: Dataset[T]) => d.withColumn(column, value)
+  def add[T](column: String, value: Column): Transform[T, Row] = _.withColumn(column, value)
 
   /**
    * Adds the given columns to the Dataset.
@@ -87,7 +87,7 @@ object Transforms {
    * @tparam T Type of input data.
    * @return Returns transform to drop the given columns.
    */
-  def drop[T](columns: String*): Transform[T, Row] = (d: Dataset[T]) => d.drop(columns: _*)
+  def drop[T](columns: String*): Transform[T, Row] = _.drop(columns: _*)
 
   /**
    * Renames the given column.
@@ -102,7 +102,7 @@ object Transforms {
    * @return Returns transform to rename the given column.
    */
   def rename[T](oldColumn: String, newColumn: String): Transform[T, Row] =
-    (d: Dataset[T]) => d.withColumnRenamed(oldColumn, newColumn)
+    _.withColumnRenamed(oldColumn, newColumn)
 
   /**
    * Renames the given columns.
@@ -152,7 +152,7 @@ object Transforms {
    * @tparam U Type of output data.
    * @return Returns the function to map the Dataset.
    */
-  def map[T, U: Encoder](f: T => U): Transform[T, U] = (d: Dataset[T]) => d map f
+  def map[T, U: Encoder](f: T => U): Transform[T, U] = _ map f
 
   /**
    * Flat maps using the given function.
@@ -164,7 +164,7 @@ object Transforms {
    * @tparam U Type of output data.
    * @return Returns transform to flatMap the Dataset.
    */
-  def flatMap[T, U: Encoder](f: T => TraversableOnce[U]): Transform[T, U] = (d: Dataset[T]) => d flatMap f
+  def flatMap[T, U: Encoder](f: T => TraversableOnce[U]): Transform[T, U] = _ flatMap f
 
   /**
    * Aggregates using the given specification.
@@ -182,7 +182,7 @@ object Transforms {
     require(groupBy.nonEmpty)
     require(aggregations.nonEmpty)
 
-    (d: Dataset[T]) => d.groupBy(groupBy.head, groupBy.tail: _*).agg(aggregations.head, aggregations.tail: _*)
+    _.groupBy(groupBy.head, groupBy.tail: _*).agg(aggregations.head, aggregations.tail: _*)
   }
 
   /**
@@ -199,7 +199,7 @@ object Transforms {
   @SuppressWarnings(Array("UnsafeTraversableMethods")) // added require to protect head and tail
   def agg[T](groupBy: Seq[String], expr: Column, exprs: Column*): Transform[T, Row] = {
     require(groupBy.nonEmpty)
-    (d: Dataset[T]) => d.groupBy(groupBy.head, groupBy.tail: _*).agg(expr, exprs: _*)
+    _.groupBy(groupBy.head, groupBy.tail: _*).agg(expr, exprs: _*)
   }
 
   // set
@@ -213,7 +213,7 @@ object Transforms {
    * @tparam T Type of input and output data.
    * @return Returns transform to union the given Datasets.
    */
-  def union[T](other: Dataset[T]): Transform[T, T] = (d: Dataset[T]) => d union other
+  def union[T](other: Dataset[T]): Transform[T, T] = _ union other
 
   /**
    * Subtracts the other Dataset[T].
@@ -224,7 +224,7 @@ object Transforms {
    * @tparam T Type of input and output data.
    * @return Returns transform to subtract the given Datasets.
    */
-  def subtract[T](other: Dataset[T]): Transform[T, T] = (d: Dataset[T]) => d except other
+  def subtract[T](other: Dataset[T]): Transform[T, T] = _ except other
 
   /**
    * Intersects the other Dataset[T].
@@ -235,7 +235,7 @@ object Transforms {
    * @tparam T Type of input and output data.
    * @return Returns transform to intersect the given Datasets.
    */
-  def intersect[T](other: Dataset[T]): Transform[T, T] = (d: Dataset[T]) => d intersect other
+  def intersect[T](other: Dataset[T]): Transform[T, T] = _ intersect other
 
   /**
    * Delta with the other Dataset[T].
@@ -246,7 +246,8 @@ object Transforms {
    * @tparam T Type of input and output data.
    * @return Returns transform to find delta of the given Datasets.
    */
-  def delta[T](other: Dataset[T]): Transform[T, T] = (d: Dataset[T]) => (d except other) union (other except d)
+  def delta[T](other: Dataset[T]): Transform[T, T] =
+    (d: Dataset[T]) => (d except other) union (other except d)
 
   // joins
 
@@ -259,7 +260,7 @@ object Transforms {
    * @tparam T Type of input data.
    * @return Returns transform to cross join the given Datasets.
    */
-  def cross[T](other: Dataset[_]): Transform[T, Row] = (d: Dataset[T]) => d crossJoin other
+  def cross[T](other: Dataset[_]): Transform[T, Row] = _ crossJoin other
 
   /**
    * Cross joins with the other Dataset.
@@ -272,7 +273,7 @@ object Transforms {
    * @return Returns transform to cross join the given Datasets.
    */
   def crossTyped[T, U](other: Dataset[U]): Transform[T, (T, U)] =
-    (d: Dataset[T]) => d.joinWith(other, lit(true), "cross")
+    _.joinWith(other, lit(true), "cross")
 
   /**
    * Inner joins with the other Dataset.
@@ -285,7 +286,7 @@ object Transforms {
    * @return Returns transform to inner join the given Datasets.
    */
   def inner[T](other: Dataset[_], columns: Seq[String]): Transform[T, Row] =
-    (d: Dataset[T]) => d.join(other, columns, "inner")
+    _.join(other, columns, "inner")
 
   /**
    * Inner joins with the other Dataset.
@@ -298,7 +299,7 @@ object Transforms {
    * @return Returns transform to inner join the given Datasets.
    */
   def inner[T](other: Dataset[_], joinExpr: Column): Transform[T, Row] =
-    (d: Dataset[T]) => d.join(other, joinExpr, "inner")
+    _.join(other, joinExpr, "inner")
 
   /**
    * Inner joins with the other Dataset.
@@ -312,7 +313,7 @@ object Transforms {
    * @return Returns transform to inner join the given Datasets.
    */
   def innerTyped[T, U](other: Dataset[U], joinExpr: Column): Transform[T, (T, U)] =
-    (d: Dataset[T]) => d.joinWith(other, joinExpr, "inner")
+    _.joinWith(other, joinExpr, "inner")
 
   /**
    * Left outer joins with the other Dataset.
@@ -325,7 +326,7 @@ object Transforms {
    * @return Returns transform to left outer join the given Datasets.
    */
   def left[T](other: Dataset[_], columns: Seq[String]): Transform[T, Row] =
-    (d: Dataset[T]) => d.join(other, columns, "left")
+    _.join(other, columns, "left")
 
   /**
    * Left outer joins with the other Dataset.
@@ -338,7 +339,7 @@ object Transforms {
    * @return Returns transform to left outer join the given Datasets.
    */
   def left[T](other: Dataset[_], joinExpr: Column): Transform[T, Row] =
-    (d: Dataset[T]) => d.join(other, joinExpr, "left")
+    _.join(other, joinExpr, "left")
 
   /**
    * Left outer joins with the other Dataset.
@@ -352,7 +353,7 @@ object Transforms {
    * @return Returns transform to left outer join the given Datasets.
    */
   def leftTyped[T, U](other: Dataset[U], joinExpr: Column): Transform[T, (T,U)] =
-    (d: Dataset[T]) => d.joinWith(other, joinExpr, "left")
+    _.joinWith(other, joinExpr, "left")
 
   /**
    * Right outer joins with the other Dataset.
@@ -365,7 +366,7 @@ object Transforms {
    * @return Returns transform to right outer join the given Datasets.
    */
   def right[T](other: Dataset[_], columns: Seq[String]): Transform[T, Row] =
-    (d: Dataset[T]) => d.join(other, columns, "right")
+    _.join(other, columns, "right")
 
   /**
    * Right outer joins with the other Dataset.
@@ -378,7 +379,7 @@ object Transforms {
    * @return Returns transform to right outer join the given Datasets.
    */
   def right[T](other: Dataset[_], joinExpr: Column): Transform[T, Row] =
-    (d: Dataset[T]) => d.join(other, joinExpr, "right")
+    _.join(other, joinExpr, "right")
 
   /**
    * Right outer joins with the other Dataset.
@@ -392,7 +393,7 @@ object Transforms {
    * @return Returns transform to right outer join the given Datasets.
    */
   def rightTyped[T, U](other: Dataset[U], joinExpr: Column): Transform[T, (T, U)] =
-    (d: Dataset[T]) => d.joinWith(other, joinExpr, "right")
+    _.joinWith(other, joinExpr, "right")
 
   /**
    * Full outer joins with the other Dataset.
@@ -405,7 +406,7 @@ object Transforms {
    * @return Returns transform to full outer join the given Datasets.
    */
   def full[T](other: Dataset[_], columns: Seq[String]): Transform[T, Row] =
-    (d: Dataset[T]) => d.join(other, columns, "full")
+    _.join(other, columns, "full")
 
   /**
    * Full outer joins with the other Dataset.
@@ -418,7 +419,7 @@ object Transforms {
    * @return Returns transform to full outer join the given Datasets.
    */
   def full[T](other: Dataset[_], joinExpr: Column): Transform[T, Row] =
-    (d: Dataset[T]) => d.join(other, joinExpr, "full")
+    _.join(other, joinExpr, "full")
 
   /**
    * Full outer joins with the other Dataset.
@@ -432,7 +433,7 @@ object Transforms {
    * @return Returns transform to full outer join the given Datasets.
    */
   def fullTyped[T, U](other: Dataset[U], joinExpr: Column): Transform[T, (T, U)] =
-    (d: Dataset[T]) => d.joinWith(other, joinExpr, "full")
+    _.joinWith(other, joinExpr, "full")
 
   // utility
 
@@ -444,7 +445,7 @@ object Transforms {
    * @tparam T Type of output data.
    * @return Returns transform to cast the given Dataset.
    */
-  def as[T: Encoder](): Transform[Row, T] = (d: Dataset[Row]) => d.as[T]
+  def as[T: Encoder](): Transform[Row, T] = _.as[T]
 
   /**
    * Casts the given Dataset[T] to Dataset[Row].
@@ -454,7 +455,7 @@ object Transforms {
    * @tparam T Type of input data.
    * @return Returns transform to cast the given Dataset.
    */
-  def row[T](): Transform[T, Row] = (d: Dataset[T]) => d.toDF()
+  def row[T](): Transform[T, Row] = _.toDF()
 
   /**
    * Caches the given Dataset.
@@ -464,7 +465,7 @@ object Transforms {
    * @tparam T Type of input data.
    * @return Returns transform to cache the given Dataset.
    */
-  def cache[T](): Transform[T, T] = (d: Dataset[T]) => d.cache()
+  def cache[T](): Transform[T, T] = _.cache()
 
   /**
    * Sorts the given Dataset.
@@ -476,7 +477,7 @@ object Transforms {
    * @tparam T Type of input and output data.
    * @return Returns transform to sort the given Dataset.
    */
-  def sort[T](column: String, columns: String*): Transform[T, T] = (d: Dataset[T]) => d.orderBy(column, columns: _*)
+  def sort[T](column: String, columns: String*): Transform[T, T] = _.orderBy(column, columns: _*)
 
   /**
    * Sorts the given Dataset.
@@ -487,7 +488,7 @@ object Transforms {
    * @tparam T Type of input and output data.
    * @return Returns transform to sort the given Dataset.
    */
-  def sort[T](columns: Column*): Transform[T, T] = (d: Dataset[T]) => d.orderBy(columns: _*)
+  def sort[T](columns: Column*): Transform[T, T] = _.orderBy(columns: _*)
 
   /**
    * Connects several transforms into a composed one.
