@@ -1,22 +1,27 @@
 name := "MiniSpark"
 
-version := "3.0.0"
+version := "3.1.0"
 
 scalaVersion := "2.12.14"
-val sparkVersion = "3.2.0"
+val sparkVersion = "3.3.1"
 
 idePackagePrefix := Some("com.github")
 Global / excludeLintKeys += idePackagePrefix
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "3.2.10" % Test, // Unit tests
+  "org.scalatest" %% "scalatest" % "3.2.14" % Test, // Unit tests
   "org.apache.spark" %% "spark-core" % sparkVersion % "provided", // Spark
   "org.apache.spark" %% "spark-sql" % sparkVersion % "provided" // Spark SQL
 )
 
 // force full test coverage
-coverageMinimumStmtTotal := 100
 coverageFailOnMinimum := true
+coverageMinimumStmtTotal := 100
+coverageMinimumBranchTotal := 100
+coverageMinimumStmtPerPackage := 100
+coverageMinimumBranchPerPackage := 100
+coverageMinimumStmtPerFile := 100
+coverageMinimumBranchPerFile := 100
 
 // quality checks
-scapegoatVersion in ThisBuild := "1.4.10"
+ThisBuild / scapegoatVersion := "1.4.14"
