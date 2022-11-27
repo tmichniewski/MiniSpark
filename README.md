@@ -67,20 +67,20 @@ to illustrate this we additionally define a few schemas as case classes:
 
 ```scala
 // input schema
-final case class Person(
+case class Person(
   firstName: String,
   lastName: String
 )
 
 // intermediate result schema
-final case class PersonWithFullName(
+case class PersonWithFullName(
   firstName: String,
   lastName: String,
   fullName: String
 )
 
 // output schema
-final case class PersonWithGreeting(
+case class PersonWithGreeting(
   firstName: String,
   lastName: String,
   fullName: String,
