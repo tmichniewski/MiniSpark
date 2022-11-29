@@ -15,7 +15,7 @@ final case class ExtractPair[T, U](e1: Extract[T], e2: Extract[U]) {
    *
    * @param c Combine to compose with.
    * @tparam V Type of output data.
-   * @return Returns composed extract.
+   * @return Composed extract.
    */
   def +[V](c: Combine[T, U, V]): Extract[V] = () => c(e1(), e2()) // E2 + C => E
 }

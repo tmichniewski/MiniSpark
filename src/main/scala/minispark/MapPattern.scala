@@ -27,7 +27,7 @@ trait MapPattern {
    * Higher order method which returns the mapper function to convert input type into output type.
    *
    * @param params Parameters to construct the resulting mapping function.
-   * @return Returns the mapping function to convert input into output.
+   * @return Mapping function to convert input into output.
    */
   def build(params: Params): Input => Output
 
@@ -39,7 +39,7 @@ trait MapPattern {
    * @param constructor Function to convert T and Output into U.
    * @tparam T Type of input data.
    * @tparam U Type of output data.
-   * @return Returns the map function.
+   * @return Map function.
    */
   def apply[T, U: Encoder](params: Params, getter: T => Input, constructor: (T, Output) => U): Transform[T, U] = {
     map[T, U] {

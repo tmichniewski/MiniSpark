@@ -19,9 +19,9 @@ trait Transform[T, U] extends (Dataset[T] => Dataset[U]) {
    *
    * @param t Transform to apply next.
    * @tparam V Resulting type of data.
-   * @return Returns composed transform.
+   * @return Composed transform.
    */
-  def +[V](t: Transform[U, V]): Transform[T, V] = (d: Dataset[T]) => d.transform(this andThen t) // T + T => T
+  def +[V](t: Transform[U, V]): Transform[T, V] = _.transform(this andThen t) // T + T => T
   // <=> (this andThen t)(d) or andThen(t)(d) or t(apply(d))
 
   /**
@@ -29,7 +29,7 @@ trait Transform[T, U] extends (Dataset[T] => Dataset[U]) {
    * An alias to andThen method.
    *
    * @param l Load to use and produce final results.
-   * @return Returns composed load.
+   * @return Composed load.
    */
   def +(l: Load[U]): Load[T] = (d: Dataset[T]) => (this andThen l)(d) // T + L => L
   // <=> (this andThen l)(d) or andThen(l)(d) or l(apply(d))

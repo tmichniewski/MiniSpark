@@ -16,14 +16,14 @@ object Spark {
   /**
    * Initializes spark session object.
    *
-   * @return Returns Spark Session.
+   * @return Spark Session.
    */
   def getSpark: SparkSession = SparkSession.builder().config(getSparkConf).getOrCreate()
 
   /**
    * Initializes Spark configuration from a properties file.
    *
-   * @return Returns Spark configuration object.
+   * @return Spark configuration object.
    */
   def getSparkConf: SparkConf = {
     val sparkConf: SparkConf = new SparkConf()

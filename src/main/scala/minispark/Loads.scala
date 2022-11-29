@@ -8,7 +8,7 @@ object Loads {
    *
    * @param filename Filename to save.
    * @tparam T Type of output data.
-   * @return Returns load.
+   * @return Load.
    */
   def loadParquet[T](filename: String): Load[T] = _.write.parquet(filename)
 }

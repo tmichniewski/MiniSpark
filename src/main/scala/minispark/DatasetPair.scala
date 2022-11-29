@@ -19,7 +19,7 @@ final case class DatasetPair[T, U](d1: Dataset[T], d2: Dataset[U], joinType: Str
    * Untyped API.
    *
    * @param columns Collection of columns to join on.
-   * @return Returns the joined Datasets.
+   * @return Joined Datasets.
    */
   def on(columns: Seq[String]): Dataset[Row] = joinType match {
     case "inner" | "left" | "right" | "full" => d1.join(d2, columns, joinType)
@@ -31,7 +31,7 @@ final case class DatasetPair[T, U](d1: Dataset[T], d2: Dataset[U], joinType: Str
    * Untyped API.
    *
    * @param joinExpr Join expression.
-   * @return Returns the joined Datasets.
+   * @return Joined Datasets.
    */
   def on(joinExpr: Column): Dataset[Row] = joinType match {
     case "inner" | "left" | "right" | "full" => d1.join(d2, joinExpr, joinType)
@@ -43,7 +43,7 @@ final case class DatasetPair[T, U](d1: Dataset[T], d2: Dataset[U], joinType: Str
    * Typed API.
    *
    * @param joinExpr Join expression.
-   * @return Returns the joined Datasets which contains tuple of rows from both Datasets.
+   * @return Joined Datasets which contains tuple of rows from both Datasets.
    */
   def onTyped(joinExpr: Column): Dataset[(T, U)] = joinType match {
     case "inner" | "left" | "right" | "full" => d1.joinWith(d2, joinExpr, joinType)
