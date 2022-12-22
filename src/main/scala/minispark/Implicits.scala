@@ -20,7 +20,7 @@ object Implicits {
      *
      * @param t The transform function which will be applied.
      * @tparam U Type of resulting data.
-     * @return Returns the produced Dataset.
+     * @return Produced Dataset.
      */
     def ++[U](t: Transform[T, U]): Dataset[U] = d transform t // <=> t(d)
 
@@ -30,7 +30,7 @@ object Implicits {
      * Typed API.
      *
      * @param other The other Dataset to be merged with.
-     * @return Returns the united Datasets.
+     * @return United Datasets.
      */
     def +(other: Dataset[T]): Dataset[T] = d union other
 
@@ -40,7 +40,7 @@ object Implicits {
      * Typed API.
      *
      * @param other The other Dataset to be subtracted.
-     * @return Returns the subtracted Datasets.
+     * @return Subtracted Datasets.
      */
     def -(other: Dataset[T]): Dataset[T] = d except other
 
@@ -50,7 +50,7 @@ object Implicits {
      * Typed API.
      *
      * @param other The other Dataset to be intersected with.
-     * @return Returns the intersected Datasets.
+     * @return Intersected Datasets.
      */
     def *(other: Dataset[T]): Dataset[T] = d intersect other
 
@@ -60,7 +60,7 @@ object Implicits {
      * Typed API.
      *
      * @param other The other Dataset to be checked with.
-     * @return Returns the delta of the given Datasets.
+     * @return Delta of the given Datasets.
      */
     def -+-(other: Dataset[T]): Dataset[T] = (d - other) + (other - d)
 
@@ -70,7 +70,7 @@ object Implicits {
      * Untyped API.
      *
      * @param other The other Dataset to be cross joined.
-     * @return Returns the cross join of the given Datasets.
+     * @return Cross join of the given Datasets.
      */
     def |*|(other: Dataset[_]): Dataset[Row] = d crossJoin other
     // alternatively this could be called |+| from the "cross" word (meaning plus),
@@ -84,7 +84,7 @@ object Implicits {
      *
      * @param other The other Dataset to be inner joined.
      * @tparam U Type of other input data.
-     * @return Returns JoinedDatasetPair to perform the real join on.
+     * @return DatasetPair to perform the real join on.
      */
     def |=|[U](other: Dataset[U]): DatasetPair[T, U] = DatasetPair(d, other, "inner")
 
@@ -95,7 +95,7 @@ object Implicits {
      *
      * @param other The other Dataset to be left outer joined.
      * @tparam U Type of other input data.
-     * @return Returns JoinedDatasetPair to perform the real join on.
+     * @return DatasetPair to perform the real join on.
      */
     def |=+|[U](other: Dataset[U]): DatasetPair[T, U] = DatasetPair(d, other, "left")
 
@@ -106,7 +106,7 @@ object Implicits {
      *
      * @param other The other Dataset to be left outer joined.
      * @tparam U Type of other input data.
-     * @return Returns JoinedDatasetPair to perform the real join on.
+     * @return DatasetPair to perform the real join on.
      */
     def |+=|[U](other: Dataset[U]): DatasetPair[T, U] = DatasetPair(d, other, "right")
 
@@ -117,7 +117,7 @@ object Implicits {
      *
      * @param other The other Dataset to be left outer joined.
      * @tparam U Type of other input data.
-     * @return Returns JoinedDatasetPair to perform the real join on.
+     * @return DatasetPair to perform the real join on.
      */
     def |+=+|[U](other: Dataset[U]): DatasetPair[T, U] = DatasetPair(d, other, "full")
   }

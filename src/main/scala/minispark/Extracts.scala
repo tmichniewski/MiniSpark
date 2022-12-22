@@ -11,7 +11,7 @@ object Extracts {
    * Produces extract.
    *
    * @param filename Filename to read.
-   * @return Returns extract.
+   * @return Extract.
    */
   def extractRowParquet(filename: String): Extract[Row] = () => spark.read.parquet(filename)
 
@@ -20,7 +20,7 @@ object Extracts {
    *
    * @param filename Filename to read.
    * @tparam T Type of input data.
-   * @return Returns extract.
+   * @return Extract.
    */
   def extractParquet[T: Encoder](filename: String): Extract[T] = () => spark.read.parquet(filename).as[T]
 }
